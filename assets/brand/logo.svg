@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2E7BFF"/>
+      <stop offset="55%" stop-color="#1B4FF0"/>
+      <stop offset="100%" stop-color="#0E32C4"/>
+    </linearGradient>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7FE3FF"/>
+      <stop offset="100%" stop-color="#20A6F5"/>
+    </linearGradient>
+    <linearGradient id="sheen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="dropClip">
+      <path d="M512 168 C512 168 762 432 762 604 A250 250 0 0 1 262 604 C262 432 512 168 512 168 Z"/>
+    </clipPath>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="26"/>
+    </filter>
+  </defs>
+
+  <rect width="1024" height="1024" rx="232" fill="url(#tile)"/>
+
+  <g opacity="0.16" fill="#FFFFFF">
+    <path d="M-40 812 q 150 -80 300 0 t 300 0 t 300 0 t 300 0 v 260 h -1200 z"/>
+  </g>
+  <g opacity="0.10" fill="#FFFFFF">
+    <path d="M-40 880 q 150 -80 300 0 t 300 0 t 300 0 t 300 0 v 200 h -1200 z"/>
+  </g>
+
+  <ellipse cx="512" cy="640" rx="230" ry="60" fill="#06239A" opacity="0.35" filter="url(#soft)"/>
+
+  <path d="M512 168 C512 168 762 432 762 604 A250 250 0 0 1 262 604 C262 432 512 168 512 168 Z" fill="#FFFFFF"/>
+
+  <g clip-path="url(#dropClip)">
+    <path d="M240 610 q 68 -58 136 0 t 136 0 t 136 0 t 136 0 v 300 h -544 z" fill="url(#water)"/>
+    <path d="M240 646 q 68 -52 136 0 t 136 0 t 136 0 t 136 0 v 300 h -544 z" fill="#0E8FE0" opacity="0.35"/>
+  </g>
+
+  <path d="M512 214 C512 214 400 340 372 452 C356 516 396 560 430 546 C462 532 436 470 470 396 C492 348 528 292 512 214 Z" fill="url(#sheen)"/>
+
+  <g fill="#FFFFFF">
+    <path d="M756 250 l 26 66 66 26 -66 26 -26 66 -26 -66 -66 -26 66 -26 z" opacity="0.95"/>
+    <path d="M676 178 l 15 38 38 15 -38 15 -15 38 -15 -38 -38 -15 38 -15 z" opacity="0.6"/>
+  </g>
+</svg>
