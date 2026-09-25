@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A water drop with a leaf: hydration + food. Safe zone is the centre 66dp. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M54,28C54,28 38,45.5 38,57.5A16,16 0,0 0,70 57.5C70,45.5 54,28 54,28Z" />
+    <path
+        android:fillColor="#FF7FE3FF"
+        android:pathData="M42,60A12,12 0,0 0,66 60C60,63 48,63 42,60Z" />
+    <path
+        android:fillColor="#FF2BC46B"
+        android:pathData="M62,40C68,34 76,34 80,36C78,43 71,47 63,46C62.5,44 62,42 62,40Z" />
+</vector>

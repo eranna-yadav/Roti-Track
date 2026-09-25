@@ -1,121 +1,83 @@
-<p align="center">
-  <img src="assets/brand/logo-512.png" width="120" alt="Sipwell logo" />
-</p>
+# Sipwell
 
-<h1 align="center">Sipwell</h1>
-<p align="center"><em>Indian diet planner, calorie tracker and water tracker</em></p>
+_Indian diet planner, calorie tracker and water tracker for Android._
 
-An Android (and iOS) app built with Expo and React Native. Plan home-style
-Indian meals, count calories and macros, and log what you drink — all on device.
+A native Android app written in Kotlin with Jetpack Compose. It has no backend and
+needs no account. Everything stays on the phone.
 
 ## Features
 
-**Food** — a daily calorie ring with protein / carbs / fat bars, today's water
-alongside, and Breakfast · Lunch · Evening Snack · Dinner sections. Browse or
-search 140+ Indian foods (idli, poha, dal tadka, rajma, paneer, biryani, chai,
-mithai…) with veg / egg / non-veg marks, pick servings, or add your own recipes.
-Step back through previous days and see the last seven at a glance.
+**Water**: an animated glass that fills toward your daily goal, quick-add buttons
+for your usual glass, and ten drinks (water, nimbu pani, coconut water, chaas,
+chai, coffee…). Each drink has its own hydration factor, so a cup of chai counts
+for 85% of its volume. You also get a daily log and a streak.
 
-**Plan** — a 7-day Indian meal plan scaled to your calorie target. Each meal is
-a real thali or plate (Idli Sambar, Rajma Chawal, Bajra Roti & Bharta, Fish
-Curry Rice…) filtered by your food preference and cuisine (North, South, West,
-East or all India). Swap any meal, or tap "I ate this" to log it in one go.
-A daily nutrition tip sits at the bottom.
+**Food**: a calorie ring and protein / carbs / fat bars, shown next to today's
+water. Meals are split into Breakfast · Lunch · Evening Snack · Dinner. You can
+search 142 Indian foods (idli, poha, dal tadka, rajma, paneer, biryani, chai,
+mithai…), filter by category, and see a veg / egg / non-veg mark on each one.
+You can log half portions and add your own recipes. Earlier days are one tap
+away, with a chart of the last seven days.
 
-**Diet Profile** — height, age, activity level, goal (lose / maintain / gain),
-veg / egg / non-veg and cuisine. The calorie target comes from Mifflin–St Jeor
-× activity, ±500 / +300 kcal for the goal, with ICMR-style macro splits and
-Asian-Indian BMI bands. Override it by hand if your dietitian gave you a number.
+**Plan**: a 7-day plan built from 65 real thalis and plates (Idli Sambar, Rajma
+Chawal, Bajra Roti & Bharta, Fish Curry Rice…). Portions are scaled to your
+calorie target, and the plan follows your food preference and cuisine (North,
+South, West, East or all India). **Swap** any meal, or tap **I ate this** to log
+the whole meal. There's also a daily nutrition tip.
 
-**Water** — a big running total over an animated water level that rises as you
-approach your goal, your target and next reminder at a glance, a one-tap
-quick-add for your usual cup, and a full drink sheet for anything else.
+**History**: water and calorie charts for 7 or 30 days, with averages, goal hits
+and your streak.
 
-**History** — day, week and month views. The day view scatters each individual
-drink across the clock and lists every record for editing or deletion; week and
-month roll up into bars with a dashed goal line and tap-to-inspect values.
+**Me**: gender, weight, height, age, activity, goal (lose / maintain / gain),
+veg / egg / non-veg and cuisine. The calorie target uses Mifflin–St Jeor ×
+activity level, −500 kcal to lose weight or +300 kcal to gain. Macros use an
+ICMR-style split. BMI uses the Asian-Indian bands. You can override the calorie
+and water targets. Water reminders can be set every 30 min – 4 h during your
+waking hours. Each reminder has a **+250 ml** button, and reminders stop once
+you reach your goal.
 
-**Insights** — nineteen short articles across six categories, from building a
-balanced thali and vegetarian protein to hydration basics. Reached from Me
-and the Plan tab.
+**Articles**: 19 short reads on Indian nutrition and hydration.
 
-**Me** — reminders, sound and haptics, daily goal, body data, drink types,
-units, week start, day boundary and time format.
+## Build in Android Studio
 
-Alongside that: an onboarding flow that derives your goal from body weight and
-waking hours, seventeen drink types each carrying its own hydration factor (a
-coffee counts for 80% of its volume, a beer for 40%), daily streaks, local
-notification scheduling in smart / interval / custom modes, and a Pro screen for
-the premium drink set.
+1. **File → Open** and pick this folder.
+2. Let Gradle sync. Android Studio downloads the SDK 35 platform if it's missing.
+3. Pick a device or emulator (Android 8.0 / API 26 or newer) and press **Run ▶**.
 
-Everything is stored on device with AsyncStorage. There is no account, no
-server and no analytics.
-
-## Running it
+To get an APK you can install on a phone, use **Build → Build App Bundle(s) / APK(s)
+→ Build APK(s)**. You can also run this from the terminal:
 
 ```bash
-npm install
-npx expo start          # then scan the QR code with Expo Go
-npx expo start --android
-npx expo start --ios
-npx expo start --web
+./gradlew assembleDebug      # app/build/outputs/apk/debug/app-debug.apk
+./gradlew assembleRelease    # minified; signed with the debug key for now
+./gradlew test               # unit tests for the planner, calorie maths and storage
 ```
 
-To build an installable Android APK:
+Before you publish to the Play Store, replace the debug signing config in
+`app/build.gradle.kts` with your own keystore.
 
-```bash
-npm install -g eas-cli
-eas build -p android --profile preview   # produces a downloadable .apk
-# or, with the Android SDK installed locally:
-npx expo run:android --variant release
-```
-
-Reminders use `expo-notifications`, which needs a development build or a real
-device to deliver on a schedule — they will not fire in a web session.
+Toolchain: AGP 8.7, Kotlin 2.1, Compose BOM 2024.12, JDK 17+. When a newer
+Android Studio offers to upgrade these, accepting is safe.
 
 ## Layout
 
 ```
-app/                        expo-router routes
-  (tabs)/                   Water · Food · Plan · History · Me
-  onboarding/               first-run setup
-  add-food · custom-food    food search and custom recipes
-  diet-profile              calorie target and diet preferences
-  insights · article/[id]   articles and reader
-  reminders · goal · body · drinks · units · day-start · pro · rate · legal
-src/
-  components/               wave, charts, sheets, icons, shared UI
-  store/                    HydrationProvider, DietProvider, defaults, AsyncStorage
-  lib/                      units, time, dates, goal & calorie maths, meal planner, notifications
-  data/                     Indian foods, meal templates, diet tips, drinks, articles, sounds
-assets/
-  brand/                    logo source (SVG) and exports
-  sounds/                   five water sound effects
+app/src/main/java/com/sipwell/app/
+  MainActivity.kt, SipwellApp.kt   entry points, notification permission
+  data/        foods, meal templates, drinks, tips, articles, models
+  domain/      calorie & macro maths, meal planner, dates
+  store/       AppStore (state + persistence), AndroidStorage (JSON file)
+  reminders/   WorkManager reminder, "+ glass" notification action
+  ui/          Compose screens: Water, Food, Add food, Plan, History, Me,
+               onboarding, articles, shared components and theme
+app/src/test/  unit tests
 ```
 
-## Design notes
+## Notes
 
-The daily target is roughly 33–36 ml per kilogram of body weight depending on
-gender, clamped to a sane range and rounded to the nearest 10 ml. You can
-override it, and once you do it stops tracking your body data.
+Food values are typical home-style estimates per serving, based on IFCT 2017 and
+standard recipes. Restaurant portions and the amount of oil vary a lot.
 
-Volumes are always stored in millilitres and converted only for display, so
-switching between metric and imperial never loses precision.
-
-"A Day Starts At" shifts which logical day a drink belongs to, so a glass at
-1am can still count toward the night before.
-
-The five sound effects are synthesised, not sampled — see the generator note in
-`assets/sounds`.
-
-## Not wired up
-
-The Pro screen has no payment provider behind it; subscribing unlocks the
-entitlement locally so the premium drinks can be tried. Language options are a
-single entry, and there is no home-screen widget yet.
-
-Food values are typical home-style estimates per serving; restaurant portions
-and oil quantities vary a lot.
-
-Sipwell is a wellbeing tool, not a medical device. The goals it suggests are
-estimates — check with a doctor or dietitian if you have a medical condition.
+Sipwell is a wellbeing tool, not a medical device. Its targets are estimates. If
+you have diabetes, a thyroid, kidney or heart condition, or are pregnant, check
+with a doctor or dietitian.

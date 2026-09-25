@@ -1,0 +1,178 @@
+package com.sipwell.app.data
+
+import com.sipwell.app.data.FoodCategory.BEVERAGES
+import com.sipwell.app.data.FoodCategory.BREADS
+import com.sipwell.app.data.FoodCategory.BREAKFAST
+import com.sipwell.app.data.FoodCategory.DAIRY
+import com.sipwell.app.data.FoodCategory.DAL
+import com.sipwell.app.data.FoodCategory.FRUITS
+import com.sipwell.app.data.FoodCategory.NONVEG
+import com.sipwell.app.data.FoodCategory.RICE
+import com.sipwell.app.data.FoodCategory.SABZI
+import com.sipwell.app.data.FoodCategory.SNACKS
+import com.sipwell.app.data.FoodCategory.SWEETS
+
+/**
+ * Common Indian foods with per-serving nutrition (kcal, protein g, carbs g, fat g).
+ * Values are typical home-style estimates collated from IFCT 2017 and standard
+ * recipe analyses — good for day-to-day tracking, not for clinical use.
+ */
+val FOODS: List<Food> = listOf(
+    // breakfast
+    Food("poha", "Poha", "🍛", BREAKFAST, "1 plate (150 g)", 250, 5.0, 45.0, 6.0),
+    Food("upma", "Upma", "🥣", BREAKFAST, "1 bowl (200 g)", 290, 7.0, 42.0, 10.0),
+    Food("idli", "Idli", "⚪", BREAKFAST, "1 piece", 58, 2.0, 12.0, 0.2, piece = true),
+    Food("dosa", "Plain Dosa", "🫓", BREAKFAST, "1 dosa", 170, 4.0, 28.0, 5.0, piece = true),
+    Food("masala-dosa", "Masala Dosa", "🫓", BREAKFAST, "1 dosa", 390, 8.0, 52.0, 16.0, piece = true),
+    Food("rava-dosa", "Rava Dosa", "🫓", BREAKFAST, "1 dosa", 220, 4.0, 30.0, 9.0, piece = true),
+    Food("medu-vada", "Medu Vada", "🍩", BREAKFAST, "1 piece", 140, 4.0, 13.0, 8.0, piece = true),
+    Food("uttapam", "Uttapam", "🥞", BREAKFAST, "1 uttapam", 210, 5.0, 34.0, 6.0, piece = true),
+    Food("pesarattu", "Pesarattu", "🥞", BREAKFAST, "1 piece", 180, 9.0, 26.0, 5.0, piece = true),
+    Food("ragi-dosa", "Ragi Dosa", "🫓", BREAKFAST, "1 dosa", 140, 3.0, 24.0, 4.0, piece = true),
+    Food("appam", "Appam", "🥞", BREAKFAST, "1 appam", 120, 2.0, 23.0, 2.0, piece = true),
+    Food("pongal", "Ven Pongal", "🍚", BREAKFAST, "1 bowl (200 g)", 300, 8.0, 42.0, 11.0),
+    Food("aloo-paratha", "Aloo Paratha", "🫓", BREAKFAST, "1 paratha", 290, 6.0, 40.0, 12.0, piece = true),
+    Food("paneer-paratha", "Paneer Paratha", "🫓", BREAKFAST, "1 paratha", 320, 12.0, 34.0, 15.0, piece = true),
+    Food("thepla", "Methi Thepla", "🫓", BREAKFAST, "1 thepla", 120, 3.0, 16.0, 5.0, piece = true),
+    Food("besan-chilla", "Besan Chilla", "🥞", BREAKFAST, "1 chilla", 150, 7.0, 18.0, 5.0, piece = true),
+    Food("moong-chilla", "Moong Dal Chilla", "🥞", BREAKFAST, "1 chilla", 130, 8.0, 16.0, 4.0, piece = true),
+    Food("dhokla", "Khaman Dhokla", "🧽", BREAKFAST, "4 pieces (100 g)", 160, 6.0, 22.0, 5.0),
+    Food("oats", "Masala Oats", "🥣", BREAKFAST, "1 bowl", 220, 7.0, 34.0, 6.0),
+    Food("oats-milk", "Oats Porridge with Milk", "🥣", BREAKFAST, "1 bowl", 230, 9.0, 34.0, 6.0),
+    Food("semiya-upma", "Semiya Upma", "🍝", BREAKFAST, "1 bowl", 250, 6.0, 42.0, 7.0),
+    Food("sabudana-khichdi", "Sabudana Khichdi", "🍚", BREAKFAST, "1 bowl (150 g)", 330, 4.0, 52.0, 12.0),
+    Food("puri", "Puri", "🫓", BREAKFAST, "1 puri", 100, 2.0, 12.0, 5.0, piece = true),
+    Food("bhatura", "Bhatura", "🫓", BREAKFAST, "1 bhatura", 250, 5.0, 30.0, 12.0, piece = true),
+    Food("bread", "Brown Bread", "🍞", BREAKFAST, "1 slice", 75, 3.0, 13.0, 1.0, piece = true),
+    Food("boiled-egg", "Boiled Egg", "🥚", BREAKFAST, "1 egg", 78, 6.3, 0.6, 5.3, Diet.EGG, piece = true),
+    Food("omelette", "Masala Omelette", "🍳", BREAKFAST, "2 eggs", 190, 13.0, 2.0, 15.0, Diet.EGG),
+    Food("egg-bhurji", "Egg Bhurji", "🍳", BREAKFAST, "1 bowl (2 eggs)", 220, 14.0, 4.0, 16.0, Diet.EGG),
+    Food("coconut-chutney", "Coconut Chutney", "🥥", BREAKFAST, "2 tbsp (30 g)", 70, 1.0, 3.0, 6.0),
+    Food("sprouts", "Moong Sprouts Salad", "🥗", BREAKFAST, "1 bowl", 110, 8.0, 18.0, 1.0),
+    // breads
+    Food("roti", "Roti / Chapati", "🫓", BREADS, "1 roti (40 g)", 110, 3.0, 18.0, 3.0, piece = true),
+    Food("phulka", "Phulka (no oil)", "🫓", BREADS, "1 phulka", 70, 2.5, 14.0, 0.5, piece = true),
+    Food("bajra-roti", "Bajra Roti", "🫓", BREADS, "1 roti", 120, 3.5, 21.0, 2.5, piece = true),
+    Food("jowar-roti", "Jowar Bhakri", "🫓", BREADS, "1 roti", 110, 3.5, 22.0, 1.0, piece = true),
+    Food("makki-roti", "Makki di Roti", "🫓", BREADS, "1 roti", 150, 3.0, 26.0, 4.5, piece = true),
+    Food("missi-roti", "Missi Roti", "🫓", BREADS, "1 roti", 140, 5.0, 20.0, 4.5, piece = true),
+    Food("paratha", "Plain Paratha", "🫓", BREADS, "1 paratha", 200, 4.0, 26.0, 9.0, piece = true),
+    Food("naan", "Naan", "🫓", BREADS, "1 naan", 260, 8.0, 45.0, 5.0, piece = true),
+    Food("butter-naan", "Butter Naan", "🫓", BREADS, "1 naan", 320, 8.0, 45.0, 11.0, piece = true),
+    Food("pav", "Pav", "🍞", BREADS, "1 pav", 110, 3.0, 20.0, 2.0, piece = true),
+    // rice
+    Food("rice", "Steamed Rice", "🍚", RICE, "1 bowl (150 g cooked)", 195, 4.0, 43.0, 0.4),
+    Food("brown-rice", "Brown Rice", "🍚", RICE, "1 bowl (150 g cooked)", 170, 4.0, 36.0, 1.4),
+    Food("jeera-rice", "Jeera Rice", "🍚", RICE, "1 bowl", 240, 4.0, 44.0, 5.0),
+    Food("veg-pulao", "Veg Pulao", "🍚", RICE, "1 bowl", 270, 5.0, 45.0, 8.0),
+    Food("veg-biryani", "Veg Biryani", "🍛", RICE, "1 plate (250 g)", 400, 9.0, 60.0, 13.0),
+    Food("curd-rice", "Curd Rice", "🍚", RICE, "1 bowl", 230, 6.0, 36.0, 7.0),
+    Food("lemon-rice", "Lemon Rice", "🍋", RICE, "1 bowl", 260, 4.0, 45.0, 7.0),
+    Food("khichdi", "Moong Dal Khichdi", "🍲", RICE, "1 bowl", 220, 8.0, 36.0, 5.0),
+    Food("bisi-bele-bath", "Bisi Bele Bath", "🍲", RICE, "1 bowl", 300, 9.0, 45.0, 9.0),
+    Food("chicken-biryani", "Chicken Biryani", "🍛", RICE, "1 plate (250 g)", 500, 25.0, 55.0, 18.0, Diet.NONVEG),
+    Food("egg-biryani", "Egg Biryani", "🍛", RICE, "1 plate (250 g)", 440, 16.0, 58.0, 15.0, Diet.EGG),
+    // dals & legumes
+    Food("dal-tadka", "Dal Tadka", "🥣", DAL, "1 bowl (150 g)", 180, 9.0, 22.0, 6.0),
+    Food("moong-dal", "Yellow Moong Dal", "🥣", DAL, "1 bowl (150 g)", 150, 9.0, 20.0, 4.0),
+    Food("chana-dal", "Chana Dal", "🥣", DAL, "1 bowl (150 g)", 190, 10.0, 26.0, 5.0),
+    Food("dal-makhani", "Dal Makhani", "🥣", DAL, "1 bowl (150 g)", 280, 10.0, 26.0, 15.0),
+    Food("sambar", "Sambar", "🍲", DAL, "1 bowl (150 ml)", 130, 6.0, 18.0, 4.0),
+    Food("rasam", "Rasam", "🍵", DAL, "1 bowl (150 ml)", 60, 2.0, 9.0, 2.0),
+    Food("rajma", "Rajma Masala", "🫘", DAL, "1 bowl (150 g)", 210, 10.0, 30.0, 6.0),
+    Food("chole", "Chole / Chana Masala", "🫘", DAL, "1 bowl (150 g)", 240, 10.0, 32.0, 8.0),
+    Food("kadhi", "Kadhi", "🥣", DAL, "1 bowl (150 g)", 160, 6.0, 14.0, 9.0),
+    Food("usal", "Matki Usal", "🫘", DAL, "1 bowl (150 g)", 200, 11.0, 28.0, 5.0),
+    // sabzi & veg curries
+    Food("aloo-gobi", "Aloo Gobi", "🥦", SABZI, "1 bowl (150 g)", 170, 4.0, 18.0, 9.0),
+    Food("bhindi", "Bhindi Masala", "🌿", SABZI, "1 bowl (150 g)", 150, 3.0, 12.0, 10.0),
+    Food("palak-paneer", "Palak Paneer", "🥬", SABZI, "1 bowl (150 g)", 270, 13.0, 9.0, 20.0),
+    Food("paneer-butter", "Paneer Butter Masala", "🧀", SABZI, "1 bowl (150 g)", 350, 14.0, 12.0, 28.0),
+    Food("matar-paneer", "Matar Paneer", "🧀", SABZI, "1 bowl (150 g)", 260, 12.0, 14.0, 17.0),
+    Food("paneer-bhurji", "Paneer Bhurji", "🧀", SABZI, "1 bowl (100 g)", 250, 15.0, 6.0, 19.0),
+    Food("mixed-veg", "Mixed Veg Curry", "🥕", SABZI, "1 bowl (150 g)", 150, 4.0, 15.0, 8.0),
+    Food("baingan-bharta", "Baingan Bharta", "🍆", SABZI, "1 bowl (150 g)", 140, 3.0, 13.0, 9.0),
+    Food("aloo-matar", "Aloo Matar", "🥔", SABZI, "1 bowl (150 g)", 180, 5.0, 24.0, 7.0),
+    Food("lauki", "Lauki Sabzi", "🥒", SABZI, "1 bowl (150 g)", 90, 2.0, 10.0, 5.0),
+    Food("poriyal", "Cabbage Poriyal", "🥬", SABZI, "1 bowl (150 g)", 110, 3.0, 10.0, 7.0),
+    Food("beans-poriyal", "Beans Poriyal", "🫛", SABZI, "1 bowl (150 g)", 120, 4.0, 11.0, 7.0),
+    Food("avial", "Avial", "🥥", SABZI, "1 bowl (150 g)", 180, 4.0, 14.0, 12.0),
+    Food("soya-curry", "Soya Chunks Curry", "🍲", SABZI, "1 bowl (150 g)", 200, 18.0, 14.0, 8.0),
+    Food("mushroom-masala", "Mushroom Masala", "🍄", SABZI, "1 bowl (150 g)", 150, 5.0, 10.0, 10.0),
+    Food("methi-aloo", "Aloo Methi", "🥔", SABZI, "1 bowl (150 g)", 160, 4.0, 20.0, 8.0),
+    Food("pav-bhaji-bhaji", "Pav Bhaji (bhaji only)", "🍲", SABZI, "1 bowl (150 g)", 230, 5.0, 26.0, 12.0),
+    Food("salad", "Kachumber Salad", "🥗", SABZI, "1 bowl", 40, 1.5, 8.0, 0.3),
+    // non-veg
+    Food("chicken-curry", "Chicken Curry", "🍗", NONVEG, "1 bowl (150 g)", 260, 24.0, 8.0, 15.0, Diet.NONVEG),
+    Food("butter-chicken", "Butter Chicken", "🍗", NONVEG, "1 bowl (150 g)", 380, 26.0, 10.0, 26.0, Diet.NONVEG),
+    Food("tandoori-chicken", "Tandoori Chicken", "🍗", NONVEG, "2 pieces (200 g)", 260, 36.0, 4.0, 11.0, Diet.NONVEG),
+    Food("chicken-tikka", "Chicken Tikka", "🍢", NONVEG, "6 pieces (150 g)", 220, 30.0, 5.0, 9.0, Diet.NONVEG),
+    Food("grilled-chicken", "Grilled Chicken Breast", "🍗", NONVEG, "100 g", 165, 31.0, 0.0, 3.6, Diet.NONVEG),
+    Food("keema", "Chicken Keema", "🍖", NONVEG, "1 bowl (150 g)", 300, 22.0, 8.0, 20.0, Diet.NONVEG),
+    Food("mutton-curry", "Mutton Curry", "🍖", NONVEG, "1 bowl (150 g)", 340, 26.0, 6.0, 24.0, Diet.NONVEG),
+    Food("fish-curry", "Fish Curry", "🐟", NONVEG, "1 bowl (150 g)", 220, 22.0, 6.0, 12.0, Diet.NONVEG),
+    Food("fish-fry", "Fish Fry", "🐟", NONVEG, "1 piece (100 g)", 200, 20.0, 6.0, 11.0, Diet.NONVEG, piece = true),
+    Food("prawn-masala", "Prawn Masala", "🦐", NONVEG, "1 bowl (150 g)", 200, 22.0, 7.0, 10.0, Diet.NONVEG),
+    Food("egg-curry", "Egg Curry", "🥚", NONVEG, "1 bowl (2 eggs)", 240, 14.0, 8.0, 17.0, Diet.EGG),
+    // dairy
+    Food("curd", "Curd / Dahi", "🥛", DAIRY, "1 bowl (150 g)", 90, 5.0, 7.0, 5.0),
+    Food("raita", "Boondi / Veg Raita", "🥣", DAIRY, "1 bowl (150 g)", 100, 4.0, 8.0, 5.0),
+    Food("paneer", "Paneer (raw)", "🧀", DAIRY, "100 g", 265, 18.0, 1.2, 21.0),
+    Food("milk", "Toned Milk", "🥛", DAIRY, "1 glass (250 ml)", 145, 8.0, 12.0, 7.5),
+    Food("haldi-doodh", "Haldi Doodh", "🥛", DAIRY, "1 glass (250 ml)", 160, 8.0, 14.0, 8.0),
+    Food("chaas", "Chaas / Buttermilk", "🥛", DAIRY, "1 glass (250 ml)", 40, 2.0, 4.0, 1.5),
+    Food("lassi", "Sweet Lassi", "🥤", DAIRY, "1 glass (250 ml)", 220, 7.0, 34.0, 6.0),
+    Food("ghee", "Ghee", "🧈", DAIRY, "1 tsp (5 g)", 45, 0.0, 0.0, 5.0),
+    // snacks
+    Food("samosa", "Samosa", "🥟", SNACKS, "1 samosa", 260, 4.0, 28.0, 15.0, piece = true),
+    Food("pakora", "Onion Pakora", "🧅", SNACKS, "5 pieces", 200, 4.0, 18.0, 13.0),
+    Food("kachori", "Kachori", "🥟", SNACKS, "1 kachori", 190, 4.0, 20.0, 11.0, piece = true),
+    Food("pani-puri", "Pani Puri", "🫧", SNACKS, "6 puris", 180, 3.0, 30.0, 5.0),
+    Food("bhel", "Bhel Puri", "🥗", SNACKS, "1 plate", 200, 5.0, 32.0, 6.0),
+    Food("pav-bhaji", "Pav Bhaji", "🍲", SNACKS, "1 plate (2 pav)", 450, 10.0, 60.0, 18.0),
+    Food("vada-pav", "Vada Pav", "🍔", SNACKS, "1 vada pav", 290, 6.0, 38.0, 13.0, piece = true),
+    Food("roasted-chana", "Roasted Chana", "🫘", SNACKS, "1 handful (30 g)", 110, 6.0, 17.0, 2.0),
+    Food("makhana", "Roasted Makhana", "🍿", SNACKS, "1 cup (30 g)", 120, 3.0, 20.0, 2.0),
+    Food("nuts", "Mixed Nuts", "🥜", SNACKS, "1 handful (30 g)", 180, 5.0, 7.0, 16.0),
+    Food("peanuts", "Roasted Peanuts", "🥜", SNACKS, "1 handful (30 g)", 170, 7.0, 5.0, 14.0),
+    Food("murmura", "Masala Murmura", "🍚", SNACKS, "1 bowl", 130, 3.0, 24.0, 3.0),
+    Food("khakhra", "Khakhra", "🫓", SNACKS, "2 khakhras", 120, 4.0, 18.0, 4.0),
+    Food("sprouts-chaat", "Sprouts Chaat", "🥗", SNACKS, "1 bowl", 140, 9.0, 22.0, 2.0),
+    Food("marie", "Marie Biscuits", "🍪", SNACKS, "4 biscuits", 120, 2.0, 20.0, 3.5),
+    Food("sundal", "Chana Sundal", "🫘", SNACKS, "1 bowl (100 g)", 150, 8.0, 22.0, 4.0),
+    // sweets
+    Food("gulab-jamun", "Gulab Jamun", "🟤", SWEETS, "1 piece", 150, 2.0, 22.0, 6.0, piece = true),
+    Food("rasgulla", "Rasgulla", "⚪", SWEETS, "1 piece", 110, 2.0, 23.0, 1.0, piece = true),
+    Food("jalebi", "Jalebi", "🌀", SWEETS, "2 pieces", 200, 1.0, 35.0, 7.0),
+    Food("kheer", "Rice Kheer", "🍮", SWEETS, "1 bowl", 250, 7.0, 36.0, 9.0),
+    Food("besan-ladoo", "Besan Ladoo", "🟡", SWEETS, "1 ladoo", 180, 3.0, 18.0, 11.0, piece = true),
+    Food("sooji-halwa", "Sooji Halwa", "🍮", SWEETS, "1 bowl", 330, 4.0, 45.0, 15.0),
+    Food("gajar-halwa", "Gajar Halwa", "🥕", SWEETS, "1 bowl", 300, 6.0, 38.0, 14.0),
+    Food("barfi", "Kaju Barfi", "💠", SWEETS, "1 piece", 140, 3.0, 16.0, 7.0, piece = true),
+    // beverages
+    Food("chai", "Masala Chai", "☕", BEVERAGES, "1 cup", 90, 3.0, 12.0, 3.5),
+    Food("chai-nosugar", "Chai (no sugar)", "☕", BEVERAGES, "1 cup", 50, 3.0, 4.0, 3.0),
+    Food("filter-coffee", "Filter Coffee", "☕", BEVERAGES, "1 cup", 110, 3.0, 14.0, 4.0),
+    Food("black-coffee", "Black Coffee", "☕", BEVERAGES, "1 cup", 5, 0.3, 0.0, 0.0),
+    Food("green-tea", "Green Tea", "🍵", BEVERAGES, "1 cup", 2, 0.0, 0.0, 0.0),
+    Food("nimbu-pani", "Nimbu Pani", "🍋", BEVERAGES, "1 glass", 60, 0.0, 15.0, 0.0),
+    Food("coconut-water", "Coconut Water", "🥥", BEVERAGES, "1 glass (240 ml)", 45, 0.5, 9.0, 0.5),
+    Food("sugarcane", "Sugarcane Juice", "🧃", BEVERAGES, "1 glass", 180, 0.0, 45.0, 0.0),
+    Food("mango-shake", "Mango Shake", "🥭", BEVERAGES, "1 glass", 250, 6.0, 40.0, 7.0),
+    // fruits
+    Food("banana", "Banana", "🍌", FRUITS, "1 medium", 105, 1.3, 27.0, 0.4, piece = true),
+    Food("apple", "Apple", "🍎", FRUITS, "1 medium", 95, 0.5, 25.0, 0.3, piece = true),
+    Food("mango", "Mango", "🥭", FRUITS, "1 cup sliced", 100, 1.4, 25.0, 0.6),
+    Food("papaya", "Papaya", "🧡", FRUITS, "1 cup", 60, 0.7, 15.0, 0.4),
+    Food("guava", "Guava", "🍐", FRUITS, "1 medium", 70, 2.6, 14.0, 1.0, piece = true),
+    Food("orange", "Orange", "🍊", FRUITS, "1 medium", 62, 1.2, 15.0, 0.2, piece = true),
+    Food("watermelon", "Watermelon", "🍉", FRUITS, "1 cup", 46, 1.0, 12.0, 0.2),
+    Food("pomegranate", "Pomegranate", "🔴", FRUITS, "½ cup arils", 72, 1.5, 16.0, 1.0),
+    Food("grapes", "Grapes", "🍇", FRUITS, "1 cup", 104, 1.0, 27.0, 0.2),
+    Food("chikoo", "Chikoo", "🟤", FRUITS, "1 medium", 80, 0.5, 20.0, 1.0, piece = true),
+    Food("dates", "Dates", "🟫", FRUITS, "3 dates", 67, 0.6, 18.0, 0.0),
+)
+
+private val foodIndex = FOODS.associateBy { it.id }
+
+fun builtinFood(id: String): Food? = foodIndex[id]
