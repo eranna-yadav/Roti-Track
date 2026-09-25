@@ -9,6 +9,7 @@ import { BlueScreen, CircleButton, GlassCard, Row, SectionTitle, ToggleRow } fro
 import { reminderTimes } from '@/lib/notifications';
 import { timeFormatLabel } from '@/lib/time';
 import { formatVolume, unitsLabel } from '@/lib/units';
+import { useDiet } from '@/store/DietProvider';
 import { useHydration } from '@/store/HydrationProvider';
 import { colors, radius, type } from '@/theme';
 
@@ -18,6 +19,7 @@ export default function MeScreen() {
   const { settings, todayMl, streak, updateSettings } = useHydration();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { profile } = useDiet();
   const [soundOpen, setSoundOpen] = useState(false);
 
   const reminderSubtitle = settings.reminderEnabled
@@ -82,6 +84,34 @@ export default function MeScreen() {
             <Text style={styles.statLabel}>Streak</Text>
           </Pressable>
         </View>
+
+        <SectionTitle>Diet & Calories</SectionTitle>
+        <GlassCard>
+          <Row
+            icon={<Text style={styles.rowIcon}>🎯</Text>}
+            title="Diet Profile"
+            subtitle={profile.configured ? undefined : 'Personalise your calorie target'}
+            badge={!profile.configured}
+            onPress={() => router.push('/diet-profile')}
+          />
+          <Row
+            icon={<Text style={styles.rowIcon}>🔥</Text>}
+            title="Calorie Goal"
+            value={`${profile.calorieGoal} kcal`}
+            onPress={() => router.push('/diet-profile')}
+          />
+          <Row
+            icon={<Text style={styles.rowIcon}>🍱</Text>}
+            title="My Meal Plan"
+            onPress={() => router.push('/(tabs)/plan')}
+          />
+          <Row
+            icon={<Text style={styles.rowIcon}>📚</Text>}
+            title="Health Articles"
+            onPress={() => router.push('/insights')}
+            last
+          />
+        </GlassCard>
 
         <SectionTitle>Reminder Settings</SectionTitle>
         <GlassCard>

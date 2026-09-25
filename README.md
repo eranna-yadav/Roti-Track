@@ -3,14 +3,31 @@
 </p>
 
 <h1 align="center">Sipwell</h1>
-<p align="center"><em>Keep hydrated for a healthy life</em></p>
+<p align="center"><em>Indian diet planner, calorie tracker and water tracker</em></p>
 
-A water-tracking mobile app built with Expo and React Native. Log what you
-drink, watch the glass fill up, get nudged when it is time for the next one.
+An Android (and iOS) app built with Expo and React Native. Plan home-style
+Indian meals, count calories and macros, and log what you drink — all on device.
 
 ## Features
 
-**Today** — a big running total over an animated water level that rises as you
+**Food** — a daily calorie ring with protein / carbs / fat bars, today's water
+alongside, and Breakfast · Lunch · Evening Snack · Dinner sections. Browse or
+search 140+ Indian foods (idli, poha, dal tadka, rajma, paneer, biryani, chai,
+mithai…) with veg / egg / non-veg marks, pick servings, or add your own recipes.
+Step back through previous days and see the last seven at a glance.
+
+**Plan** — a 7-day Indian meal plan scaled to your calorie target. Each meal is
+a real thali or plate (Idli Sambar, Rajma Chawal, Bajra Roti & Bharta, Fish
+Curry Rice…) filtered by your food preference and cuisine (North, South, West,
+East or all India). Swap any meal, or tap "I ate this" to log it in one go.
+A daily nutrition tip sits at the bottom.
+
+**Diet Profile** — height, age, activity level, goal (lose / maintain / gain),
+veg / egg / non-veg and cuisine. The calorie target comes from Mifflin–St Jeor
+× activity, ±500 / +300 kcal for the goal, with ICMR-style macro splits and
+Asian-Indian BMI bands. Override it by hand if your dietitian gave you a number.
+
+**Water** — a big running total over an animated water level that rises as you
 approach your goal, your target and next reminder at a glance, a one-tap
 quick-add for your usual cup, and a full drink sheet for anything else.
 
@@ -18,8 +35,9 @@ quick-add for your usual cup, and a full drink sheet for anything else.
 drink across the clock and lists every record for editing or deletion; week and
 month roll up into bars with a dashed goal line and tap-to-inspect values.
 
-**Insights** — fifteen short articles across five categories, from hydration
-basics to what alcohol actually does to your fluid balance.
+**Insights** — nineteen short articles across six categories, from building a
+balanced thali and vegetarian protein to hydration basics. Reached from Me
+and the Plan tab.
 
 **Me** — reminders, sound and haptics, daily goal, body data, drink types,
 units, week start, day boundary and time format.
@@ -43,6 +61,15 @@ npx expo start --ios
 npx expo start --web
 ```
 
+To build an installable Android APK:
+
+```bash
+npm install -g eas-cli
+eas build -p android --profile preview   # produces a downloadable .apk
+# or, with the Android SDK installed locally:
+npx expo run:android --variant release
+```
+
 Reminders use `expo-notifications`, which needs a development build or a real
 device to deliver on a schedule — they will not fire in a web session.
 
@@ -50,15 +77,17 @@ device to deliver on a schedule — they will not fire in a web session.
 
 ```
 app/                        expo-router routes
-  (tabs)/                   Today · History · Insights · Me
+  (tabs)/                   Water · Food · Plan · History · Me
   onboarding/               first-run setup
-  article/[id].tsx          article reader
+  add-food · custom-food    food search and custom recipes
+  diet-profile              calorie target and diet preferences
+  insights · article/[id]   articles and reader
   reminders · goal · body · drinks · units · day-start · pro · rate · legal
 src/
   components/               wave, charts, sheets, icons, shared UI
-  store/                    HydrationProvider, defaults, AsyncStorage
-  lib/                      units, time, dates, goal maths, notifications, feedback
-  data/                     drinks, articles, sound effects
+  store/                    HydrationProvider, DietProvider, defaults, AsyncStorage
+  lib/                      units, time, dates, goal & calorie maths, meal planner, notifications
+  data/                     Indian foods, meal templates, diet tips, drinks, articles, sounds
 assets/
   brand/                    logo source (SVG) and exports
   sounds/                   five water sound effects
@@ -85,5 +114,8 @@ The Pro screen has no payment provider behind it; subscribing unlocks the
 entitlement locally so the premium drinks can be tried. Language options are a
 single entry, and there is no home-screen widget yet.
 
+Food values are typical home-style estimates per serving; restaurant portions
+and oil quantities vary a lot.
+
 Sipwell is a wellbeing tool, not a medical device. The goals it suggests are
-estimates.
+estimates — check with a doctor or dietitian if you have a medical condition.

@@ -5,13 +5,16 @@ import React, { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { configureNotificationHandler } from '@/lib/notifications';
+import { DietProvider, useDiet } from '@/store/DietProvider';
 import { HydrationProvider, useHydration } from '@/store/HydrationProvider';
 
 void SplashScreen.preventAutoHideAsync().catch(() => {});
 configureNotificationHandler();
 
 function Routes() {
-  const { ready } = useHydration();
+  const { ready: hydrationReady } = useHydration();
+  const { ready: dietReady } = useDiet();
+  const ready = hydrationReady && dietReady;
 
   useEffect(() => {
     if (ready) void SplashScreen.hideAsync().catch(() => {});
@@ -34,8 +37,10 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <HydrationProvider>
-          <StatusBar style="auto" />
-          <Routes />
+          <DietProvider>
+            <StatusBar style="auto" />
+            <Routes />
+          </DietProvider>
         </HydrationProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

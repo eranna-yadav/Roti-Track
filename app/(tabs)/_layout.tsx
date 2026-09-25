@@ -1,12 +1,12 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform, StyleSheet, type ViewStyle } from 'react-native';
-import { ClockIcon, DropIcon, ListIcon, PersonIcon } from '@/components/TabIcons';
+import { BowlIcon, ClockIcon, DropIcon, PersonIcon, PlanIcon } from '@/components/TabIcons';
 import { colors } from '@/theme';
 
 /**
  * The bar rides directly on each screen's own background: transparent over the
- * water on Today, solid blue on History/Me, and pale on Insights. React
+ * water on Today, solid blue on History/Me, and pale on Food/Plan. React
  * Navigation applies the *focused* screen's options to the bar, so each tab
  * carries its own palette.
  */
@@ -49,7 +49,19 @@ export default function TabsLayout() {
     >
       <Tabs.Screen
         name="index"
-        options={{ ...onWater, title: 'Today', tabBarIcon: ({ color }) => <DropIcon color={color} /> }}
+        options={{ ...onWater, title: 'Water', tabBarIcon: ({ color }) => <DropIcon color={color} /> }}
+      />
+      <Tabs.Screen
+        name="food"
+        options={{ ...onLight, title: 'Food', tabBarIcon: ({ color }) => <BowlIcon color={color} /> }}
+      />
+      <Tabs.Screen
+        name="plan"
+        options={{
+          ...onLight,
+          title: 'Plan',
+          tabBarIcon: ({ color }) => <PlanIcon color={color} hole={colors.lavender} />,
+        }}
       />
       <Tabs.Screen
         name="history"
@@ -57,14 +69,6 @@ export default function TabsLayout() {
           ...onBlue,
           title: 'History',
           tabBarIcon: ({ color }) => <ClockIcon color={color} hole={BLUE_BOTTOM} />,
-        }}
-      />
-      <Tabs.Screen
-        name="insights"
-        options={{
-          ...onLight,
-          title: 'Insights',
-          tabBarIcon: ({ color }) => <ListIcon color={color} hole={colors.lavender} />,
         }}
       />
       <Tabs.Screen
@@ -80,5 +84,5 @@ export default function TabsLayout() {
 }
 
 const styles = StyleSheet.create({
-  label: { fontSize: 13, fontWeight: '700', marginTop: 2 },
+  label: { fontSize: 12, fontWeight: '700', marginTop: 2 },
 });

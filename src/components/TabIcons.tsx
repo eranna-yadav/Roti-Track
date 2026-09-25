@@ -104,3 +104,24 @@ export const CheckIcon = ({ color, size = 16 }: P) => (
     <Path d="m5 12.5 4.6 4.5L19 7" stroke={color} strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round" fill="none" />
   </Svg>
 );
+
+export const BowlIcon = ({ color, size = 24 }: P) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24">
+    <Path d="M3 11.5h18a9 9 0 0 1-18 0Z" fill={color} />
+    <Path
+      d="M8 8.5c0-1.4 1-1.6 1-3M12 8.5c0-1.4 1-1.6 1-3M16 8.5c0-1.4 1-1.6 1-3"
+      stroke={color}
+      strokeWidth={1.7}
+      strokeLinecap="round"
+      fill="none"
+    />
+  </Svg>
+);
+
+export const PlanIcon = ({ color, size = 24, hole = '#1B4FF0' }: Punched) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24">
+    <Rect x="3.5" y="4.5" width="17" height="16" rx="4" fill={color} />
+    <Path d="M8 3v3.5M16 3v3.5" stroke={color} strokeWidth={2} strokeLinecap="round" />
+    <Path d="m8 14 2.6 2.4L16 11" stroke={hole} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+  </Svg>
+);

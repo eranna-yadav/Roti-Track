@@ -21,6 +21,49 @@ const a = (
 
 export const CATEGORIES: ArticleCategory[] = [
   {
+    id: 'indian-diet',
+    title: 'Indian Diet',
+    tint: '#FFF1DC',
+    fg: '#8A4B00',
+    articles: [
+      a('thali', 'Building a Balanced Thali', '🍱', 4,
+        'The plate method, adapted for dal-roti-sabzi.',
+        [
+          'Half the plate: sabzi and salad. Non-starchy vegetables bring fibre, vitamins and volume for very few calories.',
+          'A quarter: protein — dal, chole, rajma, paneer, curd, eggs, fish or chicken. Most Indian meals under-deliver here.',
+          'A quarter: grains — two rotis or one katori of rice, not both in large amounts. Millets like bajra, jowar and ragi count.',
+          'A small katori of curd or a glass of chaas rounds it off and helps digestion.',
+          'Oil is the silent extra: one tablespoon of ghee or oil is about 120 kcal. Measure the tadka for a week and you will see.',
+        ]),
+      a('protein-veg', 'Protein for Vegetarians', '🫘', 4,
+        'Hitting your target without meat.',
+        [
+          'Aim for roughly 0.8–1 g of protein per kg of body weight — around 50–60 g for most adults.',
+          'Dal alone is not enough: one katori gives about 7–9 g. Pair it with curd, paneer, sprouts or soya chunks.',
+          'Combining cereal and pulse (dal-chawal, khichdi, idli-sambar) completes the amino-acid profile — the tradition was right.',
+          'Easy upgrades: besan or moong chilla for breakfast, roasted chana as a snack, a bowl of curd with lunch.',
+          'Soya chunks are the densest plant option: 50 g dry is about 26 g protein.',
+        ]),
+      a('millets', 'Why Millets Are Back', '🌾', 3,
+        'Bajra, jowar, ragi and friends.',
+        [
+          'Millets have a lower glycaemic response than polished rice or maida, so energy is released more slowly.',
+          'Ragi is one of the richest plant sources of calcium; bajra is high in iron.',
+          'Start by swapping one meal a day: ragi dosa for breakfast, jowar bhakri at lunch, or bajra roti in winter.',
+          'Millets need more water in cooking and pair well with ghee and curd, which also help absorption of their minerals.',
+        ]),
+      a('festive', 'Eating Well Through Festivals', '🪔', 3,
+        'Enjoy the mithai without undoing a month.',
+        [
+          'A single gulab jamun is about 150 kcal; a plate of festive snacks can easily pass 800.',
+          'Keep regular meals regular. Skipping lunch to "save room" usually leads to overeating in the evening.',
+          'Pick the sweets you truly love and skip the ones you eat out of habit.',
+          'Walk after big meals — even 15 minutes blunts the post-meal blood sugar spike.',
+          'Drink water between snacks. Festive days are often salty, sweet and short on fluids.',
+        ]),
+    ],
+  },
+  {
     id: 'beauty',
     title: 'Beauty & Skin',
     tint: '#FDE7E9',

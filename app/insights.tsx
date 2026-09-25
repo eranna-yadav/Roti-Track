@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SubHeader } from '@/components/SubHeader';
 import { LightScreen } from '@/components/ui';
 import { CATEGORIES, type Article, type ArticleCategory } from '@/data/articles';
 import { colors, radius, shadow, type } from '@/theme';
@@ -12,12 +13,11 @@ export default function InsightsScreen() {
 
   return (
     <LightScreen tint={colors.lavender}>
+      <SubHeader title="Insights" dark />
       <ScrollView
-        contentContainerStyle={{ paddingTop: insets.top + 10, paddingBottom: insets.bottom + 110 }}
+        contentContainerStyle={{ paddingTop: 6, paddingBottom: insets.bottom + 40 }}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.screenTitle}>INSIGHTS</Text>
-
         {CATEGORIES.map((cat) => (
           <Category key={cat.id} category={cat} onOpen={(a) => router.push(`/article/${a.id}`)} />
         ))}
@@ -69,14 +69,6 @@ function Category({
 }
 
 const styles = StyleSheet.create({
-  screenTitle: {
-    fontSize: 30,
-    fontWeight: '900',
-    color: colors.ink,
-    letterSpacing: 0.5,
-    paddingHorizontal: 16,
-    marginBottom: 18,
-  },
   categoryTitle: { ...type.h2, color: colors.ink, paddingHorizontal: 16, marginBottom: 12 },
   card: { width: 168, height: 236, borderRadius: radius.lg, overflow: 'hidden' },
   cardArt: { flex: 1, alignItems: 'center', justifyContent: 'center' },

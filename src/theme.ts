@@ -26,6 +26,15 @@ export const colors = {
   flame: '#FF7A1A',
   danger: '#EF4444',
   gold: '#FFC53D',
+
+  // diet & calories
+  saffron: '#FF8A1F',
+  leaf: '#1F9D55',
+  protein: '#7C5CFF',
+  carbs: '#FFB020',
+  fat: '#FF5C8A',
+  veg: '#1F9D55',
+  nonveg: '#B3261E',
 } as const;
 
 export const radius = { sm: 10, md: 16, lg: 22, xl: 28, pill: 999 } as const;
