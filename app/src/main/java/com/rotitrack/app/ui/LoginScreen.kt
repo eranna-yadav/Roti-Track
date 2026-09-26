@@ -1,6 +1,9 @@
 package com.rotitrack.app.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -92,7 +95,11 @@ fun LoginScreen(auth: AuthService) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Spacer(Modifier.height(32.dp))
-        Text("🫓💧", fontSize = 56.sp)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Image(RotiLogo, contentDescription = "Roti Track logo", modifier = Modifier.size(64.dp))
+            Spacer(Modifier.width(10.dp))
+            Text("💧", fontSize = 56.sp)
+        }
         Text("ROTI TRACK", fontSize = 36.sp, fontWeight = FontWeight.Black, color = Color.White, modifier = Modifier.padding(top = 8.dp))
         Text(
             "Indian diet planner, calorie & water tracker",
