@@ -42,7 +42,7 @@ private fun dietLabel(d: Diet) = when (d) {
 }
 
 @Composable
-fun PlanScreen(store: AppStore, onOpenArticles: () -> Unit, onEditProfile: () -> Unit) {
+fun PlanScreen(store: AppStore, isPro: Boolean, onUpgrade: () -> Unit, onOpenArticles: () -> Unit, onEditProfile: () -> Unit) {
     val p = store.profile
     val todayKey = today
     var day by remember { mutableStateOf(todayKey) }
@@ -58,15 +58,16 @@ fun PlanScreen(store: AppStore, onOpenArticles: () -> Unit, onEditProfile: () ->
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 10.dp)) {
                 items(days) { d ->
                     val active = d == day
+                    val locked = !isPro && d != todayKey
                     Column(
                         Modifier.width(58.dp).height(66.dp).clip(RoundedCornerShape(16.dp))
                             .background(if (active) Palette.brand else Color.White)
-                            .clickable { day = d },
+                            .clickable { if (locked) onUpgrade() else day = d },
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center,
                     ) {
                         Text(
-                            if (d == todayKey) "Today" else Days.weekdayShort(d),
+                            if (d == todayKey) "Today" else if (locked) "🔒" else Days.weekdayShort(d),
                             style = Type.small.copy(color = if (active) Color.White else Palette.muted),
                         )
                         Text("${Days.parse(d).dayOfMonth}", style = Type.h2.copy(color = if (active) Color.White else Palette.ink))
@@ -119,7 +120,7 @@ fun PlanScreen(store: AppStore, onOpenArticles: () -> Unit, onEditProfile: () ->
                 Text("P ${meal.protein} g · C ${meal.carbs} g · F ${meal.fat} g", style = Type.small, modifier = Modifier.padding(top = 4.dp))
                 Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     PillButton(
-                        "⇄  Swap", { store.swapMeal(day, meal.slot) }, Modifier.weight(1f),
+                        if (isPro) "⇄  Swap" else "🔒 Swap", { if (isPro) store.swapMeal(day, meal.slot) else onUpgrade() }, Modifier.weight(1f),
                         color = Palette.chip, textColor = Palette.brand, enabled = !logged, height = 42.dp,
                     )
                     if (day == todayKey) {

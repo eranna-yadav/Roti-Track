@@ -5,6 +5,12 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+// Firebase is optional: drop your google-services.json into app/ to switch
+// accounts from "this device only" to Firebase. Without it the app still builds.
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+}
+
 android {
     namespace = "com.sipwell.app"
     compileSdk = 35
@@ -13,8 +19,8 @@ android {
         applicationId = "com.sipwell.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.1.0"
     }
 
     buildTypes {
@@ -51,6 +57,11 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.kotlinx.serialization.json)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+    implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.billing.ktx)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     testImplementation(libs.junit)

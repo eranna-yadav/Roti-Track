@@ -59,7 +59,7 @@ private sealed interface Filter {
 }
 
 @Composable
-fun AddFoodScreen(store: AppStore, slot: MealSlot, day: String, onBack: () -> Unit) {
+fun AddFoodScreen(store: AppStore, slot: MealSlot, day: String, isPro: Boolean, onUpgrade: () -> Unit, onBack: () -> Unit) {
     val pref = store.profile.diet
     val recent = store.recentFoods()
     var query by remember { mutableStateOf("") }
@@ -163,7 +163,7 @@ fun AddFoodScreen(store: AppStore, slot: MealSlot, day: String, onBack: () -> Un
         }
 
         PillButton(
-            "＋ Create custom food", { customOpen = true },
+            if (isPro) "＋ Create custom food" else "🔒 Create custom food · Pro", { if (isPro) customOpen = true else onUpgrade() },
             Modifier.fillMaxWidth().padding(16.dp), color = Palette.ink,
         )
     }

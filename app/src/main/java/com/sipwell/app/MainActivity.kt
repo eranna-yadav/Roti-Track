@@ -1,8 +1,10 @@
 package com.sipwell.app
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -13,6 +15,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.remember
 import androidx.core.content.ContextCompat
+import com.sipwell.app.data.Profile
 import com.sipwell.app.reminders.Reminders
 import com.sipwell.app.ui.App
 import com.sipwell.app.ui.Navigator
@@ -35,8 +38,19 @@ class MainActivity : ComponentActivity(), Platform {
         setContent {
             val nav = remember { Navigator() }
             BackHandler(enabled = nav.canPop) { nav.pop() }
-            App(appStore, this, nav)
+            App(sipwell.services, this, nav)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        sipwell.currentActivity = this
+        sipwell.services.billing.restore()
+    }
+
+    override fun onPause() {
+        if (sipwell.currentActivity === this) sipwell.currentActivity = null
+        super.onPause()
     }
 
     override fun requestNotifications(onResult: (Boolean) -> Unit) {
@@ -50,5 +64,19 @@ class MainActivity : ComponentActivity(), Platform {
         permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
 
-    override fun scheduleReminders() = Reminders.schedule(this, appStore.profile)
+    override fun scheduleReminders(profile: Profile) = Reminders.schedule(this, profile)
+
+    override fun sessionChanged(uid: String?) {
+        sipwell.activeUid = uid
+        if (uid == null) {
+            Reminders.cancel(this)
+        } else {
+            sipwell.services.billing.restore()
+            Reminders.schedule(this, sipwell.storeFor(uid).profile)
+        }
+    }
+
+    override fun openUrl(url: String) {
+        runCatching { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
+    }
 }

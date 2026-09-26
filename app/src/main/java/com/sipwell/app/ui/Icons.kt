@@ -22,6 +22,7 @@ object TabIcons {
         return b.build()
     }
 
+    val Home = icon("home", "M3.5 10.5 12 3.5l8.5 7V20a1 1 0 0 1-1 1H15v-6H9v6H4.5a1 1 0 0 1-1-1Z" to false)
     val Water = icon("water", "M12 3.2s6 6.4 6 10.1a6 6 0 1 1-12 0C6 9.6 12 3.2 12 3.2Z" to false)
     val Food = icon(
         "food",

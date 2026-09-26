@@ -20,7 +20,7 @@ import com.sipwell.app.MainActivity
 import com.sipwell.app.R
 import com.sipwell.app.data.Profile
 import com.sipwell.app.domain.Days
-import com.sipwell.app.appStore
+import com.sipwell.app.sipwell
 import java.time.LocalTime
 import java.util.concurrent.TimeUnit
 
@@ -48,6 +48,10 @@ object Reminders {
             .setInitialDelay(every, TimeUnit.MINUTES)
             .build()
         wm.enqueueUniquePeriodicWork(WORK, ExistingPeriodicWorkPolicy.UPDATE, request)
+    }
+
+    fun cancel(context: Context) {
+        WorkManager.getInstance(context).cancelUniqueWork(WORK)
     }
 
     @SuppressLint("MissingPermission") // checked on the first line
@@ -80,7 +84,7 @@ object Reminders {
 /** Fires every interval; only nudges inside waking hours and while the goal is unmet. */
 class ReminderWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
     override fun doWork(): Result {
-        val store = applicationContext.appStore
+        val store = applicationContext.sipwell.activeStore ?: return Result.success()
         val p = store.profile
         if (!p.remindersOn) return Result.success()
         val hour = LocalTime.now().hour

@@ -5,8 +5,8 @@ import java.io.File
 import java.util.concurrent.Executors
 
 /** Persists the state as one JSON file, written off the main thread and swapped in atomically. */
-class AndroidStorage(context: Context) : Storage {
-    private val file = File(context.filesDir, "sipwell.json")
+class AndroidStorage(context: Context, name: String) : Storage {
+    private val file = File(context.filesDir, name)
     private val writer = Executors.newSingleThreadExecutor()
 
     override fun load(): String? = runCatching { file.takeIf { it.exists() }?.readText() }.getOrNull()

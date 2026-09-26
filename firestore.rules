@@ -1,0 +1,40 @@
+rules_version = '2';
+
+// Deploy with: firebase deploy --only firestore:rules
+// (or paste into Firebase console → Firestore → Rules)
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') == 'admin';
+    }
+
+    // Fields only an admin (or you, in the console) may set.
+    function adminOnly() {
+      return ['role', 'compPro', 'blocked'];
+    }
+
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+
+      allow create: if signedIn() && request.auth.uid == uid
+        && !request.resource.data.keys().hasAny(adminOnly());
+
+      allow update: if signedIn() && (
+        // A user updates their own activity, but never their role, Pro grant, block or join date.
+        (request.auth.uid == uid
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(adminOnly().concat(['createdAt'])))
+        // An admin can grant Pro or block, nothing else.
+        || (isAdmin()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['compPro', 'blocked']))
+      );
+
+      allow delete: if false;
+    }
+  }
+}

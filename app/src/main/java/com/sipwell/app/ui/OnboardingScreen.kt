@@ -64,7 +64,7 @@ fun OnboardingScreen(store: AppStore, platform: Platform) {
             "Start planning",
             {
                 store.updateProfile { draft.copy(onboarded = true) }
-                platform.scheduleReminders()
+                platform.scheduleReminders(store.profile)
             },
             Modifier.fillMaxWidth().align(Alignment.BottomCenter).padding(16.dp),
         )

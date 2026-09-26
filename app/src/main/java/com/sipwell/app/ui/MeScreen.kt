@@ -1,6 +1,13 @@
 package com.sipwell.app.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,12 +31,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sipwell.app.account.Account
 import com.sipwell.app.data.Profile
 import com.sipwell.app.domain.Nutrition
 import com.sipwell.app.store.AppStore
 
 @Composable
-fun MeScreen(store: AppStore, platform: Platform, onOpenArticles: () -> Unit) {
+fun MeScreen(
+    store: AppStore,
+    platform: Platform,
+    account: Account,
+    isPro: Boolean,
+    isAdmin: Boolean,
+    onOpenArticles: () -> Unit,
+    onUpgrade: () -> Unit,
+    onAdmin: () -> Unit,
+    onSignOut: () -> Unit,
+) {
     val p = store.profile
     var confirmReset by remember { mutableStateOf(false) }
     val suggestedKcal = Nutrition.recommendedCalories(p)
@@ -40,12 +58,39 @@ fun MeScreen(store: AppStore, platform: Platform, onOpenArticles: () -> Unit) {
     fun change(next: Profile) {
         store.updateProfile { next }
         if (next.remindersOn && (next.reminderEveryMin != p.reminderEveryMin || next.wakeHour != p.wakeHour || next.sleepHour != p.sleepHour)) {
-            platform.scheduleReminders()
+            platform.scheduleReminders(next)
         }
     }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(ScreenPadding)) {
         ScreenHeader("ME")
+
+        AppCard {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.size(52.dp).clip(CircleShape).background(Palette.brand), contentAlignment = Alignment.Center) {
+                    Text(initials(account.name), color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
+                }
+                Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
+                    Text(account.name, style = Type.title)
+                    Text(account.email, style = Type.small)
+                }
+                if (isPro) Badge("PRO", Palette.saffron)
+            }
+            Spacer(Modifier.height(12.dp))
+            PillButton(
+                if (isPro) "Manage Pro subscription" else "👑 Upgrade to Pro", onUpgrade, Modifier.fillMaxWidth(),
+                color = if (isPro) Palette.chip else Palette.saffron, textColor = if (isPro) Palette.brand else Color.White, height = 46.dp,
+            )
+        }
+        if (isAdmin) {
+            AppCard(color = Palette.ink, onClick = onAdmin) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("🛠️  Admin dashboard", style = Type.title.copy(color = Color.White), modifier = Modifier.weight(1f))
+                    Text("›", fontSize = 24.sp, color = Color.White)
+                }
+                Text("Users, subscriptions and revenue", style = Type.small.copy(color = Color.White.copy(alpha = 0.7f)))
+            }
+        }
 
         AppCard(color = Palette.saffronSoft) {
             Text("Your daily targets", style = Type.small.copy(color = Palette.inkSoft))
@@ -116,11 +161,11 @@ fun MeScreen(store: AppStore, platform: Platform, onOpenArticles: () -> Unit) {
                 if (on) {
                     platform.requestNotifications { granted ->
                         store.updateProfile { it.copy(remindersOn = granted) }
-                        platform.scheduleReminders()
+                        platform.scheduleReminders(store.profile)
                     }
                 } else {
                     store.updateProfile { it.copy(remindersOn = false) }
-                    platform.scheduleReminders()
+                    platform.scheduleReminders(store.profile)
                 }
             }
             if (p.remindersOn) {
@@ -156,11 +201,14 @@ fun MeScreen(store: AppStore, platform: Platform, onOpenArticles: () -> Unit) {
                 Text("›", fontSize = 24.sp, color = Palette.muted)
             }
         }
+        AppCard(onClick = onSignOut) {
+            Text("↩️  Sign out", style = Type.title)
+        }
         AppCard(onClick = { confirmReset = true }) {
             Text("🗑️  Reset all data", style = Type.title.copy(color = Palette.danger))
         }
         Text(
-            "Sipwell stores everything on this phone. No account, no server, no ads.\nVersion 1.0.0",
+            "Your food and water logs stay on this phone. Signed in as ${account.email}.\nVersion 1.1.0",
             style = Type.small, modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
         )
     }
@@ -169,12 +217,12 @@ fun MeScreen(store: AppStore, platform: Platform, onOpenArticles: () -> Unit) {
         AlertDialog(
             onDismissRequest = { confirmReset = false },
             title = { Text("Reset all data?") },
-            text = { Text("This deletes your profile, water log, meals and custom foods. It cannot be undone.") },
+            text = { Text("This deletes your profile, water log, meals and custom foods on this phone. Your account and subscription stay. It cannot be undone.") },
             confirmButton = {
                 TextButton(onClick = {
                     confirmReset = false
                     store.resetAll()
-                    platform.scheduleReminders()
+                    platform.scheduleReminders(store.profile)
                 }) { Text("Reset", color = Palette.danger) }
             },
             dismissButton = { TextButton(onClick = { confirmReset = false }) { Text("Cancel") } },
