@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Sipwell"
+rootProject.name = "RotiTrack"
 include(":app")

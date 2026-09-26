@@ -1,4 +1,4 @@
-# Sipwell
+# Roti Track
 
 _Indian diet planner, calorie tracker and water tracker for Android._
 
@@ -89,7 +89,7 @@ The app runs in one of two modes:
 ### 1. Firebase (accounts + admin)
 
 1. At <https://console.firebase.google.com>, create a project and add an Android
-   app with package `com.sipwell.app`.
+   app with package `com.rotitrack.app`.
 2. Download `google-services.json` into the `app/` folder, then sync Gradle.
 3. Go to **Authentication → Sign-in method** and enable **Email/Password**.
 4. Go to **Firestore Database** and create a database. Under **Rules**, paste
@@ -104,8 +104,8 @@ The app runs in one of two modes:
    Play Console. Billing only works for apps installed from Play.
 2. Go to **Monetize → Subscriptions** and create two subscriptions, each with an
    auto-renewing base plan:
-   - `sipwell_pro_monthly`: ₹259, renews every month
-   - `sipwell_pro_yearly`: ₹990, renews every year
+   - `rotitrack_pro_monthly`: ₹259, renews every month
+   - `rotitrack_pro_yearly`: ₹990, renews every year
 3. Add your Google account as a license tester so test purchases are free.
 
 Pro status is checked on the device. Before a large launch, verify purchase
@@ -115,8 +115,8 @@ Cloud Function). The plan shown to admins is the one each device reports.
 ## Layout
 
 ```
-app/src/main/java/com/sipwell/app/
-  MainActivity.kt, SipwellApp.kt   entry points; chooses Firebase or on-device accounts
+app/src/main/java/com/rotitrack/app/
+  MainActivity.kt, RotiTrackApp.kt   entry points; chooses Firebase or on-device accounts
   account/     accounts, plans, admin stats, on-device fallbacks
   cloud/       Firebase Auth + Firestore, Google Play Billing
   data/        foods, meal templates, drinks, tips, articles, models
@@ -134,6 +134,6 @@ app/src/test/  unit tests
 Food values are typical home-style estimates per serving, based on IFCT 2017 and
 standard recipes. Restaurant portions and the amount of oil vary a lot.
 
-Sipwell is a wellbeing tool, not a medical device. Its targets are estimates. If
+Roti Track is a wellbeing tool, not a medical device. Its targets are estimates. If
 you have diabetes, a thyroid, kidney or heart condition, or are pregnant, check
 with a doctor or dietitian.

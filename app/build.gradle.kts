@@ -12,11 +12,11 @@ if (file("google-services.json").exists()) {
 }
 
 android {
-    namespace = "com.sipwell.app"
+    namespace = "com.rotitrack.app"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.sipwell.app"
+        applicationId = "com.rotitrack.app"
         minSdk = 26
         targetSdk = 35
         versionCode = 2
