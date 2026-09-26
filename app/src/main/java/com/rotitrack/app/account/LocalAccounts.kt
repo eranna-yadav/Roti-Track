@@ -105,6 +105,7 @@ class LocalDirectory(private val storage: Storage) : UserDirectory {
     override suspend fun publish(s: UserSummary) {
         val old = users[s.uid] ?: UserSummary(s.uid)
         users = users + (s.uid to s.copy(compPro = old.compPro, blocked = old.blocked, isAdmin = old.isAdmin,
+            razorpayPlanId = old.razorpayPlanId, razorpayStatus = old.razorpayStatus, razorpayUntil = old.razorpayUntil,
             createdAt = if (old.createdAt > 0) old.createdAt else s.createdAt))
         save()
     }

@@ -231,9 +231,11 @@ private fun UserDetail(u: UserSummary, uid: String, directory: UserDirectory, ch
         }
         AppCard {
             Info("Plan", u.plan?.let { "${it.label} · ₹${it.rupees}/${it.period}" } ?: if (u.compPro) "Pro (granted free)" else "Free")
+            u.paidVia?.let { Info("Paid via", it) }
+            u.razorpayStatus?.let { Info("Razorpay status", it) }
             Info("Joined", date(u.createdAt))
             Info("Last active", ago(u.lastActive))
-            Info("Streak", "${u.streak} days")
+            Info("Streak", "${u.streak} day${if (u.streak == 1) "" else "s"}")
             Info("Days logged", "${u.daysLogged}")
             Info("Calorie goal", "${u.calorieGoal} kcal")
             Info("Water goal", liters(u.waterGoalMl))

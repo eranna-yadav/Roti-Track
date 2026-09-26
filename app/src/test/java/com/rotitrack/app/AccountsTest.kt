@@ -114,4 +114,25 @@ class AccountsTest {
         assertEquals(1, s.comp)
         assertEquals(68, yearlySavingPercent)
     }
+
+    @Test fun razorpayProLastsUntilThePaidPeriodEnds() {
+        val later = System.currentTimeMillis() + 86_400_000L
+        val paid = UserSummary("r", razorpayPlanId = Plan.YEARLY.productId, razorpayStatus = "cancelled", razorpayUntil = later)
+        assertEquals(Plan.YEARLY, paid.plan)
+        assertEquals("Razorpay", paid.paidVia)
+        assertTrue(paid.isPro)
+        val expired = paid.copy(razorpayUntil = System.currentTimeMillis() - 1)
+        assertNull(expired.plan)
+        assertFalse(expired.isPro)
+        // Revenue counts Razorpay subscribers too.
+        assertEquals(Plan.YEARLY.rupees / 12, AdminStats.of(listOf(paid)).mrr)
+    }
+
+    @Test fun userCannotOverwriteServerRazorpayFields() = runBlocking {
+        val dir = LocalDirectory(Mem())
+        dir.create(UserSummary("u", razorpayPlanId = Plan.MONTHLY.productId, razorpayUntil = 42))
+        dir.publish(UserSummary("u", razorpayPlanId = null, razorpayUntil = 0, streak = 3))
+        assertEquals(42, dir.get("u")!!.razorpayUntil)
+        assertEquals(Plan.MONTHLY.productId, dir.get("u")!!.razorpayPlanId)
+    }
 }

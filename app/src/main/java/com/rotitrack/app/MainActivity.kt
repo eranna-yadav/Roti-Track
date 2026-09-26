@@ -15,13 +15,16 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.remember
 import androidx.core.content.ContextCompat
+import com.razorpay.Checkout
+import com.razorpay.PaymentData
+import com.razorpay.PaymentResultWithDataListener
 import com.rotitrack.app.data.Profile
 import com.rotitrack.app.reminders.Reminders
 import com.rotitrack.app.ui.App
 import com.rotitrack.app.ui.Navigator
 import com.rotitrack.app.ui.Platform
 
-class MainActivity : ComponentActivity(), Platform {
+class MainActivity : ComponentActivity(), Platform, PaymentResultWithDataListener {
 
     private var pendingResult: ((Boolean) -> Unit)? = null
 
@@ -32,6 +35,7 @@ class MainActivity : ComponentActivity(), Platform {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (rotiTrack.razorpay != null) Checkout.preload(applicationContext)
         // The app is always light, so keep dark system-bar icons even when the phone is in dark mode.
         val bars = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
         enableEdgeToEdge(statusBarStyle = bars, navigationBarStyle = bars)
@@ -74,6 +78,15 @@ class MainActivity : ComponentActivity(), Platform {
             rotiTrack.services.billing.restore()
             Reminders.schedule(this, rotiTrack.storeFor(uid).profile)
         }
+    }
+
+    // Razorpay Checkout reports back to the activity that opened it.
+    override fun onPaymentSuccess(paymentId: String?, data: PaymentData?) {
+        rotiTrack.razorpay?.onPaymentSuccess(paymentId, data)
+    }
+
+    override fun onPaymentError(code: Int, response: String?, data: PaymentData?) {
+        rotiTrack.razorpay?.onPaymentError(code, response)
     }
 
     override fun openUrl(url: String) {

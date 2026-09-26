@@ -6,7 +6,9 @@ import com.rotitrack.app.store.AppStore
 class Services(
     val auth: AuthService,
     val directory: UserDirectory,
+    /** Google Play Billing (or the demo stand-in). */
     val billing: Billing,
+    val razorpay: RazorpayGateway,
     /** Each account keeps its own log on the phone. */
     val storeFor: (uid: String) -> AppStore,
 )

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        Google Play user choice billing (India). Set to true only after enrolling
+        Roti Track in Play Console → Monetization setup → Alternative billing.
+        When true, Play's purchase flow offers Razorpay next to Google Play.
+    -->
+    <bool name="user_choice_billing">false</bool>
+</resources>

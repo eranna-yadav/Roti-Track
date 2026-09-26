@@ -1,0 +1,177 @@
+/**
+ * Roti Track payments backend (Firebase Cloud Functions, Node 20).
+ *
+ * The Razorpay key secret lives only here. The app asks for a subscription,
+ * pays in Razorpay Checkout, then sends the result back to be verified.
+ * Webhooks keep Pro in step with renewals, failures and cancellations.
+ *
+ * Set up (see ../README.md):
+ *   firebase functions:secrets:set RAZORPAY_KEY_ID
+ *   firebase functions:secrets:set RAZORPAY_KEY_SECRET
+ *   firebase functions:secrets:set RAZORPAY_WEBHOOK_SECRET
+ *   and put the two Razorpay plan IDs in functions/.env
+ */
+const { onCall, onRequest, HttpsError } = require("firebase-functions/v2/https");
+const { defineSecret, defineString } = require("firebase-functions/params");
+const logger = require("firebase-functions/logger");
+const admin = require("firebase-admin");
+const Razorpay = require("razorpay");
+const lib = require("./lib");
+
+admin.initializeApp();
+const db = admin.firestore();
+
+const REGION = "asia-south1";
+const KEY_ID = defineSecret("RAZORPAY_KEY_ID");
+const KEY_SECRET = defineSecret("RAZORPAY_KEY_SECRET");
+const WEBHOOK_SECRET = defineSecret("RAZORPAY_WEBHOOK_SECRET");
+const PLAN_MONTHLY = defineString("RAZORPAY_PLAN_MONTHLY", { description: "Razorpay plan_id for ₹259/month" });
+const PLAN_YEARLY = defineString("RAZORPAY_PLAN_YEARLY", { description: "Razorpay plan_id for ₹990/year" });
+const ANDROID_PACKAGE = "com.rotitrack.app";
+
+function razorpay() {
+  return new Razorpay({ key_id: KEY_ID.value(), key_secret: KEY_SECRET.value() });
+}
+
+function razorpayPlanFor(planId) {
+  if (planId === "rotitrack_pro_monthly") return PLAN_MONTHLY.value();
+  if (planId === "rotitrack_pro_yearly") return PLAN_YEARLY.value();
+  return null;
+}
+
+function requireAuth(req) {
+  if (!req.auth) throw new HttpsError("unauthenticated", "Sign in first.");
+  return req.auth.uid;
+}
+
+/** Step 1: create a Razorpay subscription for the signed-in user. */
+exports.createRazorpaySubscription = onCall(
+  { region: REGION, secrets: [KEY_ID, KEY_SECRET] },
+  async (req) => {
+    const uid = requireAuth(req);
+    const planId = req.data && req.data.plan;
+    const rzpPlan = razorpayPlanFor(planId);
+    if (!rzpPlan) throw new HttpsError("invalid-argument", "Unknown plan.");
+
+    const user = (await db.doc(`users/${uid}`).get()).data() || {};
+    if (user.blocked) throw new HttpsError("permission-denied", "Account blocked.");
+    if (user.razorpayUntil > Date.now() && user.razorpayStatus === "active") {
+      throw new HttpsError("already-exists", "You already have an active Pro subscription.");
+    }
+
+    const sub = await razorpay().subscriptions.create({
+      plan_id: rzpPlan,
+      total_count: lib.PLANS[planId].totalCount,
+      customer_notify: 1,
+      notes: {
+        uid,
+        planId,
+        // Present when the user picked Razorpay on Google Play's choice screen.
+        externalTransactionToken: (req.data && req.data.externalTransactionToken) || "",
+      },
+    });
+    await db.doc(`payments/${sub.id}`).set({
+      uid, planId, status: sub.status, createdAt: Date.now(),
+      externalTransactionToken: sub.notes.externalTransactionToken || null,
+    });
+    return { subscriptionId: sub.id, keyId: KEY_ID.value() };
+  }
+);
+
+/** Step 2: verify the Checkout result and switch Pro on. */
+exports.verifyRazorpayPayment = onCall(
+  { region: REGION, secrets: [KEY_ID, KEY_SECRET] },
+  async (req) => {
+    const uid = requireAuth(req);
+    const { paymentId, subscriptionId, signature } = req.data || {};
+    if (!paymentId || !subscriptionId || !signature) throw new HttpsError("invalid-argument", "Missing payment details.");
+    if (!lib.verifyPaymentSignature({ paymentId, subscriptionId, signature }, KEY_SECRET.value())) {
+      logger.warn("Bad payment signature", { uid, subscriptionId });
+      throw new HttpsError("permission-denied", "Payment could not be verified.");
+    }
+
+    const sub = await razorpay().subscriptions.fetch(subscriptionId);
+    if (!sub.notes || sub.notes.uid !== uid) throw new HttpsError("permission-denied", "This payment belongs to another account.");
+
+    const fields = lib.userFieldsFromSubscription(sub, sub.notes.planId);
+    // A just-authenticated subscription may not have current_end yet; cover the first cycle.
+    if (!fields.razorpayUntil) {
+      const days = sub.notes.planId === "rotitrack_pro_yearly" ? 366 : 31;
+      fields.razorpayUntil = Date.now() + days * 86_400_000;
+    }
+    await db.doc(`users/${uid}`).set(fields, { merge: true });
+    await db.doc(`payments/${subscriptionId}`).set({ status: sub.status, lastPaymentId: paymentId, verifiedAt: Date.now() }, { merge: true });
+    await reportToPlay(sub, paymentId, true).catch((e) => logger.error("Play report failed", e));
+    return { ok: true, until: fields.razorpayUntil };
+  }
+);
+
+/** Lets a user stop auto-renew. Pro stays until the end of the paid period. */
+exports.cancelRazorpaySubscription = onCall(
+  { region: REGION, secrets: [KEY_ID, KEY_SECRET] },
+  async (req) => {
+    const uid = requireAuth(req);
+    const user = (await db.doc(`users/${uid}`).get()).data() || {};
+    if (!user.razorpaySubscriptionId) throw new HttpsError("not-found", "No Razorpay subscription.");
+    const sub = await razorpay().subscriptions.cancel(user.razorpaySubscriptionId, true);
+    await db.doc(`users/${uid}`).set({ razorpayStatus: sub.status === "active" ? "cancelled" : sub.status }, { merge: true });
+    return { ok: true };
+  }
+);
+
+/** Razorpay → us: renewals, failed charges, cancellations. Point the dashboard webhook here. */
+exports.razorpayWebhook = onRequest(
+  { region: REGION, secrets: [KEY_ID, KEY_SECRET, WEBHOOK_SECRET] },
+  async (req, res) => {
+    const signature = req.get("X-Razorpay-Signature");
+    if (!lib.verifyWebhookSignature(req.rawBody, signature, WEBHOOK_SECRET.value())) {
+      res.status(400).send("bad signature");
+      return;
+    }
+    const event = req.body.event || "";
+    const sub = req.body.payload && req.body.payload.subscription && req.body.payload.subscription.entity;
+    if (!event.startsWith("subscription.") || !sub || !sub.notes || !sub.notes.uid) {
+      res.status(200).send("ignored");
+      return;
+    }
+    await db.doc(`users/${sub.notes.uid}`).set(lib.userFieldsFromSubscription(sub, sub.notes.planId), { merge: true });
+    await db.doc(`payments/${sub.id}`).set({ status: sub.status, lastEvent: event, updatedAt: Date.now() }, { merge: true });
+
+    if (event === "subscription.charged") {
+      const payment = req.body.payload.payment && req.body.payload.payment.entity;
+      if (payment) await reportToPlay(sub, payment.id, false).catch((e) => logger.error("Play report failed", e));
+    }
+    res.status(200).send("ok");
+  }
+);
+
+/**
+ * Google Play user choice billing: every transaction made through Razorpay
+ * after the user picked it on Play's choice screen must be reported to Google
+ * within 24 hours. Needs the Android Publisher API enabled and this service
+ * account invited in Play Console (see README). Skipped for direct installs.
+ */
+async function reportToPlay(sub, paymentId, initial) {
+  const token = sub.notes && sub.notes.externalTransactionToken;
+  if (!token) return;
+  const { google } = require("googleapis");
+  const auth = new google.auth.GoogleAuth({ scopes: ["https://www.googleapis.com/auth/androidpublisher"] });
+  const publisher = google.androidpublisher({ version: "v3", auth });
+  const payments = db.doc(`payments/${sub.id}`);
+  const first = (await payments.get()).data() || {};
+  const body = {
+    ...lib.playAmounts(lib.PLANS[sub.notes.planId].rupees),
+    transactionTime: new Date().toISOString(),
+    userTaxAddress: { regionCode: "IN" },
+    recurringTransaction: initial
+      ? { externalTransactionToken: token, externalSubscription: { subscriptionType: "RECURRING" } }
+      : { initialExternalTransactionId: first.playTransactionId, externalSubscription: { subscriptionType: "RECURRING" } },
+  };
+  const id = `rzp_${paymentId}`.replace(/[^A-Za-z0-9_-]/g, "_");
+  await publisher.externaltransactions.createexternaltransaction({
+    parent: `applications/${ANDROID_PACKAGE}`,
+    externalTransactionId: id,
+    requestBody: body,
+  });
+  if (initial) await payments.set({ playTransactionId: id }, { merge: true });
+}

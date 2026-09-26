@@ -30,11 +30,26 @@ class PlayBilling(
     context: Context,
     private val activity: () -> Activity?,
     private val uid: () -> String?,
+    /**
+     * Google Play user choice billing (India): when on, Play's purchase flow first shows a
+     * choice screen, and picking Razorpay calls [onAlternativeChosen] with Google's
+     * external transaction token. Only turn on once enrolled in Play Console.
+     */
+    override val offersAlternative: Boolean,
+    private val onAlternativeChosen: (Plan, String) -> Unit,
 ) : Billing, PurchasesUpdatedListener {
 
     private val client = BillingClient.newBuilder(context)
         .setListener(this)
         .enablePendingPurchases(PendingPurchasesParams.newBuilder().enableOneTimeProducts().build())
+        .apply {
+            if (offersAlternative) {
+                enableUserChoiceBilling { details ->
+                    val plan = details.products.firstNotNullOfOrNull { Plan.byProductId(it.id) }
+                    if (plan != null) onAlternativeChosen(plan, details.externalTransactionToken)
+                }
+            }
+        }
         .build()
 
     private var details by mutableStateOf<Map<Plan, ProductDetails>>(emptyMap())

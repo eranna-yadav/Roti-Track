@@ -14,9 +14,11 @@ service cloud.firestore {
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') == 'admin';
     }
 
-    // Fields only an admin (or you, in the console) may set.
+    // Fields a user may never set on their own document: admin controls, and
+    // Razorpay status, which only the payments server (Admin SDK) writes.
     function adminOnly() {
-      return ['role', 'compPro', 'blocked'];
+      return ['role', 'compPro', 'blocked',
+              'razorpaySubscriptionId', 'razorpayPlanId', 'razorpayStatus', 'razorpayUntil'];
     }
 
     match /users/{uid} {
@@ -35,6 +37,12 @@ service cloud.firestore {
       );
 
       allow delete: if false;
+    }
+
+    // Razorpay payment records: written by the server, readable by admins.
+    match /payments/{id} {
+      allow read: if isAdmin();
+      allow write: if false;
     }
   }
 }

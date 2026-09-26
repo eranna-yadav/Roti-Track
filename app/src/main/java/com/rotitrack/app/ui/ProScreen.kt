@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,10 +30,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.rotitrack.app.account.Account
 import com.rotitrack.app.account.Billing
+import com.rotitrack.app.account.RazorpayGateway
+import com.rotitrack.app.account.UserSummary
 import com.rotitrack.app.account.DemoBilling
 import com.rotitrack.app.account.Plan
 import com.rotitrack.app.account.yearlySavingPercent
+import kotlinx.coroutines.launch
 
 private val FEATURES = listOf(
     Triple("Water tracking & reminders", true, true),
@@ -46,9 +51,25 @@ private val FEATURES = listOf(
 )
 
 @Composable
-fun ProScreen(billing: Billing, compPro: Boolean, platform: Platform, onBack: () -> Unit) {
+fun ProScreen(
+    billing: Billing,
+    razorpay: RazorpayGateway,
+    account: Account,
+    summary: UserSummary?,
+    platform: Platform,
+    onBack: () -> Unit,
+) {
     var selected by remember { mutableStateOf(Plan.YEARLY) }
-    val active = billing.activePlan
+    val scope = rememberCoroutineScope()
+    val playPlan = billing.activePlan
+    val rzpPlan = summary?.razorpayPlan
+    val compPro = summary?.compPro == true
+
+    // Installed from Play → Play's own flow (with its Razorpay choice screen when enrolled).
+    // Otherwise Razorpay directly; with neither, the debug demo.
+    val usePlay = billing !is DemoBilling && billing.unavailableReason == null
+    val useRazorpay = !usePlay && razorpay.unavailableReason == null
+    val demo = !usePlay && !useRazorpay && billing is DemoBilling
 
     Column(Modifier.fillMaxSize().background(Palette.ink)) {
         Row(Modifier.fillMaxWidth().padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -79,9 +100,17 @@ fun ProScreen(billing: Billing, compPro: Boolean, platform: Platform, onBack: ()
             Spacer(Modifier.height(20.dp))
 
             when {
-                active != null -> Status(
+                playPlan != null -> Status(
                     "You're Pro 🎉",
-                    "${active.label} plan · ${billing.price(active)}/${active.period}. Renews automatically until you cancel.",
+                    "${playPlan.label} plan via Google Play · ${billing.price(playPlan)}/${playPlan.period}. Renews automatically until you cancel.",
+                )
+                rzpPlan != null -> Status(
+                    "You're Pro 🎉",
+                    if (summary?.razorpayStatus == "cancelled") {
+                        "Auto-renew is off. Pro stays on until ${longDate(summary.razorpayUntil)}."
+                    } else {
+                        "${rzpPlan.label} plan via Razorpay · ${rzpPlan.fallbackPrice}/${rzpPlan.period}. Next renewal ${longDate(summary!!.razorpayUntil)}."
+                    },
                 )
                 compPro -> Status("You're Pro 🎉", "Pro access has been granted to your account by the Roti Track team.")
                 else -> {
@@ -92,39 +121,56 @@ fun ProScreen(billing: Billing, compPro: Boolean, platform: Platform, onBack: ()
                     ) { selected = Plan.YEARLY }
                     Spacer(Modifier.height(10.dp))
                     PlanCard(Plan.MONTHLY, billing.price(Plan.MONTHLY), selected == Plan.MONTHLY, note = "Billed every month") { selected = Plan.MONTHLY }
+                    Text(
+                        when {
+                            usePlay && billing.offersAlternative -> "Next, choose Google Play or Razorpay (UPI, cards, netbanking, wallets)."
+                            usePlay -> "Payment through Google Play."
+                            useRazorpay -> "Pay securely with UPI, cards, netbanking or wallets via Razorpay."
+                            demo -> "Demo mode: no payment service is connected, so no money is charged."
+                            else -> billing.unavailableReason ?: razorpay.unavailableReason.orEmpty()
+                        },
+                        style = Type.small.copy(color = if (demo) Palette.carbs else Color.White.copy(alpha = 0.75f)),
+                        modifier = Modifier.padding(top = 12.dp),
+                    )
                 }
             }
-            billing.unavailableReason?.let {
+            razorpay.message?.let {
                 Text(it, style = Type.small.copy(color = Palette.carbs), modifier = Modifier.padding(top = 12.dp))
             }
-            if (billing is DemoBilling) {
-                Text(
-                    "Demo mode: Google Play Billing isn't connected, so no money is charged.",
-                    style = Type.small.copy(color = Palette.carbs), modifier = Modifier.padding(top = 12.dp),
-                )
-            }
             Text(
-                "Subscriptions renew automatically through Google Play until cancelled. Cancel any time in " +
-                    "Play Store → Payments & subscriptions, at least 24 hours before renewal.",
+                "Subscriptions renew automatically until cancelled. Google Play subscriptions are managed in Play Store → " +
+                    "Payments & subscriptions; Razorpay ones from this screen. Prices include GST.",
                 style = Type.small.copy(color = Color.White.copy(alpha = 0.5f)), modifier = Modifier.padding(vertical = 16.dp),
             )
         }
 
         Column(Modifier.fillMaxWidth().padding(20.dp)) {
+            val light = Modifier.fillMaxWidth()
             when {
-                active != null && billing is DemoBilling -> PillButton("Cancel subscription (demo)", { billing.cancel() }, Modifier.fillMaxWidth(), color = Color.White, textColor = Palette.ink)
-                active != null -> PillButton(
+                playPlan != null && billing is DemoBilling -> PillButton("Cancel subscription (demo)", { billing.cancel() }, light, color = Color.White, textColor = Palette.ink)
+                playPlan != null -> PillButton(
                     "Manage subscription",
-                    { platform.openUrl("https://play.google.com/store/account/subscriptions?sku=${active.productId}&package=com.rotitrack.app") },
-                    Modifier.fillMaxWidth(), color = Color.White, textColor = Palette.ink,
+                    { platform.openUrl("https://play.google.com/store/account/subscriptions?sku=${playPlan.productId}&package=com.rotitrack.app") },
+                    light, color = Color.White, textColor = Palette.ink,
                 )
-                compPro -> PillButton("Done", onBack, Modifier.fillMaxWidth(), color = Color.White, textColor = Palette.ink)
+                rzpPlan != null && summary?.razorpayStatus != "cancelled" -> PillButton(
+                    if (razorpay.busy) "Please wait…" else "Turn off auto-renew",
+                    { scope.launch { runCatching { razorpay.cancel() } } },
+                    light, color = Color.White, textColor = Palette.ink, enabled = !razorpay.busy,
+                )
+                rzpPlan != null || compPro -> PillButton("Done", onBack, light, color = Color.White, textColor = Palette.ink)
                 else -> PillButton(
-                    "Subscribe · ${billing.price(selected)}/${selected.period}", { billing.purchase(selected) },
-                    Modifier.fillMaxWidth(), color = Palette.saffron, enabled = billing.unavailableReason == null, height = 58.dp,
+                    if (razorpay.busy) "Please wait…" else "Subscribe · ${billing.price(selected)}/${selected.period}",
+                    {
+                        when {
+                            usePlay || demo -> billing.purchase(selected)
+                            useRazorpay -> scope.launch { runCatching { razorpay.subscribe(selected, account) } }
+                        }
+                    },
+                    light, color = Palette.saffron, enabled = (usePlay || useRazorpay || demo) && !razorpay.busy, height = 58.dp,
                 )
             }
-            if (active == null && !compPro) {
+            if (playPlan == null && rzpPlan == null && !compPro && usePlay) {
                 Text(
                     "Restore purchases", style = Type.small.copy(color = Color.White.copy(alpha = 0.7f)),
                     textAlign = TextAlign.Center,
@@ -134,6 +180,8 @@ fun ProScreen(billing: Billing, compPro: Boolean, platform: Platform, onBack: ()
         }
     }
 }
+
+private fun longDate(t: Long): String = java.text.SimpleDateFormat("d MMM yyyy", java.util.Locale.getDefault()).format(java.util.Date(t))
 
 @Composable
 private fun PlanCard(plan: Plan, price: String, selected: Boolean, note: String, badge: String? = null, onClick: () -> Unit) {

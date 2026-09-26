@@ -84,15 +84,16 @@ fun App(services: Services, platform: Platform, nav: Navigator = remember { Navi
         }
         val store = remember(account.uid) { services.storeFor(account.uid) }
         var summary by remember(account.uid) { mutableStateOf<UserSummary?>(null) }
-        LaunchedEffect(account.uid) {
-            platform.sessionChanged(account.uid)
+        LaunchedEffect(account.uid) { platform.sessionChanged(account.uid) }
+        // Reload after sign-in and after every Razorpay payment, which the server records.
+        LaunchedEffect(account.uid, services.razorpay.version) {
             summary = runCatching { services.directory.get(account.uid) }.getOrNull()
         }
         // Publish activity for the admin dashboard, debounced: any change restarts the wait.
-        val plan = services.billing.activePlan
-        LaunchedEffect(account.uid, store.state, plan) {
+        val playPlan = services.billing.activePlan
+        LaunchedEffect(account.uid, store.state, playPlan) {
             delay(2_000)
-            runCatching { services.directory.publish(summarize(account, store, plan)) }
+            runCatching { services.directory.publish(summarize(account, store, playPlan)) }
         }
 
         if (summary?.blocked == true) {
@@ -108,7 +109,8 @@ fun App(services: Services, platform: Platform, nav: Navigator = remember { Navi
             return@RotiTrackTheme
         }
 
-        val isPro = plan != null || summary?.compPro == true
+        val plan = playPlan ?: summary?.razorpayPlan
+        val isPro = plan != null || summary?.isPro == true
         val isAdmin = account.isAdmin || summary?.isAdmin == true
         val upgrade = { nav.push(Route.Pro) }
         val route = nav.current
@@ -158,7 +160,7 @@ fun App(services: Services, platform: Platform, nav: Navigator = remember { Navi
                     is Route.AddFood -> AddFoodScreen(store, route.slot, route.day, isPro, onUpgrade = upgrade, onBack = nav::pop)
                     Route.Articles -> ArticlesScreen(onOpen = { nav.push(Route.Article(it)) }, onBack = nav::pop)
                     is Route.Article -> ArticleScreen(route.id, onBack = nav::pop)
-                    Route.Pro -> ProScreen(services.billing, compPro = summary?.compPro == true, platform, onBack = nav::pop)
+                    Route.Pro -> ProScreen(services.billing, services.razorpay, account, summary, platform, onBack = nav::pop)
                     Route.Admin -> if (isAdmin) AdminScreen(services.directory, onOpen = { nav.push(Route.AdminUser(it)) }, onBack = nav::pop) else LaunchedEffect(Unit) { nav.pop() }
                     is Route.AdminUser -> if (isAdmin) AdminUserScreen(services.directory, route.uid, onBack = nav::pop) else LaunchedEffect(Unit) { nav.pop() }
                 }

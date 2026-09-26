@@ -3,8 +3,9 @@
 _Indian diet planner, calorie tracker and water tracker for Android._
 
 A native Android app written in Kotlin with Jetpack Compose. Accounts and the
-admin dashboard use Firebase, and Pro subscriptions use Google Play Billing.
-Food and water logs stay on the phone.
+admin dashboard use Firebase. Pro subscriptions are paid through Razorpay (UPI,
+cards, netbanking, wallets) or Google Play. Food and water logs stay on the
+phone.
 
 ## Features
 
@@ -33,9 +34,10 @@ water and calories.
 **Account**: sign up, sign in, forgot password and sign out, with email and a
 password. Each account keeps its own logs on the phone.
 
-**Pro**: ₹259/month or ₹990/year (68% cheaper), sold through Google Play.
-Pro unlocks the full 7-day plan, meal swaps, 30-day trends and your own recipes.
-Everything else is free.
+**Pro**: ₹259/month or ₹990/year (68% cheaper). Pro unlocks the full 7-day
+plan, meal swaps, 30-day trends and your own recipes; everything else is free.
+Users pay through Razorpay or Google Play, and can turn off Razorpay auto-renew
+from the Pro screen.
 
 **Admin dashboard** (admins only, from the Me tab):
 - Totals: users, Pro users, monthly and yearly subscribers, estimated monthly
@@ -79,12 +81,16 @@ Android Studio offers to upgrade these, accepting is safe.
 
 The app runs in one of two modes:
 
-| | Without setup | With Firebase + Play Console |
+| | Without setup | With Firebase (+ Razorpay, Play Console) |
 |---|---|---|
 | Accounts | Stored on this phone. The first account is the admin | Firebase Auth (email/password) |
 | Admin dashboard | Shows accounts on this phone | Shows every user |
-| Pro (debug build) | Demo purchase with no charge | Demo purchase with no charge |
-| Pro (release build) | Google Play Billing | Google Play Billing |
+| Pro, debug build | Demo purchase with no charge | Razorpay (use test keys) |
+| Pro, installed from Play | Google Play Billing | Play's choice screen: Razorpay or Google Play* |
+| Pro, APK installed directly | Demo purchase with no charge | Razorpay |
+
+\* Only once you enrol in Google's user choice billing. Until then, Play installs
+use Google Play Billing only.
 
 ### 1. Firebase (accounts + admin)
 
@@ -98,7 +104,38 @@ The app runs in one of two modes:
    field `role` with the value `admin`. Reopen the app and the Admin dashboard
    appears under Me.
 
-### 2. Google Play (Pro subscriptions)
+### 2. Razorpay (Pro payments)
+
+The Razorpay key secret must never go into the app. It lives in Firebase Cloud
+Functions (`functions/`), which create each subscription, verify the payment
+signature, and track renewals through webhooks. Cloud Functions need the
+Firebase **Blaze** (pay-as-you-go) plan.
+
+1. In the [Razorpay Dashboard](https://dashboard.razorpay.com), go to
+   **Subscriptions → Plans** and create two plans. Start in Test mode.
+   - ₹259, every 1 month
+   - ₹990, every 1 year
+2. Copy `functions/.env.example` to `functions/.env` and paste in the two
+   `plan_…` IDs.
+3. Install the [Firebase CLI](https://firebase.google.com/docs/cli), then run
+   these from the repo folder:
+   ```bash
+   firebase use <your-project-id>
+   firebase functions:secrets:set RAZORPAY_KEY_ID        # rzp_test_… or rzp_live_…
+   firebase functions:secrets:set RAZORPAY_KEY_SECRET
+   firebase functions:secrets:set RAZORPAY_WEBHOOK_SECRET # any strong random string
+   firebase deploy --only functions,firestore:rules
+   ```
+4. In the Razorpay Dashboard, go to **Settings → Webhooks** and add
+   `https://asia-south1-<project-id>.cloudfunctions.net/razorpayWebhook`. Use the
+   same webhook secret, and tick the `subscription.*` events.
+5. Try it with a debug build and Razorpay's test UPI ID or test cards. When it
+   works, switch to live keys and live plan IDs.
+
+Payment records are saved in the Firestore `payments` collection, which only
+admins can read.
+
+### 3. Google Play (Pro subscriptions)
 
 1. Upload a release build (`./gradlew bundleRelease`) to a testing track in
    Play Console. Billing only works for apps installed from Play.
@@ -107,10 +144,20 @@ The app runs in one of two modes:
    - `rotitrack_pro_monthly`: ₹259, renews every month
    - `rotitrack_pro_yearly`: ₹990, renews every year
 3. Add your Google account as a license tester so test purchases are free.
+4. **To offer Razorpay on Play:** enrol in **Play Console → Monetization setup
+   → Alternative billing (user choice billing, India)**. Then:
+   - set `user_choice_billing` to `true` in `app/src/main/res/values/config.xml`;
+   - enable the Google Play Android Developer API in Google Cloud;
+   - in Play Console → Users & permissions, invite the Cloud Functions service
+     account (`<project-id>@appspot.gserviceaccount.com`) with financial access.
 
-Pro status is checked on the device. Before a large launch, verify purchase
-tokens on a server with the Google Play Developer API (for example, a Firebase
-Cloud Function). The plan shown to admins is the one each device reports.
+   The functions then report each Razorpay transaction to Google, as the
+   programme requires. Google charges a reduced service fee on these
+   transactions.
+
+Razorpay payments are verified on the server. Google Play purchases are still
+checked on the device only. For Play, add server-side purchase verification
+with the Google Play Developer API before a large launch.
 
 ## Layout
 
@@ -118,7 +165,7 @@ Cloud Function). The plan shown to admins is the one each device reports.
 app/src/main/java/com/rotitrack/app/
   MainActivity.kt, RotiTrackApp.kt   entry points; chooses Firebase or on-device accounts
   account/     accounts, plans, admin stats, on-device fallbacks
-  cloud/       Firebase Auth + Firestore, Google Play Billing
+  cloud/       Firebase Auth + Firestore, Razorpay Checkout, Google Play Billing
   data/        foods, meal templates, drinks, tips, articles, models
   domain/      calorie & macro maths, meal planner, dates
   store/       AppStore (state + persistence), AndroidStorage (JSON file)
@@ -126,6 +173,7 @@ app/src/main/java/com/rotitrack/app/
   ui/          Compose screens: Login, Home, Water, Food, Add food, Plan, Me,
                Pro, Admin, onboarding, articles, shared components and theme
 firestore.rules   who may read and write which user fields
+functions/        Cloud Functions: Razorpay subscriptions, verification, webhooks
 app/src/test/  unit tests
 ```
 

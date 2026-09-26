@@ -16,7 +16,8 @@ enum class Plan(val productId: String, val label: String, val fallbackPrice: Str
 
 /**
  * What the admin dashboard knows about a user. The app publishes the
- * activity fields; [compPro], [blocked] and [isAdmin] are only ever written by an admin.
+ * activity fields; [compPro], [blocked] and [isAdmin] are only ever written by
+ * an admin, and the razorpay* fields only by the payments server.
  */
 @Serializable
 data class UserSummary(
@@ -35,8 +36,19 @@ data class UserSummary(
     val streak: Int = 0,
     val daysLogged: Int = 0,
     val diet: String = "",
+    /** Set by the server after a verified Razorpay payment or webhook. */
+    val razorpayPlanId: String? = null,
+    val razorpayStatus: String? = null,
+    val razorpayUntil: Long = 0,
 ) {
-    val plan: Plan? get() = Plan.byProductId(planId)
+    /** Razorpay plan that is paid up right now; stays until the cycle ends even if auto-renew is off. */
+    val razorpayPlan: Plan? get() = if (razorpayUntil > System.currentTimeMillis()) Plan.byProductId(razorpayPlanId) else null
+    val plan: Plan? get() = Plan.byProductId(planId) ?: razorpayPlan
+    val paidVia: String? get() = when {
+        Plan.byProductId(planId) != null -> "Google Play"
+        razorpayPlan != null -> "Razorpay"
+        else -> null
+    }
     val isPro: Boolean get() = plan != null || compPro
 }
 
@@ -69,8 +81,44 @@ interface Billing {
     fun price(plan: Plan): String
     /** Non-null when purchases can't happen right now (e.g. not installed from Google Play). */
     val unavailableReason: String?
+    /** True when Google Play's user choice screen also offers Razorpay. */
+    val offersAlternative: Boolean get() = false
     fun purchase(plan: Plan)
     fun restore()
+}
+
+/**
+ * Razorpay subscriptions. The app never sees the key secret: the server
+ * creates the subscription and verifies the payment signature.
+ */
+interface RazorpayGateway {
+    /** Non-null when Razorpay can't be used (e.g. Firebase isn't set up). */
+    val unavailableReason: String?
+    /** True while a payment or cancellation is in progress. Compose state. */
+    val busy: Boolean
+    /** Last success or error message for the user. Compose state. */
+    val message: String?
+    /** Changes after every successful payment or cancellation, so the UI can reload the account. */
+    val version: Int
+
+    /**
+     * Creates a subscription on the server, opens Razorpay Checkout and verifies
+     * the result. [externalTransactionToken] comes from Google Play's user choice screen.
+     */
+    suspend fun subscribe(plan: Plan, account: Account, externalTransactionToken: String? = null)
+
+    /** Turns off auto-renew; Pro stays until the paid period ends. */
+    suspend fun cancel()
+}
+
+/** Used when there is no payments server (no Firebase config). */
+class NoRazorpay(override val unavailableReason: String = "Razorpay needs the online (Firebase) setup.") : RazorpayGateway {
+    override val busy = false
+    override val message: String? = null
+    override val version = 0
+    override suspend fun subscribe(plan: Plan, account: Account, externalTransactionToken: String?) =
+        throw AuthException(unavailableReason)
+    override suspend fun cancel() = throw AuthException(unavailableReason)
 }
 
 fun validateEmail(email: String): String? =
