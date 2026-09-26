@@ -30,6 +30,10 @@ android {
             storePassword = "android"
             keyAlias = "androiddebugkey"
             keyPassword = "android"
+            // Also sign with the older v1 scheme: some Samsung installers reject v2-only
+            // APKs as "package appears to be invalid".
+            enableV1Signing = true
+            enableV2Signing = true
         }
     }
 
