@@ -224,9 +224,9 @@ fun LogFoodSheet(food: Food, initialSlot: MealSlot, onDismiss: () -> Unit, onLog
                 Nutri("Carbs", "${fmt(food.carbs * servings)} g", Palette.carbs)
                 Nutri("Fat", "${fmt(food.fat * servings)} g", Palette.fat)
             }
-            Row(Modifier.padding(vertical = 18.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(Modifier.padding(vertical = 18.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 MealSlot.entries.forEach { s ->
-                    Chip(s.short, s == slot, { slot = s }, Modifier.weight(1f))
+                    Chip(s.short, s == slot, { slot = s }, Modifier.weight(1f), hPadding = 4.dp)
                 }
             }
             PillButton("Add to ${slot.short}", { onLog(servings, slot) }, Modifier.fillMaxWidth())

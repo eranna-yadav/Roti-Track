@@ -122,17 +122,17 @@ fun PillButton(
 }
 
 @Composable
-fun Chip(text: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun Chip(text: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier, hPadding: Dp = 16.dp) {
     Box(
         modifier
             .height(38.dp)
             .clip(RoundedCornerShape(50))
             .background(if (selected) Palette.brand else Palette.chip)
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = hPadding),
         contentAlignment = Alignment.Center,
     ) {
-        Text(text, style = Type.small.copy(color = if (selected) Color.White else Palette.inkSoft))
+        Text(text, style = Type.small.copy(color = if (selected) Color.White else Palette.inkSoft), maxLines = 1, softWrap = false)
     }
 }
 
