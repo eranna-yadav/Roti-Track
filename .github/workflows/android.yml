@@ -1,0 +1,66 @@
+name: Android build
+
+# Builds a test APK on every push to this branch and publishes it as the
+# "Test build" pre-release, so it can be downloaded straight to a phone.
+on:
+  push:
+    branches: [claude/indian-diet-planner-app-aztce8, main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Unit tests
+        run: ./gradlew --no-daemon testDebugUnitTest
+
+      - name: Build debug APK
+        run: ./gradlew --no-daemon assembleDebug
+
+      - name: Rename APK
+        run: cp app/build/outputs/apk/debug/app-debug.apk RotiTrack-test.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RotiTrack-test-apk
+          path: RotiTrack-test.apk
+
+      - name: Publish "Test build" pre-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete test-build --yes --cleanup-tag || true
+          gh release create test-build RotiTrack-test.apk \
+            --prerelease \
+            --target "$GITHUB_SHA" \
+            --title "Roti Track – test build" \
+            --notes "Debug build of ${GITHUB_SHA::7}. Download RotiTrack-test.apk on your Android phone and open it to install. Accounts are stored on the phone and Pro uses a demo purchase (no money is charged)."
+
+  functions:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: functions
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm test

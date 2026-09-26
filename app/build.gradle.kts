@@ -23,6 +23,16 @@ android {
         versionName = "1.2.0"
     }
 
+    signingConfigs {
+        // A committed debug key, so every CI test build can update the previous install.
+        getByName("debug") {
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true

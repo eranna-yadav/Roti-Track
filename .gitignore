@@ -12,3 +12,6 @@
 *.aab
 *.jks
 *.keystore
+
+# Shared debug key so each new test build installs over the last one. Not for release.
+!app/debug.keystore
