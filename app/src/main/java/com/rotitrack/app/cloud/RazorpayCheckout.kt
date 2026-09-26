@@ -103,7 +103,7 @@ class FirebaseRazorpay(private val activity: () -> Activity?) : RazorpayGateway 
 
     @Suppress("UNCHECKED_CAST")
     private suspend fun call(name: String, data: Map<String, Any?>): Map<String, Any?> =
-        (functions.getHttpsCallable(name).call(data).await().data as? Map<String, Any?>).orEmpty()
+        (functions.getHttpsCallable(name).call(data).await().getData() as? Map<String, Any?>).orEmpty()
 
     companion object {
         /** Must match REGION in functions/index.js. */
