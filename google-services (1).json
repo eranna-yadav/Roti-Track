@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "756637519670",
+    "project_id": "roti-track",
+    "storage_bucket": "roti-track.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:756637519670:android:694b86f0ec6eaa00b3ed97",
+        "android_client_info": {
+          "package_name": "com.rotitrack.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCq90MHXDTkzEBrlLkgV75CmefEz4LMY3A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
