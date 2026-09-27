@@ -1,5 +1,5 @@
 /**
- * Roti Track payments backend (Firebase Cloud Functions, Node 20).
+ * Roti Track payments backend (Firebase Cloud Functions, Node 22).
  *
  * The Razorpay key secret lives only here. The app asks for a subscription,
  * pays in Razorpay Checkout, then sends the result back to be verified.
