@@ -139,7 +139,7 @@ use Google Play Billing only.
    the contents of `firestore.rules` and publish.
 5. Sign up in the app. Then, in Firestore → `users` → your document, add a
    field `role` with the value `admin`. Reopen the app and the Admin dashboard
-   appears under Me.
+   appears under Profile.
 
 ### 2. Razorpay (Pro payments)
 
