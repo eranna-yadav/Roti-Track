@@ -39,5 +39,5 @@ data class AdminStats(
     }
 }
 
-/** Savings of the yearly plan against twelve months of monthly, e.g. 68. */
+/** Savings of the yearly plan against twelve months of monthly, e.g. 77. */
 val yearlySavingPercent: Int = ((1 - Plan.YEARLY.rupees / (Plan.MONTHLY.rupees * 12.0)) * 100).roundToInt()

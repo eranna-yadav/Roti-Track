@@ -28,13 +28,13 @@ test("Pro lasts to the end of the paid cycle, including after cancel", () => {
 });
 
 test("Play amounts split 18% GST out of the price", () => {
-  const a = lib.playAmounts(259);
-  assert.strictEqual(Number(a.originalPreTaxAmount.priceMicros) + Number(a.originalTaxAmount.priceMicros), 259_000_000);
-  assert.strictEqual(a.originalPreTaxAmount.priceMicros, "219491525");
+  const a = lib.playAmounts(359);
+  assert.strictEqual(Number(a.originalPreTaxAmount.priceMicros) + Number(a.originalTaxAmount.priceMicros), 359_000_000);
+  assert.strictEqual(a.originalPreTaxAmount.priceMicros, "304237288");
 });
 
 test("plan prices match the app", () => {
-  assert.strictEqual(lib.PLANS.rotitrack_pro_monthly.rupees, 259);
+  assert.strictEqual(lib.PLANS.rotitrack_pro_monthly.rupees, 359);
   assert.strictEqual(lib.PLANS.rotitrack_pro_yearly.rupees, 990);
 });
 

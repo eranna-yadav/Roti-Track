@@ -3,7 +3,7 @@ const crypto = require("crypto");
 
 /** App product IDs → price in rupees. Must match Plan in the Android app. */
 const PLANS = {
-  rotitrack_pro_monthly: { rupees: 259, period: "monthly", totalCount: 120 },
+  rotitrack_pro_monthly: { rupees: 359, period: "monthly", totalCount: 120 },
   rotitrack_pro_yearly: { rupees: 990, period: "yearly", totalCount: 10 },
 };
 

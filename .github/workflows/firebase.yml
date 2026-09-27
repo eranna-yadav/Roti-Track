@@ -8,7 +8,7 @@ name: Deploy Firebase
 #   RAZORPAY_KEY_ID            rzp_test_… or rzp_live_…
 #   RAZORPAY_KEY_SECRET
 #   RAZORPAY_WEBHOOK_SECRET    any long random string; the same one goes in Razorpay → Webhooks
-#   RAZORPAY_PLAN_MONTHLY      plan_… for ₹259/month
+#   RAZORPAY_PLAN_MONTHLY      plan_… for ₹359/month
 #   RAZORPAY_PLAN_YEARLY       plan_… for ₹990/year
 # The Key ID and plan IDs aren't secret, so they may be repository variables instead.
 on:

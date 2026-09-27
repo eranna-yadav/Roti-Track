@@ -26,7 +26,7 @@ const REGION = "asia-south1";
 const KEY_ID = defineSecret("RAZORPAY_KEY_ID");
 const KEY_SECRET = defineSecret("RAZORPAY_KEY_SECRET");
 const WEBHOOK_SECRET = defineSecret("RAZORPAY_WEBHOOK_SECRET");
-const PLAN_MONTHLY = defineString("RAZORPAY_PLAN_MONTHLY", { description: "Razorpay plan_id for ₹259/month" });
+const PLAN_MONTHLY = defineString("RAZORPAY_PLAN_MONTHLY", { description: "Razorpay plan_id for ₹359/month" });
 const PLAN_YEARLY = defineString("RAZORPAY_PLAN_YEARLY", { description: "Razorpay plan_id for ₹990/year" });
 const ANDROID_PACKAGE = "com.rotitrack.app";
 

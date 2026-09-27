@@ -6,7 +6,7 @@ data class Account(val uid: String, val name: String, val email: String, val isA
 
 /** Play Console product IDs. Create two auto-renewing subscriptions with these IDs. */
 enum class Plan(val productId: String, val label: String, val fallbackPrice: String, val period: String, val rupees: Int) {
-    MONTHLY("rotitrack_pro_monthly", "Monthly", "₹259", "month", 259),
+    MONTHLY("rotitrack_pro_monthly", "Monthly", "₹359", "month", 359),
     YEARLY("rotitrack_pro_yearly", "Yearly", "₹990", "year", 990);
 
     companion object {

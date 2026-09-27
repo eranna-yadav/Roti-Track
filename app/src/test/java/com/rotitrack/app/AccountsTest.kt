@@ -108,11 +108,11 @@ class AccountsTest {
         val s = AdminStats.of(users, now)
         assertEquals(5, s.total)
         assertEquals(4, s.pro)
-        assertEquals(2 * 259 + 990 / 12, s.mrr)
+        assertEquals(2 * 359 + 990 / 12, s.mrr)
         assertEquals(1, s.new7d)
         assertEquals(1, s.active24h)
         assertEquals(1, s.comp)
-        assertEquals(68, yearlySavingPercent)
+        assertEquals(77, yearlySavingPercent)
     }
 
     @Test fun razorpayProLastsUntilThePaidPeriodEnds() {

@@ -49,7 +49,7 @@ water and calories.
 **Account**: sign up, sign in, forgot password and sign out, with email and a
 password. Each account keeps its own logs on the phone.
 
-**Pro**: ₹259/month or ₹990/year (68% cheaper). Pro unlocks the full 7-day
+**Pro**: ₹359/month or ₹990/year (77% cheaper). Pro unlocks the full 7-day
 plan, meal swaps, 30-day trends and your own recipes; everything else is free.
 Users pay through Razorpay or Google Play, and can turn off Razorpay auto-renew
 from the Pro screen.
@@ -150,7 +150,7 @@ Firebase **Blaze** (pay-as-you-go) plan.
 
 1. In the [Razorpay Dashboard](https://dashboard.razorpay.com), go to
    **Subscriptions → Plans** and create two plans. Start in Test mode.
-   - ₹259, every 1 month
+   - ₹359, every 1 month
    - ₹990, every 1 year
 2. Copy `functions/.env.example` to `functions/.env` and paste in the two
    `plan_…` IDs.
@@ -178,7 +178,7 @@ admins can read.
    Play Console. Billing only works for apps installed from Play.
 2. Go to **Monetize → Subscriptions** and create two subscriptions, each with an
    auto-renewing base plan:
-   - `rotitrack_pro_monthly`: ₹259, renews every month
+   - `rotitrack_pro_monthly`: ₹359, renews every month
    - `rotitrack_pro_yearly`: ₹990, renews every year
 3. Add your Google account as a license tester so test purchases are free.
 4. **To offer Razorpay on Play:** enrol in **Play Console → Monetization setup
