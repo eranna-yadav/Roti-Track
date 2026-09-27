@@ -24,11 +24,14 @@ import androidx.core.content.FileProvider
 import com.razorpay.Checkout
 import com.razorpay.PaymentData
 import com.razorpay.PaymentResultWithDataListener
+import com.rotitrack.app.data.Prefs
 import com.rotitrack.app.data.Profile
+import com.rotitrack.app.data.WaterSound
 import com.rotitrack.app.domain.Report
 import com.rotitrack.app.reminders.MealReminders
 import com.rotitrack.app.report.PdfReport
 import com.rotitrack.app.reminders.Reminders
+import com.rotitrack.app.reminders.WaterSounds
 import com.rotitrack.app.ui.App
 import com.rotitrack.app.ui.Navigator
 import com.rotitrack.app.ui.Platform
@@ -76,8 +79,9 @@ class MainActivity : ComponentActivity(), Platform, PaymentResultWithDataListene
     }
 
     override fun scheduleReminders(profile: Profile) {
-        Reminders.schedule(this, profile)
-        MealReminders.schedule(this, rotiTrack.activeStore?.prefs?.mealReminders)
+        val prefs = rotiTrack.activeStore?.prefs ?: Prefs()
+        Reminders.schedule(this, profile, prefs)
+        MealReminders.schedule(this, prefs.mealReminders)
     }
 
     override fun sessionChanged(uid: String?) {
@@ -88,7 +92,7 @@ class MainActivity : ComponentActivity(), Platform, PaymentResultWithDataListene
         } else {
             rotiTrack.services.billing.restore()
             val store = rotiTrack.storeFor(uid)
-            Reminders.schedule(this, store.profile)
+            Reminders.schedule(this, store.profile, store.prefs)
             MealReminders.schedule(this, store.prefs.mealReminders)
         }
     }
@@ -122,6 +126,17 @@ class MainActivity : ComponentActivity(), Platform, PaymentResultWithDataListene
         val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
         runCatching { startActivity(intent) }
     }
+
+    override fun openBatterySettings() {
+        runCatching { startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)) }
+            .onFailure { openNotificationSettings() }
+    }
+
+    override fun playSound(sound: WaterSound, volume: Float) = WaterSounds.play(this, sound, volume)
+
+    override fun stopSound() = WaterSounds.stop()
+
+    override fun vibrate() = WaterSounds.vibrate(this)
 
     override fun exportReport(report: Report) {
         val file = PdfReport.write(this, report)

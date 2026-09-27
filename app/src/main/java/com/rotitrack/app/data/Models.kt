@@ -115,6 +115,42 @@ val DEFAULT_MEAL_REMINDERS = listOf(
     MealReminder("end_of_day", "End of Day", 21, 0),
 )
 
+@Serializable enum class WaterReminderMode(val label: String, val blurb: String) {
+    STANDARD("Standard", "Based on your sleep and meal schedule"),
+    INTERVAL("Interval", "A reminder every so often while you're awake"),
+    CUSTOM("Custom", "Customize all reminders by yourself"),
+}
+
+/** One water reminder time. Standard ones also carry a [label] such as "Before Lunch". */
+@Serializable
+data class ReminderTime(val hour: Int, val minute: Int, val enabled: Boolean = true, val label: String = "") {
+    val minuteOfDay: Int get() = hour * 60 + minute
+}
+
+val DEFAULT_STANDARD_TIMES = listOf(
+    ReminderTime(6, 30, label = "After Wake-up"),
+    ReminderTime(8, 0, label = "Before Breakfast"),
+    ReminderTime(9, 30, label = "After Breakfast"),
+    ReminderTime(12, 30, label = "Before Lunch"),
+    ReminderTime(14, 30, label = "After Lunch"),
+    ReminderTime(19, 30, label = "Before Dinner"),
+    ReminderTime(21, 0, label = "After Dinner"),
+    ReminderTime(22, 0, label = "Before Sleep"),
+)
+
+val DEFAULT_CUSTOM_TIMES = (0 until 12).map { i ->
+    val m = 6 * 60 + 30 + i * 90
+    ReminderTime(m / 60, m % 60, enabled = i in 1..10)
+}
+
+@Serializable enum class WaterSound(val label: String, val seconds: Int) {
+    DROP_1("Water drop 1", 1),
+    DROP_2("Water drop 2", 3),
+    FLOWING_1("Water flowing 1", 5),
+    FLOWING_2("Water flowing 2", 7),
+    FLOWING_3("Water flowing 3", 9),
+}
+
 @Serializable
 data class Prefs(
     val appearance: Appearance = Appearance.LIGHT,
@@ -127,6 +163,16 @@ data class Prefs(
     val mealReminders: List<MealReminder> = DEFAULT_MEAL_REMINDERS,
     /** Where referral earnings are paid. */
     val payoutUpi: String = "",
+    /** Water reminders are switched on in [Profile.remindersOn]; Interval mode uses the profile's hours too. */
+    val waterReminderMode: WaterReminderMode = WaterReminderMode.STANDARD,
+    val standardTimes: List<ReminderTime> = DEFAULT_STANDARD_TIMES,
+    val customTimes: List<ReminderTime> = DEFAULT_CUSTOM_TIMES,
+    /** No water reminders on Saturday and Sunday. */
+    val weekendMode: Boolean = false,
+    val soundOn: Boolean = true,
+    val sound: WaterSound = WaterSound.DROP_1,
+    val soundVolume: Float = 0.6f,
+    val vibration: Boolean = true,
 )
 
 @Serializable

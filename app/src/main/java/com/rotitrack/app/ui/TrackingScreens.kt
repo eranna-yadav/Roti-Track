@@ -49,7 +49,7 @@ import java.util.Locale
 // ------------------------------------------------------------------ reminders
 
 @Composable
-fun TrackingRemindersScreen(store: AppStore, platform: Platform, onBack: () -> Unit) {
+fun TrackingRemindersScreen(store: AppStore, platform: Platform, onWaterReminders: () -> Unit, onBack: () -> Unit) {
     val prefs = store.prefs
     val p = store.profile
     var editing by remember { mutableStateOf<MealReminder?>(null) }
@@ -88,44 +88,11 @@ fun TrackingRemindersScreen(store: AppStore, platform: Platform, onBack: () -> U
 
         SectionLabel("Water reminders")
         SettingsGroup {
-            Column(Modifier.padding(vertical = 8.dp)) {
-                ToggleLine("Remind me to drink", p.remindersOn) { on ->
-                    if (on) {
-                        platform.requestNotifications { granted ->
-                            store.updateProfile { it.copy(remindersOn = granted) }
-                            platform.scheduleReminders(store.profile)
-                        }
-                    } else {
-                        store.updateProfile { it.copy(remindersOn = false) }
-                        platform.scheduleReminders(store.profile)
-                    }
-                }
-                if (p.remindersOn) {
-                    fun change(f: (com.rotitrack.app.data.Profile) -> com.rotitrack.app.data.Profile) {
-                        store.updateProfile(f)
-                        platform.scheduleReminders(store.profile)
-                    }
-                    Text("Every", style = Type.small, modifier = Modifier.padding(top = 10.dp))
-                    Stepper(
-                        if (p.reminderEveryMin % 60 == 0) "${p.reminderEveryMin / 60} h" else "${p.reminderEveryMin / 60} h ${p.reminderEveryMin % 60} min",
-                        onMinus = { change { it.copy(reminderEveryMin = (it.reminderEveryMin - 30).coerceAtLeast(30)) } },
-                        onPlus = { change { it.copy(reminderEveryMin = (it.reminderEveryMin + 30).coerceAtMost(240)) } },
-                    )
-                    Text("From", style = Type.small, modifier = Modifier.padding(top = 10.dp))
-                    Stepper(
-                        hour(p.wakeHour),
-                        onMinus = { change { it.copy(wakeHour = (it.wakeHour - 1).coerceAtLeast(4)) } },
-                        onPlus = { change { it.copy(wakeHour = (it.wakeHour + 1).coerceAtMost(it.sleepHour - 2)) } },
-                    )
-                    Text("Until", style = Type.small, modifier = Modifier.padding(top = 10.dp))
-                    Stepper(
-                        hour(p.sleepHour),
-                        onMinus = { change { it.copy(sleepHour = (it.sleepHour - 1).coerceAtLeast(it.wakeHour + 2)) } },
-                        onPlus = { change { it.copy(sleepHour = (it.sleepHour + 1).coerceAtMost(23)) } },
-                    )
-                    Text("Water reminders stop for the day once you reach your goal.", style = Type.small, modifier = Modifier.padding(vertical = 8.dp))
-                }
-            }
+            SettingsRow(
+                "💧", "Water reminders",
+                subtitle = if (p.remindersOn) "${prefs.waterReminderMode.label} mode" else "Off",
+                last = true, onClick = onWaterReminders,
+            )
         }
     }
 

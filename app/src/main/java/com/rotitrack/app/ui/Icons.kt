@@ -40,4 +40,18 @@ object TabIcons {
         "M12 12.2a3.8 3.8 0 1 0 0-7.6 3.8 3.8 0 0 0 0 7.6Z" to false,
         "M4.5 20.5a7.5 7.5 0 0 1 15 0Z" to false,
     )
+
+    val Bell = icon(
+        "bell",
+        "M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.8h-15Z" to true,
+        "M10 20.5a2 2 0 0 0 4 0" to true,
+    )
+    val Speaker = icon(
+        "speaker",
+        "M4 9.5h3.5L12 5.5v13l-4.5-4H4Z" to true,
+        "M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" to true,
+    )
+    val Vibrate = icon("vibrate", "M8.5 4.5h7v15h-7Z" to true, "M5 9v6M2.5 10.5v3M19 9v6M21.5 10.5v3" to true)
+    val Pencil = icon("pencil", "M5 19l1-4L15.5 5.5l3 3L9 18Z" to true)
+    val Info = icon("info", "M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17Z" to true, "M12 11v5M12 7.8v.4" to true)
 }

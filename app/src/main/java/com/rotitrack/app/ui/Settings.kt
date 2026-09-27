@@ -93,9 +93,9 @@ fun SettingsRow(
 }
 
 @Composable
-fun Banner(text: String, action: String, onAction: () -> Unit) {
+fun Banner(text: String, action: String, color: Color = Palette.card, onAction: () -> Unit) {
     Column(
-        Modifier.fillMaxWidth().padding(bottom = 12.dp).clip(RoundedCornerShape(20.dp)).background(Palette.card)
+        Modifier.fillMaxWidth().padding(bottom = 12.dp).clip(RoundedCornerShape(20.dp)).background(color)
             .clickable(onClick = onAction).padding(16.dp),
     ) {
         Text(text, style = Type.body)

@@ -63,24 +63,35 @@ import kotlin.math.min
 import kotlin.math.sin
 
 @Composable
-fun WaterScreen(store: AppStore) {
+fun WaterScreen(store: AppStore, platform: Platform, onReminders: () -> Unit) {
     val p = store.profile
+    val prefs = store.prefs
     val day = today
     val total = store.waterTotal(day)
     val entries = store.waterForDay(day).asReversed()
     val progress = if (p.waterGoalMl > 0) min(1f, total.toFloat() / p.waterGoalMl) else 0f
     var drink by remember { mutableStateOf(DRINKS.first()) }
     var customOpen by remember { mutableStateOf(false) }
+    var soundsOpen by remember { mutableStateOf(false) }
+    fun add(ml: Int) {
+        store.addWater(ml, drink.id)
+        if (prefs.soundOn) platform.playSound(prefs.sound, prefs.soundVolume)
+    }
 
     LazyColumn(Modifier.fillMaxSize(), contentPadding = ScreenPadding) {
         item {
-            ScreenHeader("WATER") {
+            // Streak on the left, reminders and sounds on the right.
+            Row(Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 12.dp), verticalAlignment = Alignment.CenterVertically) {
                 Row(
                     Modifier.clip(RoundedCornerShape(50)).background(Palette.card).padding(horizontal = 14.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text("🔥 ${store.streak()}-day streak", style = Type.small.copy(color = Palette.ink))
                 }
+                Spacer(Modifier.weight(1f))
+                HeaderIcon(TabIcons.Bell, "Water reminders", if (p.remindersOn) Palette.brand else Palette.ink, onReminders)
+                Spacer(Modifier.width(10.dp))
+                HeaderIcon(TabIcons.Speaker, "Sounds & Effects", if (prefs.soundOn) Palette.brand else Palette.muted) { soundsOpen = true }
             }
         }
         item {
@@ -111,7 +122,7 @@ fun WaterScreen(store: AppStore) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 listOf(p.cupMl, 150, 500).distinct().forEach { ml ->
                     PillButton(
-                        "+ $ml ml", { store.addWater(ml, drink.id) },
+                        "+ $ml ml", { add(ml) },
                         modifier = Modifier.weight(1f), height = 56.dp,
                     )
                 }
@@ -147,12 +158,13 @@ fun WaterScreen(store: AppStore) {
         }
     }
 
+    if (soundsOpen) SoundsSheet(store, platform) { soundsOpen = false }
     if (customOpen) {
         AmountDialog(
             title = "Add ${drink.name}",
             onDismiss = { customOpen = false },
             onConfirm = { ml ->
-                store.addWater(ml, drink.id)
+                add(ml)
                 customOpen = false
             },
         )

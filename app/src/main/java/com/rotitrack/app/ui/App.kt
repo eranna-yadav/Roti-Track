@@ -28,6 +28,7 @@ import com.rotitrack.app.account.UserSummary
 import com.rotitrack.app.account.summarize
 import com.rotitrack.app.data.MealSlot
 import com.rotitrack.app.data.Profile
+import com.rotitrack.app.data.WaterSound
 import com.rotitrack.app.domain.Days
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.AlertDialog
@@ -50,6 +51,12 @@ interface Platform {
     /** Whether the system lets the app post notifications at all. */
     fun notificationsEnabled(): Boolean
     fun openNotificationSettings()
+    /** Where the user can stop Android from holding back background reminders. */
+    fun openBatterySettings()
+    /** Plays a water sound once (a preview, or when water is logged). */
+    fun playSound(sound: WaterSound, volume: Float)
+    fun stopSound()
+    fun vibrate()
     /** Renders the report as a PDF and opens the share sheet. */
     fun exportReport(report: Report)
     /** Light or dark status/navigation bar icons to match the theme. */
@@ -179,7 +186,7 @@ private fun SignedIn(services: Services, platform: Platform, nav: Navigator, acc
             when (route) {
                 is Route.Tabs -> when (route.tab) {
                     Tab.HOME -> DashboardScreen(store, account, isPro, plan, onUpgrade = upgrade, onOpen = nav::tab)
-                    Tab.WATER -> WaterScreen(store)
+                    Tab.WATER -> WaterScreen(store, platform, onReminders = { nav.push(Route.Page(ProfilePage.WATER_REMINDERS)) })
                     Tab.FOOD -> FoodScreen(store, onAdd = { slot, day -> nav.push(Route.AddFood(slot, day)) })
                     Tab.PLAN -> PlanScreen(store, isPro, onUpgrade = upgrade, onOpenArticles = { nav.push(Route.Articles) }, onEditProfile = { nav.push(Route.Page(ProfilePage.PERSONAL)) })
                     Tab.PROFILE -> ProfileScreen(
@@ -212,7 +219,8 @@ private fun SignedIn(services: Services, platform: Platform, nav: Navigator, acc
                     ProfilePage.LANGUAGE -> LanguageScreen(store, onBack = nav::pop)
                     ProfilePage.GOALS -> NutritionGoalsScreen(store, onBack = nav::pop)
                     ProfilePage.FASTING -> FastingScreen(store, onBack = nav::pop)
-                    ProfilePage.REMINDERS -> TrackingRemindersScreen(store, platform, onBack = nav::pop)
+                    ProfilePage.REMINDERS -> TrackingRemindersScreen(store, platform, onWaterReminders = { nav.push(Route.Page(ProfilePage.WATER_REMINDERS)) }, onBack = nav::pop)
+                    ProfilePage.WATER_REMINDERS -> WaterRemindersScreen(store, platform, onBack = nav::pop)
                     ProfilePage.REFERRAL -> ReferralScreen(store, account, summary, platform, onBack = nav::pop)
                     ProfilePage.BADGES -> BadgesScreen(store, onBack = nav::pop)
                     ProfilePage.REPORT -> ReportScreen(store, account, isPro, platform, onUpgrade = upgrade, onBack = nav::pop)
