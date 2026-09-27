@@ -98,7 +98,7 @@ fun LoginScreen(auth: AuthService) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Image(RotiLogo, contentDescription = "Roti Track logo", modifier = Modifier.size(64.dp))
             Spacer(Modifier.width(10.dp))
-            Text("💧", fontSize = 56.sp)
+            Image(WaterDropLogo, contentDescription = null, modifier = Modifier.size(width = 48.dp, height = 64.dp))
         }
         Text("ROTI TRACK", fontSize = 36.sp, fontWeight = FontWeight.Black, color = Color.White, modifier = Modifier.padding(top = 8.dp))
         Text(

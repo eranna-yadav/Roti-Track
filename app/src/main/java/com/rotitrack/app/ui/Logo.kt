@@ -1,5 +1,7 @@
 package com.rotitrack.app.ui
 
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -29,4 +31,22 @@ val RotiLogo: ImageVector by lazy {
     fill(0xFFB06A2C, "M58.8,66 C59.5,65.7 60.3,66.1 60.3,66.8 C60.3,67.5 59.4,67.8 58.9,67.5 C58.3,67.2 58.2,66.3 58.8,66Z")
     b.clearGroup()
     return@lazy b.build()
+}
+
+/** The glossy light-blue water drop shown next to the logo (the classic 💧 look, drawn so every phone matches). */
+val WaterDropLogo: ImageVector by lazy {
+    val b = ImageVector.Builder("drop", 30.dp, 40.dp, 30f, 40f)
+    val drop = "M15,1 C15,1 2,17.5 2,26 A13,13 0 0,0 28,26 C28,17.5 15,1 15,1Z"
+    b.addPath(
+        PathParser().parsePathString(drop).toNodes(),
+        fill = Brush.linearGradient(listOf(Color(0xFFB9ECFF), Color(0xFF55C3F5), Color(0xFF1E88E5)), Offset(8f, 4f), Offset(22f, 39f)),
+        stroke = SolidColor(Color(0xFF1976D2)),
+        strokeLineWidth = 0.8f,
+    )
+    // Soft highlight on the left side.
+    b.addPath(
+        PathParser().parsePathString("M9,20 C9,16.5 11.5,12.5 13,10.5 C12.3,14 11,18 11.2,22.5 C11.3,25 9,24 9,20Z").toNodes(),
+        fill = SolidColor(Color(0xCCFFFFFF)),
+    )
+    b.build()
 }

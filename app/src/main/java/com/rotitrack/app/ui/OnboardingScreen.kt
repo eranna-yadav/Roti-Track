@@ -44,7 +44,7 @@ fun OnboardingScreen(store: AppStore, platform: Platform) {
             Row(verticalAlignment = Alignment.CenterVertically) {
             Image(RotiLogo, contentDescription = "Roti Track logo", modifier = Modifier.size(72.dp))
             Spacer(Modifier.width(10.dp))
-            Text("💧", fontSize = 64.sp)
+            Image(WaterDropLogo, contentDescription = null, modifier = Modifier.size(width = 54.dp, height = 72.dp))
         }
             Text("ROTI TRACK", fontSize = 40.sp, fontWeight = FontWeight.Black, color = Color.White, modifier = Modifier.padding(top = 12.dp))
             Text("Indian diet planner, calorie & water tracker", style = Type.body.copy(color = Color.White.copy(alpha = 0.8f)))
