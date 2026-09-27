@@ -18,7 +18,8 @@ service cloud.firestore {
     // Razorpay status, which only the payments server (Admin SDK) writes.
     function adminOnly() {
       return ['role', 'compPro', 'blocked',
-              'razorpaySubscriptionId', 'razorpayPlanId', 'razorpayStatus', 'razorpayUntil'];
+              'razorpaySubscriptionId', 'razorpayPlanId', 'razorpayStatus', 'razorpayUntil',
+              'referralEarnings', 'referralCount', 'referralCredited', 'referralCreditedTo', 'referralPaid'];
     }
 
     match /users/{uid} {
@@ -29,14 +30,32 @@ service cloud.firestore {
 
       allow update: if signedIn() && (
         // A user updates their own activity, but never their role, Pro grant, block or join date.
+        // The referral code a user signed up with is fixed at sign-up.
         (request.auth.uid == uid
-          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(adminOnly().concat(['createdAt'])))
-        // An admin can grant Pro or block, nothing else.
+          && !request.resource.data.diff(resource.data).affectedKeys()
+                .hasAny(adminOnly().concat(['createdAt', 'referredByCode'])))
+        // An admin can grant Pro, block, or record a referral payout, nothing else.
         || (isAdmin()
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['compPro', 'blocked']))
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['compPro', 'blocked', 'referralPaid']))
       );
 
-      allow delete: if false;
+      // Users can delete their own account record.
+      allow delete: if signedIn() && request.auth.uid == uid;
+    }
+
+    // Referral code → owner. Anyone may look up one exact code (to check it at sign-up);
+    // nobody may list them. A user registers only their own code.
+    match /referralCodes/{code} {
+      allow get: if true;
+      allow list: if false;
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    // Referral payouts owed: written by the server, readable by admins.
+    match /referrals/{id} {
+      allow read: if isAdmin();
+      allow write: if false;
     }
 
     // Razorpay payment records: written by the server, readable by admins.

@@ -15,6 +15,8 @@ data class AdminStats(
     val new7d: Int,
     val active24h: Int,
     val blocked: Int,
+    /** ₹ earned by referrers but not yet paid out. */
+    val referralDue: Int = 0,
 ) {
     companion object {
         fun of(users: List<UserSummary>, now: Long = System.currentTimeMillis()): AdminStats {
@@ -31,6 +33,7 @@ data class AdminStats(
                 new7d = users.count { now - it.createdAt < 7 * DAY_MS },
                 active24h = users.count { now - it.lastActive < DAY_MS },
                 blocked = users.count { it.blocked },
+                referralDue = users.sumOf { it.referralDue },
             )
         }
     }

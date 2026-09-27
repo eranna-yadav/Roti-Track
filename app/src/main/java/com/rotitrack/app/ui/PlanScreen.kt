@@ -61,7 +61,7 @@ fun PlanScreen(store: AppStore, isPro: Boolean, onUpgrade: () -> Unit, onOpenArt
                     val locked = !isPro && d != todayKey
                     Column(
                         Modifier.width(58.dp).height(66.dp).clip(RoundedCornerShape(16.dp))
-                            .background(if (active) Palette.brand else Color.White)
+                            .background(if (active) Palette.brand else Palette.card)
                             .clickable { if (locked) onUpgrade() else day = d },
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center,
@@ -160,7 +160,7 @@ fun PlanScreen(store: AppStore, isPro: Boolean, onUpgrade: () -> Unit, onOpenArt
 
 @Composable
 private fun Tag(text: String) {
-    Box(Modifier.clip(RoundedCornerShape(50)).background(Color.White).padding(horizontal = 10.dp, vertical = 4.dp)) {
+    Box(Modifier.clip(RoundedCornerShape(50)).background(Palette.card).padding(horizontal = 10.dp, vertical = 4.dp)) {
         Text(text.uppercase(), style = Type.tiny.copy(color = Palette.saffron))
     }
 }

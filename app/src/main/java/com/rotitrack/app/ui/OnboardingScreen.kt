@@ -60,7 +60,7 @@ fun OnboardingScreen(store: AppStore, platform: Platform) {
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 100.dp)) {
             ScreenHeader("ABOUT YOU")
             Text("We use this to set your calorie and water targets and build your meal plan.", style = Type.body.copy(color = Palette.inkSoft))
-            ProfileForm(draft) { draft = it }
+            ProfileForm(draft, { draft = it })
             Spacer(Modifier.height(16.dp))
             AppCard(color = Palette.saffronSoft) {
                 Text("Your starting targets", style = Type.small.copy(color = Palette.inkSoft))

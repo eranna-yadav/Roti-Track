@@ -37,3 +37,12 @@ test("plan prices match the app", () => {
   assert.strictEqual(lib.PLANS.rotitrack_pro_monthly.rupees, 259);
   assert.strictEqual(lib.PLANS.rotitrack_pro_yearly.rupees, 990);
 });
+
+test("referral pays once, only for a verified paid plan", () => {
+  const now = 1_000;
+  assert.ok(lib.shouldCreditReferral({ referredByCode: "RTABC234", razorpayUntil: 5_000 }, now));
+  assert.ok(!lib.shouldCreditReferral({ referredByCode: "RTABC234", razorpayUntil: 5_000, referralCredited: true }, now));
+  assert.ok(!lib.shouldCreditReferral({ referredByCode: "RTABC234", razorpayUntil: 500 }, now));
+  assert.ok(!lib.shouldCreditReferral({ razorpayUntil: 5_000 }, now));
+  assert.strictEqual(lib.REFERRAL_REWARD, 500);
+});

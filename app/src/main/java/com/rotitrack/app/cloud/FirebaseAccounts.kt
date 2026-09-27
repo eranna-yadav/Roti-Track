@@ -7,6 +7,7 @@ import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.google.firebase.auth.FirebaseUser
@@ -19,6 +20,8 @@ import com.rotitrack.app.account.AuthException
 import com.rotitrack.app.account.AuthService
 import com.rotitrack.app.account.UserDirectory
 import com.rotitrack.app.account.UserSummary
+import com.rotitrack.app.account.normalizeReferralCode
+import com.rotitrack.app.account.referralCodeFor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -64,11 +67,25 @@ class FirebaseAuthService(private val directory: FirestoreDirectory) : AuthServi
         refresh(user)
     }
 
-    override suspend fun signUp(name: String, email: String, password: String) = friendly {
+    override suspend fun signUp(name: String, email: String, password: String, referralCode: String?) = friendly {
+        val code = normalizeReferralCode(referralCode)
+        if (code != null && !directory.referralCodeExists(code)) {
+            throw AuthException("That referral code doesn't exist. Check it or leave it empty.")
+        }
         val user = auth.createUserWithEmailAndPassword(email, password).await().user ?: throw AuthException("Sign-up failed")
         user.updateProfile(UserProfileChangeRequest.Builder().setDisplayName(name).build()).await()
-        directory.create(user.uid, name, email)
+        directory.create(user.uid, name, email, code)
         refresh(user, name)
+    }
+
+    override suspend fun deleteAccount() = friendly {
+        val user = auth.currentUser ?: return@friendly
+        directory.delete(user.uid)
+        try {
+            user.delete().await()
+        } catch (e: FirebaseAuthRecentLoginRequiredException) {
+            throw AuthException("For your security, sign out, sign in again, then delete your account.")
+        }
     }
 
     override suspend fun sendPasswordReset(email: String) = friendly {
@@ -100,9 +117,29 @@ class FirebaseAuthService(private val directory: FirestoreDirectory) : AuthServi
 class FirestoreDirectory : UserDirectory {
     private val users = FirebaseFirestore.getInstance().collection("users")
 
-    suspend fun create(uid: String, name: String, email: String) {
+    private val codes = FirebaseFirestore.getInstance().collection("referralCodes")
+    private var codeRegistered = false
+
+    suspend fun create(uid: String, name: String, email: String, referredByCode: String?) {
         val now = System.currentTimeMillis()
-        users.document(uid).set(mapOf("name" to name, "email" to email, "createdAt" to now, "lastActive" to now)).await()
+        val code = referralCodeFor(uid)
+        users.document(uid).set(
+            mapOf(
+                "name" to name, "email" to email, "createdAt" to now, "lastActive" to now,
+                "referralCode" to code, "referredByCode" to referredByCode,
+            )
+        ).await()
+        registerCode(uid)
+    }
+
+    suspend fun referralCodeExists(code: String): Boolean = codes.document(code).get().await().exists()
+
+    /** referralCodes/{code} → {uid}: lets sign-up check a code and the server find the referrer. */
+    private suspend fun registerCode(uid: String) {
+        if (codeRegistered) return
+        val doc = codes.document(referralCodeFor(uid))
+        if (!doc.get().await().exists()) doc.set(mapOf("uid" to uid)).await()
+        codeRegistered = true
     }
 
     override suspend fun publish(s: UserSummary) {
@@ -117,9 +154,12 @@ class FirestoreDirectory : UserDirectory {
                 "streak" to s.streak,
                 "daysLogged" to s.daysLogged,
                 "diet" to s.diet,
+                "referralCode" to s.referralCode,
+                "payoutUpi" to s.payoutUpi,
             ),
             SetOptions.merge(),
         ).await()
+        runCatching { registerCode(s.uid) }
     }
 
     override suspend fun get(uid: String): UserSummary? = users.document(uid).get().await().toSummary()
@@ -133,6 +173,15 @@ class FirestoreDirectory : UserDirectory {
 
     override suspend fun setBlocked(uid: String, value: Boolean) {
         users.document(uid).update("blocked", value).await()
+    }
+
+    override suspend fun markReferralPaid(uid: String) {
+        val earned = users.document(uid).get().await().getLong("referralEarnings") ?: 0
+        users.document(uid).update("referralPaid", earned).await()
+    }
+
+    override suspend fun delete(uid: String) {
+        users.document(uid).delete().await()
     }
 
     private fun DocumentSnapshot.toSummary(): UserSummary? = if (!exists()) null else UserSummary(
@@ -150,5 +199,15 @@ class FirestoreDirectory : UserDirectory {
         streak = getLong("streak")?.toInt() ?: 0,
         daysLogged = getLong("daysLogged")?.toInt() ?: 0,
         diet = getString("diet").orEmpty(),
+        razorpayPlanId = getString("razorpayPlanId"),
+        razorpayStatus = getString("razorpayStatus"),
+        razorpayUntil = getLong("razorpayUntil") ?: 0,
+        referralCode = getString("referralCode").orEmpty(),
+        referredByCode = getString("referredByCode"),
+        referralEarnings = getLong("referralEarnings")?.toInt() ?: 0,
+        referralCount = getLong("referralCount")?.toInt() ?: 0,
+        referralCredited = getBoolean("referralCredited") ?: false,
+        referralPaid = getLong("referralPaid")?.toInt() ?: 0,
+        payoutUpi = getString("payoutUpi").orEmpty(),
     )
 }

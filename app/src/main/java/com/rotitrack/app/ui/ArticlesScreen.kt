@@ -54,7 +54,7 @@ fun ArticlesScreen(onOpen: (String) -> Unit, onBack: () -> Unit) {
                             Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                                 Text(a.emoji, fontSize = 56.sp)
                             }
-                            Column(Modifier.fillMaxWidth().background(Color.White.copy(alpha = 0.6f)).padding(12.dp)) {
+                            Column(Modifier.fillMaxWidth().background(Palette.card.copy(alpha = 0.6f)).padding(12.dp)) {
                                 Text(a.title, color = Color(cat.fg), fontWeight = FontWeight.ExtraBold, fontSize = 15.sp, maxLines = 3)
                                 Text("${a.minutes} min read", style = Type.tiny.copy(color = Color(cat.fg)), modifier = Modifier.padding(top = 4.dp))
                             }

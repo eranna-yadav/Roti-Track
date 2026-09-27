@@ -38,7 +38,7 @@ fun FormLabel(text: String) = Text(text, style = Type.title.copy(color = Palette
 private fun Tile(emoji: String, label: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier) {
     Column(
         modifier.height(84.dp).clip(RoundedCornerShape(18.dp))
-            .background(if (selected) Palette.brand else Color.White)
+            .background(if (selected) Palette.brand else Palette.card)
             .clickable(onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -50,7 +50,7 @@ private fun Tile(emoji: String, label: String, selected: Boolean, onClick: () ->
 
 /** Body data and diet preferences. Used by onboarding and the Me tab. */
 @Composable
-fun ProfileForm(p: Profile, onChange: (Profile) -> Unit) {
+fun ProfileForm(p: Profile, onChange: (Profile) -> Unit, showWeight: Boolean = true) {
     FormLabel("Gender")
     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         listOf(Triple(Gender.FEMALE, "👩", "Female"), Triple(Gender.MALE, "👨", "Male"), Triple(Gender.OTHER, "🧑", "Other"))
@@ -59,13 +59,15 @@ fun ProfileForm(p: Profile, onChange: (Profile) -> Unit) {
 
     FormLabel("Body")
     AppCard {
-        Text("Weight", style = Type.small)
-        Stepper(
-            "${fmt(p.weightKg)} kg",
-            onMinus = { onChange(p.copy(weightKg = ((p.weightKg - 0.5).coerceAtLeast(25.0) * 2).roundToInt() / 2.0)) },
-            onPlus = { onChange(p.copy(weightKg = ((p.weightKg + 0.5).coerceAtMost(250.0) * 2).roundToInt() / 2.0)) },
-        )
-        Spacer(Modifier.height(10.dp))
+        if (showWeight) {
+            Text("Weight", style = Type.small)
+            Stepper(
+                "${fmt(p.weightKg)} kg",
+                onMinus = { onChange(p.copy(weightKg = ((p.weightKg - 0.5).coerceAtLeast(25.0) * 2).roundToInt() / 2.0)) },
+                onPlus = { onChange(p.copy(weightKg = ((p.weightKg + 0.5).coerceAtMost(250.0) * 2).roundToInt() / 2.0)) },
+            )
+            Spacer(Modifier.height(10.dp))
+        }
         Text("Height", style = Type.small)
         Stepper(
             "${p.heightCm} cm",

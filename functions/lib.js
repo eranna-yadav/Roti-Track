@@ -52,4 +52,12 @@ function playAmounts(rupees) {
   };
 }
 
-module.exports = { PLANS, hmac, verifyPaymentSignature, verifyWebhookSignature, userFieldsFromSubscription, playAmounts };
+/** ₹ paid to a referrer. Must match REFERRAL_REWARD_RUPEES in the app. */
+const REFERRAL_REWARD = 500;
+
+/** True when this user's record should now pay out their referrer. */
+function shouldCreditReferral(user, now) {
+  return Boolean(user && user.referredByCode && !user.referralCredited && (user.razorpayUntil || 0) > now);
+}
+
+module.exports = { REFERRAL_REWARD, shouldCreditReferral, PLANS, hmac, verifyPaymentSignature, verifyWebhookSignature, userFieldsFromSubscription, playAmounts };

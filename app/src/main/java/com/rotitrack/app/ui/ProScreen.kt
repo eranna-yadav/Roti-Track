@@ -71,7 +71,7 @@ fun ProScreen(
     val useRazorpay = !usePlay && razorpay.unavailableReason == null
     val demo = !usePlay && !useRazorpay && billing is DemoBilling
 
-    Column(Modifier.fillMaxSize().background(Palette.ink)) {
+    Column(Modifier.fillMaxSize().background(Palette.night)) {
         Row(Modifier.fillMaxWidth().padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
             Text("✕", fontSize = 22.sp, color = Color.White, modifier = Modifier.clickable(onClick = onBack).padding(14.dp))
         }
@@ -147,18 +147,18 @@ fun ProScreen(
         Column(Modifier.fillMaxWidth().padding(20.dp)) {
             val light = Modifier.fillMaxWidth()
             when {
-                playPlan != null && billing is DemoBilling -> PillButton("Cancel subscription (demo)", { billing.cancel() }, light, color = Color.White, textColor = Palette.ink)
+                playPlan != null && billing is DemoBilling -> PillButton("Cancel subscription (demo)", { billing.cancel() }, light, color = Color.White, textColor = Palette.night)
                 playPlan != null -> PillButton(
                     "Manage subscription",
                     { platform.openUrl("https://play.google.com/store/account/subscriptions?sku=${playPlan.productId}&package=com.rotitrack.app") },
-                    light, color = Color.White, textColor = Palette.ink,
+                    light, color = Color.White, textColor = Palette.night,
                 )
                 rzpPlan != null && summary?.razorpayStatus != "cancelled" -> PillButton(
                     if (razorpay.busy) "Please wait…" else "Turn off auto-renew",
                     { scope.launch { runCatching { razorpay.cancel() } } },
-                    light, color = Color.White, textColor = Palette.ink, enabled = !razorpay.busy,
+                    light, color = Color.White, textColor = Palette.night, enabled = !razorpay.busy,
                 )
-                rzpPlan != null || compPro -> PillButton("Done", onBack, light, color = Color.White, textColor = Palette.ink)
+                rzpPlan != null || compPro -> PillButton("Done", onBack, light, color = Color.White, textColor = Palette.night)
                 else -> PillButton(
                     if (razorpay.busy) "Please wait…" else "Subscribe · ${billing.price(selected)}/${selected.period}",
                     {
@@ -194,13 +194,13 @@ private fun PlanCard(plan: Plan, price: String, selected: Boolean, note: String,
     ) {
         Column(Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(plan.label, style = Type.title.copy(color = if (selected) Palette.ink else Color.White))
+                Text(plan.label, style = Type.title.copy(color = if (selected) Palette.night else Color.White))
                 badge?.let { Badge(it, Palette.leaf) }
             }
-            Text(note, style = Type.small.copy(color = if (selected) Palette.inkSoft else Color.White.copy(alpha = 0.6f)))
+            Text(note, style = Type.small.copy(color = if (selected) Color(0xFF3A4762) else Color.White.copy(alpha = 0.6f)))
         }
         Text(
-            "$price\n/${plan.period}", style = Type.title.copy(color = if (selected) Palette.ink else Color.White),
+            "$price\n/${plan.period}", style = Type.title.copy(color = if (selected) Palette.night else Color.White),
             textAlign = TextAlign.End,
         )
     }

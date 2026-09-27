@@ -40,7 +40,22 @@ data class UserSummary(
     val razorpayPlanId: String? = null,
     val razorpayStatus: String? = null,
     val razorpayUntil: Long = 0,
+    /** This user's own code to share, e.g. "RTK7P2QX". */
+    val referralCode: String = "",
+    /** The code this user signed up with, if any. Set once, at sign-up. */
+    val referredByCode: String? = null,
+    /** Server-maintained: ₹ earned and friends who went Pro with this user's code. */
+    val referralEarnings: Int = 0,
+    val referralCount: Int = 0,
+    /** Server-maintained: this user's own Pro purchase has already paid out their referrer. */
+    val referralCredited: Boolean = false,
+    /** Where referral earnings should be paid. */
+    val payoutUpi: String = "",
+    /** Admin-maintained: ₹ of [referralEarnings] already paid out. */
+    val referralPaid: Int = 0,
 ) {
+    val referralDue: Int get() = (referralEarnings - referralPaid).coerceAtLeast(0)
+
     /** Razorpay plan that is paid up right now; stays until the cycle ends even if auto-renew is off. */
     val razorpayPlan: Plan? get() = if (razorpayUntil > System.currentTimeMillis()) Plan.byProductId(razorpayPlanId) else null
     val plan: Plan? get() = Plan.byProductId(planId) ?: razorpayPlan
@@ -60,9 +75,11 @@ interface AuthService {
     /** "Firebase" or "This device only". Shown on the login screen. */
     val backendLabel: String
     suspend fun signIn(email: String, password: String)
-    suspend fun signUp(name: String, email: String, password: String)
+    suspend fun signUp(name: String, email: String, password: String, referralCode: String? = null)
     suspend fun sendPasswordReset(email: String)
     fun signOut()
+    /** Deletes the account and its server record. The caller clears data on the phone. */
+    suspend fun deleteAccount()
 }
 
 interface UserDirectory {
@@ -72,7 +89,30 @@ interface UserDirectory {
     suspend fun all(): List<UserSummary>
     suspend fun setCompPro(uid: String, value: Boolean)
     suspend fun setBlocked(uid: String, value: Boolean)
+    suspend fun delete(uid: String)
+    /** Admin: records that everything earned so far has been paid to the user. */
+    suspend fun markReferralPaid(uid: String)
 }
+
+/** ₹ paid to a user when a friend who signed up with their code buys Pro. */
+const val REFERRAL_REWARD_RUPEES = 500
+
+/** A stable, shareable code for a user, e.g. "RTK7P2QX". No 0/O/1/I to avoid mix-ups. */
+fun referralCodeFor(uid: String): String {
+    val alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+    var h = 1125899906842597L
+    for (c in uid) h = 31 * h + c.code
+    val sb = StringBuilder("RT")
+    var x = h and Long.MAX_VALUE
+    repeat(6) {
+        sb.append(alphabet[(x % alphabet.length).toInt()])
+        x /= alphabet.length
+    }
+    return sb.toString()
+}
+
+fun normalizeReferralCode(code: String?): String? =
+    code?.trim()?.uppercase()?.replace(" ", "")?.takeIf { it.isNotEmpty() }
 
 interface Billing {
     /** Currently owned subscription, if any. Compose state. */

@@ -101,9 +101,69 @@ data class Profile(
     val sleepHour: Int = 22,
 )
 
+@Serializable enum class Appearance(val label: String) { LIGHT("Light"), DARK("Dark"), SYSTEM("System") }
+
+/** A daily nudge to log a meal (or everything at once, for "End of Day"). */
+@Serializable
+data class MealReminder(val key: String, val label: String, val hour: Int, val minute: Int, val enabled: Boolean = true)
+
+val DEFAULT_MEAL_REMINDERS = listOf(
+    MealReminder("breakfast", "Breakfast", 8, 30),
+    MealReminder("lunch", "Lunch", 12, 0),
+    MealReminder("snack", "Snack", 15, 0),
+    MealReminder("dinner", "Dinner", 19, 0),
+    MealReminder("end_of_day", "End of Day", 21, 0),
+)
+
+@Serializable
+data class Prefs(
+    val appearance: Appearance = Appearance.LIGHT,
+    val badgeCelebrations: Boolean = true,
+    /** Calories burned in exercise are added to the day's goal. */
+    val addBurnedCalories: Boolean = false,
+    /** Up to 200 kcal left over yesterday are added to today's goal. */
+    val rolloverCalories: Boolean = false,
+    val language: String = "en",
+    val mealReminders: List<MealReminder> = DEFAULT_MEAL_REMINDERS,
+    /** Where referral earnings are paid. */
+    val payoutUpi: String = "",
+)
+
+@Serializable
+data class ExerciseEntry(
+    val id: String,
+    val day: String,
+    val ts: Long,
+    val activityId: String,
+    val name: String,
+    val emoji: String,
+    val minutes: Int,
+    val kcal: Int,
+)
+
+@Serializable
+data class WeightEntry(val day: String, val kg: Double)
+
+@Serializable
+data class FastRecord(val start: Long, val end: Long, val targetHours: Int)
+
+@Serializable
+data class Fasting(
+    /** Hours of fasting in the chosen plan, e.g. 16 for 16:8. */
+    val targetHours: Int = 16,
+    val activeStart: Long? = null,
+    val history: List<FastRecord> = emptyList(),
+)
+
 @Serializable
 data class AppState(
     val profile: Profile = Profile(),
+    val prefs: Prefs = Prefs(),
+    val exercises: List<ExerciseEntry> = emptyList(),
+    val weights: List<WeightEntry> = emptyList(),
+    val fasting: Fasting = Fasting(),
+    /** Badge id → when it was unlocked. */
+    val badges: Map<String, Long> = emptyMap(),
     val water: List<WaterEntry> = emptyList(),
     val meals: List<MealEntry> = emptyList(),
     val customFoods: List<Food> = emptyList(),

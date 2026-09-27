@@ -18,6 +18,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import com.rotitrack.app.reminders.MealReminders
 import com.rotitrack.app.reminders.Reminders
 import com.rotitrack.app.store.AndroidStorage
 import com.rotitrack.app.store.AppStore
@@ -48,6 +49,7 @@ class RotiTrackApp : Application() {
     override fun onCreate() {
         super.onCreate()
         Reminders.createChannel(this)
+        MealReminders.createChannel(this)
 
         val (auth, directory) = if (usesFirebase) {
             val dir = FirestoreDirectory()

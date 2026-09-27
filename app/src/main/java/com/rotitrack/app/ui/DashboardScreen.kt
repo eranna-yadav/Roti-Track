@@ -56,6 +56,7 @@ fun DashboardScreen(
     val day = today
     val totals = store.totals(day)
     val water = store.waterTotal(day)
+    val todayGoal = store.calorieGoalFor(day)
     val macros = store.macroTargets()
     val hour = LocalTime.now().hour
     val nextSlot = when {
@@ -98,10 +99,10 @@ fun DashboardScreen(
                 Text("Today", style = Type.title)
                 Spacer(Modifier.height(12.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    CalorieRing(totals.kcal, p.calorieGoal, size = 128.dp)
+                    CalorieRing(totals.kcal, todayGoal, size = 128.dp)
                     Spacer(Modifier.width(16.dp))
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Progress("Calories", "${totals.kcal} / ${p.calorieGoal}", totals.kcal.toFloat() / p.calorieGoal, Palette.leaf)
+                        Progress("Calories", "${totals.kcal} / $todayGoal", totals.kcal.toFloat() / todayGoal, Palette.leaf)
                         Progress("Water", "${liters(water)} / ${liters(p.waterGoalMl)}", water.toFloat() / p.waterGoalMl, Palette.aqua)
                         Progress("Protein", "${totals.protein.toInt()} / ${macros.protein} g", (totals.protein / macros.protein).toFloat(), Palette.protein)
                     }
@@ -137,7 +138,7 @@ fun DashboardScreen(
 
         if (!isPro) {
             item {
-                AppCard(color = Palette.ink, onClick = onUpgrade) {
+                AppCard(color = Palette.night, onClick = onUpgrade) {
                     Text("👑 Roti Track Pro", style = Type.h2.copy(color = Color.White))
                     Text(
                         "7-day meal plans, unlimited swaps, 30-day trends and your own recipes. " +
@@ -208,7 +209,7 @@ private fun Progress(label: String, value: String, fraction: Float, color: Color
 
 @Composable
 private fun StatTile(emoji: String, value: String, label: String, modifier: Modifier) {
-    Column(modifier.clip(RoundedCornerShape(20.dp)).background(Color.White).padding(12.dp)) {
+    Column(modifier.clip(RoundedCornerShape(20.dp)).background(Palette.card).padding(12.dp)) {
         Text(emoji, fontSize = 20.sp)
         Text(value, style = Type.h2.copy(fontSize = 20.sp), modifier = Modifier.padding(top = 4.dp), maxLines = 1)
         Text(label, style = Type.tiny, maxLines = 2)

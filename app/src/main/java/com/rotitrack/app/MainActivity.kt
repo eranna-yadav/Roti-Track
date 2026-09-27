@@ -1,12 +1,16 @@
 package com.rotitrack.app
 
 import android.Manifest
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.BackHandler
@@ -14,11 +18,16 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.remember
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import com.razorpay.Checkout
 import com.razorpay.PaymentData
 import com.razorpay.PaymentResultWithDataListener
 import com.rotitrack.app.data.Profile
+import com.rotitrack.app.domain.Report
+import com.rotitrack.app.reminders.MealReminders
+import com.rotitrack.app.report.PdfReport
 import com.rotitrack.app.reminders.Reminders
 import com.rotitrack.app.ui.App
 import com.rotitrack.app.ui.Navigator
@@ -36,9 +45,7 @@ class MainActivity : ComponentActivity(), Platform, PaymentResultWithDataListene
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (rotiTrack.razorpay != null) Checkout.preload(applicationContext)
-        // The app is always light, so keep dark system-bar icons even when the phone is in dark mode.
-        val bars = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
-        enableEdgeToEdge(statusBarStyle = bars, navigationBarStyle = bars)
+        setDarkTheme(false)
         setContent {
             val nav = remember { Navigator() }
             BackHandler(enabled = nav.canPop) { nav.pop() }
@@ -68,15 +75,21 @@ class MainActivity : ComponentActivity(), Platform, PaymentResultWithDataListene
         permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
 
-    override fun scheduleReminders(profile: Profile) = Reminders.schedule(this, profile)
+    override fun scheduleReminders(profile: Profile) {
+        Reminders.schedule(this, profile)
+        MealReminders.schedule(this, rotiTrack.activeStore?.prefs?.mealReminders)
+    }
 
     override fun sessionChanged(uid: String?) {
         rotiTrack.activeUid = uid
         if (uid == null) {
             Reminders.cancel(this)
+            MealReminders.cancelAll(this)
         } else {
             rotiTrack.services.billing.restore()
-            Reminders.schedule(this, rotiTrack.storeFor(uid).profile)
+            val store = rotiTrack.storeFor(uid)
+            Reminders.schedule(this, store.profile)
+            MealReminders.schedule(this, store.prefs.mealReminders)
         }
     }
 
@@ -91,5 +104,38 @@ class MainActivity : ComponentActivity(), Platform, PaymentResultWithDataListene
 
     override fun openUrl(url: String) {
         runCatching { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
+    }
+
+    override fun share(text: String) {
+        val send = Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, text)
+        startActivity(Intent.createChooser(send, "Share Roti Track"))
+    }
+
+    override fun copyText(text: String) {
+        getSystemService(ClipboardManager::class.java).setPrimaryClip(ClipData.newPlainText("Roti Track", text))
+        Toast.makeText(this, "Copied $text", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun notificationsEnabled(): Boolean = NotificationManagerCompat.from(this).areNotificationsEnabled()
+
+    override fun openNotificationSettings() {
+        val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+        runCatching { startActivity(intent) }
+    }
+
+    override fun exportReport(report: Report) {
+        val file = PdfReport.write(this, report)
+        val uri = FileProvider.getUriForFile(this, "$packageName.files", file)
+        val send = Intent(Intent.ACTION_SEND)
+            .setType("application/pdf")
+            .putExtra(Intent.EXTRA_STREAM, uri)
+            .putExtra(Intent.EXTRA_SUBJECT, "Roti Track summary report")
+            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        startActivity(Intent.createChooser(send, "Save or share your report"))
+    }
+
+    override fun setDarkTheme(dark: Boolean) {
+        val bars = if (dark) SystemBarStyle.dark(Color.TRANSPARENT) else SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
+        enableEdgeToEdge(statusBarStyle = bars, navigationBarStyle = bars)
     }
 }

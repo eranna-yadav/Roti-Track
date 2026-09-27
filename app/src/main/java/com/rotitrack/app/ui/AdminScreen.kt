@@ -134,7 +134,7 @@ fun AdminScreen(directory: UserDirectory, onOpen: (String) -> Unit, onBack: () -
                             singleLine = true, shape = RoundedCornerShape(50),
                             colors = TextFieldDefaults.colors(
                                 focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent,
-                                focusedContainerColor = Color.White, unfocusedContainerColor = Color.White,
+                                focusedContainerColor = Palette.card, unfocusedContainerColor = Palette.card,
                             ),
                             modifier = Modifier.fillMaxWidth(),
                         )
@@ -152,7 +152,7 @@ fun AdminScreen(directory: UserDirectory, onOpen: (String) -> Unit, onBack: () -
 
 @Composable
 private fun Kpi(label: String, value: String, modifier: Modifier, color: Color = Palette.ink) {
-    Column(modifier.clip(RoundedCornerShape(18.dp)).background(Color.White).padding(14.dp)) {
+    Column(modifier.clip(RoundedCornerShape(18.dp)).background(Palette.card).padding(14.dp)) {
         Text(label, style = Type.tiny, maxLines = 1, overflow = TextOverflow.Ellipsis)
         Text(value, style = Type.h2.copy(color = color), maxLines = 1, modifier = Modifier.padding(top = 4.dp))
     }
@@ -161,7 +161,7 @@ private fun Kpi(label: String, value: String, modifier: Modifier, color: Color =
 @Composable
 private fun UserRow(u: UserSummary, onClick: () -> Unit) {
     Row(
-        Modifier.fillMaxWidth().padding(bottom = 8.dp).clip(RoundedCornerShape(18.dp)).background(Color.White)
+        Modifier.fillMaxWidth().padding(bottom = 8.dp).clip(RoundedCornerShape(18.dp)).background(Palette.card)
             .clickable(onClick = onClick).padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

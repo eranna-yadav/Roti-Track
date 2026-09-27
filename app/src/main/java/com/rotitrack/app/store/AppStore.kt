@@ -1,9 +1,16 @@
 package com.rotitrack.app.store
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.rotitrack.app.data.ExerciseType
 import com.rotitrack.app.data.AppState
+import com.rotitrack.app.data.ExerciseEntry
+import com.rotitrack.app.data.FastRecord
+import com.rotitrack.app.data.Prefs
+import com.rotitrack.app.data.WeightEntry
+import com.rotitrack.app.data.burnedKcal
 import com.rotitrack.app.data.Diet
 import com.rotitrack.app.data.FOODS
 import com.rotitrack.app.data.Food
@@ -41,11 +48,30 @@ class AppStore(private val storage: Storage) {
         private set
 
     val profile: Profile get() = state.profile
+    val prefs: Prefs get() = state.prefs
+
+    /** Badges unlocked since the UI last showed a celebration. */
+    val celebrations = mutableStateListOf<Badge>()
+
+    init {
+        // Record badges earned before this version, without celebrating them.
+        val earned = Badges.earned(state, streak(), ::waterTotal) - state.badges.keys
+        if (earned.isNotEmpty()) {
+            state = state.copy(badges = state.badges + earned.associateWith { System.currentTimeMillis() })
+        }
+    }
 
     private fun update(transform: (AppState) -> AppState) {
         state = withDerivedGoals(transform(state))
+        val fresh = Badges.earned(state, streak(), ::waterTotal) - state.badges.keys
+        if (fresh.isNotEmpty()) {
+            state = state.copy(badges = state.badges + fresh.associateWith { System.currentTimeMillis() })
+            if (state.prefs.badgeCelebrations) celebrations += fresh.mapNotNull { Badges.byId(it) }
+        }
         storage.save(json.encodeToString(AppState.serializer(), state))
     }
+
+    fun updatePrefs(transform: (Prefs) -> Prefs) = update { it.copy(prefs = transform(it.prefs)) }
 
     // ---------------------------------------------------------------- profile
 
@@ -71,9 +97,9 @@ class AppStore(private val storage: Storage) {
 
     fun waterTotal(day: String): Int = state.water.filter { it.day == day }.sumOf { effectiveMl(it) }
 
-    /** Consecutive days with any water logged, ending today (or yesterday if today is empty). */
+    /** Consecutive days with any water or food logged, ending today (or yesterday if today is empty). */
     fun streak(): Int {
-        val days = state.water.map { it.day }.toSet()
+        val days = state.water.map { it.day }.toSet() + state.meals.map { it.day }
         var day = Days.today()
         if (day !in days) day = Days.shift(day, -1)
         var n = 0
@@ -120,6 +146,55 @@ class AppStore(private val storage: Storage) {
     }
 
     fun macroTargets(): Nutrition.Macros = Nutrition.macroTargets(profile.calorieGoal, profile.weightKg, profile.goal)
+
+    /** Leftover calories from the day before [day], capped at 200, when that day had food logged. */
+    fun rollover(day: String): Int {
+        val prev = Days.shift(day, -1)
+        if (state.meals.none { it.day == prev }) return 0
+        return (profile.calorieGoal - totals(prev).kcal).coerceIn(0, 200)
+    }
+
+    /** The day's calorie target after the burned-calories and rollover preferences. */
+    fun calorieGoalFor(day: String): Int =
+        profile.calorieGoal +
+            (if (prefs.addBurnedCalories) burned(day) else 0) +
+            (if (prefs.rolloverCalories) rollover(day) else 0)
+
+    // --------------------------------------------------------------- exercise
+
+    fun addExercise(activity: ExerciseType, minutes: Int, day: String) = update {
+        val kcal = burnedKcal(activity, it.profile.weightKg, minutes)
+        it.copy(exercises = it.exercises + ExerciseEntry(uid(), day, System.currentTimeMillis(), activity.id, activity.name, activity.emoji, minutes, kcal))
+    }
+
+    fun removeExercise(id: String) = update { s -> s.copy(exercises = s.exercises.filterNot { it.id == id }) }
+
+    fun exercisesForDay(day: String): List<ExerciseEntry> = state.exercises.filter { it.day == day }.sortedBy { it.ts }
+
+    fun burned(day: String): Int = state.exercises.filter { it.day == day }.sumOf { it.kcal }
+
+    // ----------------------------------------------------------------- weight
+
+    /** Sets the current weight and records it for today (one entry per day). */
+    fun logWeight(kg: Double) = update { s ->
+        val today = Days.today()
+        s.copy(
+            profile = s.profile.copy(weightKg = kg),
+            weights = (s.weights.filterNot { it.day == today } + WeightEntry(today, kg)).sortedBy { it.day },
+        )
+    }
+
+    // ---------------------------------------------------------------- fasting
+
+    fun setFastTarget(hours: Int) = update { it.copy(fasting = it.fasting.copy(targetHours = hours)) }
+
+    fun startFast(at: Long = System.currentTimeMillis()) = update { it.copy(fasting = it.fasting.copy(activeStart = at)) }
+
+    fun endFast(at: Long = System.currentTimeMillis()) = update { s ->
+        val start = s.fasting.activeStart ?: return@update s
+        s.copy(fasting = s.fasting.copy(activeStart = null, history = s.fasting.history + FastRecord(start, at, s.fasting.targetHours)))
+    }
+
 
     // ------------------------------------------------------------------- plan
 

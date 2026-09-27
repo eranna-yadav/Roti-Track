@@ -29,6 +29,13 @@ import com.rotitrack.app.account.summarize
 import com.rotitrack.app.data.MealSlot
 import com.rotitrack.app.data.Profile
 import com.rotitrack.app.domain.Days
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.AlertDialog
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
+import com.rotitrack.app.domain.Report
+import com.rotitrack.app.store.AppStore
+import com.rotitrack.app.account.Account
 
 /** What the Android layer provides to the UI. Keeps the screens platform-neutral. */
 interface Platform {
@@ -38,6 +45,15 @@ interface Platform {
     /** Called when someone signs in (uid) or out (null), so background work follows the right account. */
     fun sessionChanged(uid: String?)
     fun openUrl(url: String)
+    fun share(text: String)
+    fun copyText(text: String)
+    /** Whether the system lets the app post notifications at all. */
+    fun notificationsEnabled(): Boolean
+    fun openNotificationSettings()
+    /** Renders the report as a PDF and opens the share sheet. */
+    fun exportReport(report: Report)
+    /** Light or dark status/navigation bar icons to match the theme. */
+    fun setDarkTheme(dark: Boolean)
 }
 
 enum class Tab(val label: String, val icon: ImageVector) {
@@ -45,7 +61,7 @@ enum class Tab(val label: String, val icon: ImageVector) {
     WATER("Water", TabIcons.Water),
     FOOD("Food", TabIcons.Food),
     PLAN("Plan", TabIcons.Plan),
-    ME("Me", TabIcons.Me),
+    PROFILE("Profile", TabIcons.Me),
 }
 
 sealed interface Route {
@@ -56,6 +72,7 @@ sealed interface Route {
     data object Pro : Route
     data object Admin : Route
     data class AdminUser(val uid: String) : Route
+    data class Page(val page: ProfilePage) : Route
 }
 
 /** A tiny back stack; the Android activity wires the system back button to [pop]. */
@@ -76,96 +93,147 @@ class Navigator {
 
 @Composable
 fun App(services: Services, platform: Platform, nav: Navigator = remember { Navigator() }) {
-    RotiTrackTheme {
-        val account = services.auth.account
-        if (account == null) {
-            LoginScreen(services.auth)
-            return@RotiTrackTheme
-        }
-        val store = remember(account.uid) { services.storeFor(account.uid) }
-        var summary by remember(account.uid) { mutableStateOf<UserSummary?>(null) }
-        LaunchedEffect(account.uid) { platform.sessionChanged(account.uid) }
-        // Reload after sign-in and after every Razorpay payment, which the server records.
-        LaunchedEffect(account.uid, services.razorpay.version) {
-            summary = runCatching { services.directory.get(account.uid) }.getOrNull()
-        }
-        // Publish activity for the admin dashboard, debounced: any change restarts the wait.
-        val playPlan = services.billing.activePlan
-        LaunchedEffect(account.uid, store.state, playPlan) {
-            delay(2_000)
-            runCatching { services.directory.publish(summarize(account, store, playPlan)) }
-        }
+    val account = services.auth.account
+    if (account == null) {
+        LaunchedEffect(Unit) { platform.setDarkTheme(false) }
+        RotiTrackTheme { LoginScreen(services.auth) }
+        return
+    }
+    val store = remember(account.uid) { services.storeFor(account.uid) }
+    val dark = isDark(store.prefs.appearance)
+    LaunchedEffect(dark) { platform.setDarkTheme(dark) }
+    RotiTrackTheme(dark) { SignedIn(services, platform, nav, account, store) }
+}
 
-        if (summary?.blocked == true) {
-            BlockedScreen(onSignOut = {
-                platform.sessionChanged(null)
-                services.auth.signOut()
-            })
-            return@RotiTrackTheme
-        }
-        if (!store.profile.onboarded) {
-            LaunchedEffect(account.uid) { if (store.profile.name.isBlank()) store.updateProfile { it.copy(name = account.name) } }
-            OnboardingScreen(store, platform)
-            return@RotiTrackTheme
-        }
+@Composable
+private fun SignedIn(services: Services, platform: Platform, nav: Navigator, account: Account, store: AppStore) {
+    var summary by remember(account.uid) { mutableStateOf<UserSummary?>(null) }
+    var deleteError by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+    LaunchedEffect(account.uid) { platform.sessionChanged(account.uid) }
+    // Reload after sign-in, after every Razorpay payment, and when the Profile tab opens (referral earnings).
+    LaunchedEffect(account.uid, services.razorpay.version, nav.current) {
+        summary = runCatching { services.directory.get(account.uid) }.getOrNull()
+    }
+    // Publish activity for the admin dashboard, debounced: any change restarts the wait.
+    val playPlan = services.billing.activePlan
+    LaunchedEffect(account.uid, store.state, playPlan) {
+        delay(2_000)
+        runCatching { services.directory.publish(summarize(account, store, playPlan)) }
+    }
 
-        val plan = playPlan ?: summary?.razorpayPlan
-        val isPro = plan != null || summary?.isPro == true
-        val isAdmin = account.isAdmin || summary?.isAdmin == true
-        val upgrade = { nav.push(Route.Pro) }
-        val route = nav.current
-        Scaffold(
-            containerColor = Palette.background,
-            bottomBar = {
-                if (route is Route.Tabs) {
-                    NavigationBar(containerColor = Color.White) {
-                        Tab.entries.forEach { t ->
-                            NavigationBarItem(
-                                selected = route.tab == t,
-                                onClick = { nav.tab(t) },
-                                icon = { Icon(t.icon, contentDescription = t.label) },
-                                label = { Text(t.label) },
-                                colors = NavigationBarItemDefaults.colors(
-                                    selectedIconColor = Palette.brand,
-                                    selectedTextColor = Palette.brand,
-                                    indicatorColor = Palette.chip,
-                                    unselectedIconColor = Palette.muted,
-                                    unselectedTextColor = Palette.muted,
-                                ),
-                            )
-                        }
-                    }
-                }
-            },
-        ) { padding ->
-            Box(Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding)) {
-                when (route) {
-                    is Route.Tabs -> when (route.tab) {
-                        Tab.HOME -> DashboardScreen(store, account, isPro, plan, onUpgrade = upgrade, onOpen = nav::tab)
-                        Tab.WATER -> WaterScreen(store)
-                        Tab.FOOD -> FoodScreen(store, onAdd = { slot, day -> nav.push(Route.AddFood(slot, day)) })
-                        Tab.PLAN -> PlanScreen(store, isPro, onUpgrade = upgrade, onOpenArticles = { nav.push(Route.Articles) }, onEditProfile = { nav.tab(Tab.ME) })
-                        Tab.ME -> MeScreen(
-                            store, platform, account, isPro, isAdmin,
-                            onOpenArticles = { nav.push(Route.Articles) },
-                            onUpgrade = upgrade,
-                            onAdmin = { nav.push(Route.Admin) },
-                            onSignOut = {
-                                platform.sessionChanged(null)
-                                nav.tab(Tab.HOME)
-                                services.auth.signOut()
-                            },
+    val signOut = {
+        platform.sessionChanged(null)
+        nav.tab(Tab.HOME)
+        services.auth.signOut()
+    }
+
+    if (summary?.blocked == true) {
+        BlockedScreen(onSignOut = signOut)
+        return
+    }
+    if (!store.profile.onboarded) {
+        LaunchedEffect(account.uid) { if (store.profile.name.isBlank()) store.updateProfile { it.copy(name = account.name) } }
+        OnboardingScreen(store, platform)
+        return
+    }
+
+    val plan = playPlan ?: summary?.razorpayPlan
+    val isPro = plan != null || summary?.isPro == true
+    val isAdmin = account.isAdmin || summary?.isAdmin == true
+    val upgrade = { nav.push(Route.Pro) }
+    val openPage = { page: ProfilePage ->
+        when (page) {
+            ProfilePage.ADMIN -> nav.push(Route.Admin)
+            ProfilePage.PRO -> nav.push(Route.Pro)
+            ProfilePage.ARTICLES -> nav.push(Route.Articles)
+            else -> nav.push(Route.Page(page))
+        }
+    }
+    val route = nav.current
+    Scaffold(
+        containerColor = Palette.background,
+        bottomBar = {
+            if (route is Route.Tabs) {
+                NavigationBar(containerColor = Palette.card) {
+                    Tab.entries.forEach { t ->
+                        NavigationBarItem(
+                            selected = route.tab == t,
+                            onClick = { nav.tab(t) },
+                            icon = { Icon(t.icon, contentDescription = t.label) },
+                            label = { Text(t.label) },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = Palette.brand,
+                                selectedTextColor = Palette.brand,
+                                indicatorColor = Palette.chip,
+                                unselectedIconColor = Palette.muted,
+                                unselectedTextColor = Palette.muted,
+                            ),
                         )
                     }
-                    is Route.AddFood -> AddFoodScreen(store, route.slot, route.day, isPro, onUpgrade = upgrade, onBack = nav::pop)
-                    Route.Articles -> ArticlesScreen(onOpen = { nav.push(Route.Article(it)) }, onBack = nav::pop)
-                    is Route.Article -> ArticleScreen(route.id, onBack = nav::pop)
-                    Route.Pro -> ProScreen(services.billing, services.razorpay, account, summary, platform, onBack = nav::pop)
-                    Route.Admin -> if (isAdmin) AdminScreen(services.directory, onOpen = { nav.push(Route.AdminUser(it)) }, onBack = nav::pop) else LaunchedEffect(Unit) { nav.pop() }
-                    is Route.AdminUser -> if (isAdmin) AdminUserScreen(services.directory, route.uid, onBack = nav::pop) else LaunchedEffect(Unit) { nav.pop() }
+                }
+            }
+        },
+    ) { padding ->
+        Box(Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding)) {
+            when (route) {
+                is Route.Tabs -> when (route.tab) {
+                    Tab.HOME -> DashboardScreen(store, account, isPro, plan, onUpgrade = upgrade, onOpen = nav::tab)
+                    Tab.WATER -> WaterScreen(store)
+                    Tab.FOOD -> FoodScreen(store, onAdd = { slot, day -> nav.push(Route.AddFood(slot, day)) })
+                    Tab.PLAN -> PlanScreen(store, isPro, onUpgrade = upgrade, onOpenArticles = { nav.push(Route.Articles) }, onEditProfile = { nav.push(Route.Page(ProfilePage.PERSONAL)) })
+                    Tab.PROFILE -> ProfileScreen(
+                        store, account, isPro, isAdmin, platform,
+                        onOpen = openPage,
+                        onSignOut = signOut,
+                        onDeleteAccount = {
+                            scope.launch {
+                                try {
+                                    platform.sessionChanged(null)
+                                    services.auth.deleteAccount()
+                                    store.resetAll()
+                                    nav.tab(Tab.HOME)
+                                } catch (e: Exception) {
+                                    deleteError = e.message ?: "Couldn't delete the account. Try again."
+                                }
+                            }
+                        },
+                    )
+                }
+                is Route.AddFood -> AddFoodScreen(store, route.slot, route.day, isPro, onUpgrade = upgrade, onBack = nav::pop)
+                Route.Articles -> ArticlesScreen(onOpen = { nav.push(Route.Article(it)) }, onBack = nav::pop)
+                is Route.Article -> ArticleScreen(route.id, onBack = nav::pop)
+                Route.Pro -> ProScreen(services.billing, services.razorpay, account, summary, platform, onBack = nav::pop)
+                Route.Admin -> if (isAdmin) AdminScreen(services.directory, onOpen = { nav.push(Route.AdminUser(it)) }, onBack = nav::pop) else LaunchedEffect(Unit) { nav.pop() }
+                is Route.AdminUser -> if (isAdmin) AdminUserScreen(services.directory, route.uid, onBack = nav::pop) else LaunchedEffect(Unit) { nav.pop() }
+                is Route.Page -> when (route.page) {
+                    ProfilePage.PERSONAL -> PersonalDetailsScreen(store, platform, onBack = nav::pop)
+                    ProfilePage.PREFERENCES -> PreferencesScreen(store, onBack = nav::pop)
+                    ProfilePage.LANGUAGE -> LanguageScreen(store, onBack = nav::pop)
+                    ProfilePage.GOALS -> NutritionGoalsScreen(store, onBack = nav::pop)
+                    ProfilePage.FASTING -> FastingScreen(store, onBack = nav::pop)
+                    ProfilePage.REMINDERS -> TrackingRemindersScreen(store, platform, onBack = nav::pop)
+                    ProfilePage.REFERRAL -> ReferralScreen(store, account, summary, platform, onBack = nav::pop)
+                    ProfilePage.BADGES -> BadgesScreen(store, onBack = nav::pop)
+                    ProfilePage.REPORT -> ReportScreen(store, account, isPro, platform, onUpgrade = upgrade, onBack = nav::pop)
+                    ProfilePage.TERMS -> LegalScreen(terms = true, onBack = nav::pop)
+                    ProfilePage.PRIVACY -> LegalScreen(terms = false, onBack = nav::pop)
+                    ProfilePage.ADMIN, ProfilePage.PRO, ProfilePage.ARTICLES -> LaunchedEffect(Unit) { nav.pop() }
                 }
             }
         }
+    }
+
+    store.celebrations.firstOrNull()?.let { badge ->
+        BadgeCelebration(badge) { store.celebrations.remove(badge) }
+    }
+    deleteError?.let { msg ->
+        AlertDialog(
+            onDismissRequest = { deleteError = null },
+            title = { Text("Account not deleted") },
+            text = { Text(msg) },
+            confirmButton = { TextButton(onClick = { deleteError = null }) { Text("OK") } },
+        )
     }
 }
 

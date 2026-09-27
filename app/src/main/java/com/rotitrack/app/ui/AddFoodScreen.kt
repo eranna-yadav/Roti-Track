@@ -82,7 +82,7 @@ fun AddFoodScreen(store: AppStore, slot: MealSlot, day: String, isPro: Boolean, 
         FoodCategory.entries.forEach { add(Filter.Category(it)) }
     }
 
-    Column(Modifier.fillMaxSize().background(Color.White).imePadding()) {
+    Column(Modifier.fillMaxSize().background(Palette.card).imePadding()) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             Text("‹", fontSize = 34.sp, color = Palette.ink, modifier = Modifier.clickable(onClick = onBack).padding(horizontal = 12.dp))
             Text("Add to ${slot.label}", style = Type.h2, modifier = Modifier.weight(1f))
@@ -164,7 +164,7 @@ fun AddFoodScreen(store: AppStore, slot: MealSlot, day: String, isPro: Boolean, 
 
         PillButton(
             if (isPro) "＋ Create custom food" else "🔒 Create custom food · Pro", { if (isPro) customOpen = true else onUpgrade() },
-            Modifier.fillMaxWidth().padding(16.dp), color = Palette.ink,
+            Modifier.fillMaxWidth().padding(16.dp), color = Palette.night,
         )
     }
 
@@ -199,7 +199,7 @@ fun LogFoodSheet(food: Food, initialSlot: MealSlot, onDismiss: () -> Unit, onLog
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = Color.White,
+        containerColor = Palette.card,
     ) {
         Column(Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {

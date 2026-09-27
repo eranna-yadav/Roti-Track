@@ -39,14 +39,36 @@ plan, meal swaps, 30-day trends and your own recipes; everything else is free.
 Users pay through Razorpay or Google Play, and can turn off Razorpay auto-renew
 from the Pro screen.
 
-**Admin dashboard** (admins only, from the Me tab):
+**Admin dashboard** (admins only, from the Profile tab):
 - Totals: users, Pro users, monthly and yearly subscribers, estimated monthly
   revenue in ₹, new sign-ups (7 days), active users (24 h), and a 14-day sign-up
   chart.
-- A searchable, filterable user list. For each user you can give free Pro or
-  block the account.
+- A searchable, filterable user list. For each user you can give free Pro,
+  block the account, and see referral earnings owed with a "mark paid" button.
 
-**Me**: gender, weight, height, age, activity, goal (lose / maintain / gain),
+**Profile**:
+- **Invite friends**: each user gets a promo code. When a friend signs up with
+  it and then buys Pro, the referrer earns ₹500 (once per friend). Users add a
+  UPI ID for payouts.
+- **Personal details**: name, age, gender, height, a weight log with history,
+  activity level, diet preference and cuisine.
+- **Preferences**: Light, Dark or System appearance; badge celebrations; add
+  calories burned to the day's goal; roll over up to 200 unused calories from
+  yesterday.
+- **Language**: English. Indian languages are listed as "coming soon".
+- **Edit Nutrition Goals**, **Intermittent Fasting** (12:12 to OMAD, with a live
+  timer and history), **Tracking Reminders** (Breakfast, Lunch, Snack, Dinner and
+  End of Day at your own times, plus water reminders), and **Badges**.
+- **Export PDF Summary Report**: meal history, exercise history, weekly weight
+  trend, and daily calories and macros, shared as a PDF. The 7-day report is
+  free; 30 and 90 days need Pro.
+- **Support & Legal**: request a feature, support email, terms, privacy.
+- **Logout** and **Delete Account**.
+
+**Exercise** (Food tab): log 16 activities, from walking and yoga to Surya
+Namaskar and cricket, with calories estimated as MET × weight × time.
+
+**Body and targets**: gender, weight, height, age, activity, goal (lose / maintain / gain),
 veg / egg / non-veg and cuisine. The calorie target uses Mifflin–St Jeor ×
 activity level, −500 kcal to lose weight or +300 kcal to gain. Macros use an
 ICMR-style split. BMI uses the Asian-Indian bands. You can override the calorie

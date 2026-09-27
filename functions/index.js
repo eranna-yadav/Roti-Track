@@ -12,6 +12,7 @@
  *   and put the two Razorpay plan IDs in functions/.env
  */
 const { onCall, onRequest, HttpsError } = require("firebase-functions/v2/https");
+const { onDocumentWritten } = require("firebase-functions/v2/firestore");
 const { defineSecret, defineString } = require("firebase-functions/params");
 const logger = require("firebase-functions/logger");
 const admin = require("firebase-admin");
@@ -175,3 +176,34 @@ async function reportToPlay(sub, paymentId, initial) {
   });
   if (initial) await payments.set({ playTransactionId: id }, { merge: true });
 }
+
+/**
+ * Referral reward: the first time a user who signed up with a friend's code
+ * has a server-verified paid plan (Razorpay), the friend earns ₹500.
+ * Runs in a transaction so a user can only ever pay out once.
+ */
+exports.creditReferral = onDocumentWritten({ document: "users/{uid}", region: REGION }, async (event) => {
+  const after = event.data && event.data.after && event.data.after.data();
+  if (!after) return;
+  const uid = event.params.uid;
+  if (!lib.shouldCreditReferral(after, Date.now())) return;
+
+  const codeDoc = await db.doc(`referralCodes/${after.referredByCode}`).get();
+  const referrerUid = codeDoc.exists && codeDoc.data().uid;
+  if (!referrerUid || referrerUid === uid) return;
+
+  await db.runTransaction(async (tx) => {
+    const userRef = db.doc(`users/${uid}`);
+    const fresh = (await tx.get(userRef)).data() || {};
+    if (fresh.referralCredited) return;
+    tx.set(userRef, { referralCredited: true, referralCreditedTo: referrerUid }, { merge: true });
+    tx.set(db.doc(`users/${referrerUid}`), {
+      referralEarnings: admin.firestore.FieldValue.increment(lib.REFERRAL_REWARD),
+      referralCount: admin.firestore.FieldValue.increment(1),
+    }, { merge: true });
+    tx.set(db.doc(`referrals/${uid}`), {
+      referrerUid, referredUid: uid, amount: lib.REFERRAL_REWARD, createdAt: Date.now(),
+    });
+  });
+  logger.info("Referral credited", { uid, referrerUid });
+});

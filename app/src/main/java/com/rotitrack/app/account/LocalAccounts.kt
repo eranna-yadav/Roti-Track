@@ -57,16 +57,25 @@ class LocalAuth(private val storage: Storage, private val directory: LocalDirect
         account = u.toAccount()
     }
 
-    override suspend fun signUp(name: String, email: String, password: String) {
+    override suspend fun signUp(name: String, email: String, password: String, referralCode: String?) {
         validateEmail(email)?.let { throw AuthException(it) }
         validatePassword(password)?.let { throw AuthException(it) }
         if (state.users.any { it.email.equals(email.trim(), ignoreCase = true) }) throw AuthException("An account with this email already exists")
+        normalizeReferralCode(referralCode)?.let { code ->
+            if (directory.all().none { it.referralCode == code }) throw AuthException("That referral code doesn't exist. Check it or leave it empty.")
+        }
         val salt = ByteArray(16).also { SecureRandom().nextBytes(it) }.let { Base64.getEncoder().encodeToString(it) }
         val u = LocalUser(UUID.randomUUID().toString(), name.trim(), email.trim().lowercase(), salt, hash(password, salt),
             isAdmin = state.users.isEmpty(), createdAt = System.currentTimeMillis())
         state = state.copy(users = state.users + u, sessionUid = u.uid)
         save()
-        directory.create(UserSummary(u.uid, u.name, u.email, createdAt = u.createdAt, lastActive = u.createdAt, isAdmin = u.isAdmin))
+        val code = normalizeReferralCode(referralCode)
+        directory.create(
+            UserSummary(
+                u.uid, u.name, u.email, createdAt = u.createdAt, lastActive = u.createdAt, isAdmin = u.isAdmin,
+                referralCode = referralCodeFor(u.uid), referredByCode = code,
+            )
+        )
         account = u.toAccount()
     }
 
@@ -76,6 +85,14 @@ class LocalAuth(private val storage: Storage, private val directory: LocalDirect
 
     override fun signOut() {
         state = state.copy(sessionUid = null)
+        save()
+        account = null
+    }
+
+    override suspend fun deleteAccount() {
+        val uid = account?.uid ?: return
+        directory.delete(uid)
+        state = state.copy(users = state.users.filterNot { it.uid == uid }, sessionUid = null)
         save()
         account = null
     }
@@ -104,9 +121,30 @@ class LocalDirectory(private val storage: Storage) : UserDirectory {
 
     override suspend fun publish(s: UserSummary) {
         val old = users[s.uid] ?: UserSummary(s.uid)
-        users = users + (s.uid to s.copy(compPro = old.compPro, blocked = old.blocked, isAdmin = old.isAdmin,
+        var merged = s.copy(
+            compPro = old.compPro, blocked = old.blocked, isAdmin = old.isAdmin,
             razorpayPlanId = old.razorpayPlanId, razorpayStatus = old.razorpayStatus, razorpayUntil = old.razorpayUntil,
-            createdAt = if (old.createdAt > 0) old.createdAt else s.createdAt))
+            referredByCode = old.referredByCode, referralEarnings = old.referralEarnings,
+            referralCount = old.referralCount, referralCredited = old.referralCredited, referralPaid = old.referralPaid,
+            createdAt = if (old.createdAt > 0) old.createdAt else s.createdAt,
+        )
+        // Stand-in for the server: the first time a referred user is on a paid plan, pay their referrer.
+        val referrer = merged.referredByCode?.let { code -> users.values.firstOrNull { it.referralCode == code } }
+        if (merged.plan != null && !merged.referralCredited && referrer != null && referrer.uid != merged.uid) {
+            users = users + (referrer.uid to referrer.copy(
+                referralEarnings = referrer.referralEarnings + REFERRAL_REWARD_RUPEES,
+                referralCount = referrer.referralCount + 1,
+            ))
+            merged = merged.copy(referralCredited = true)
+        }
+        users = users + (s.uid to merged)
+        save()
+    }
+
+    override suspend fun markReferralPaid(uid: String) = edit(uid) { it.copy(referralPaid = it.referralEarnings) }
+
+    override suspend fun delete(uid: String) {
+        users = users - uid
         save()
     }
 

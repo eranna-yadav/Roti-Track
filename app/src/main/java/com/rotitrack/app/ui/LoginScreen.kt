@@ -51,6 +51,7 @@ fun LoginScreen(auth: AuthService) {
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var referral by remember { mutableStateOf("") }
     var showPassword by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var info by remember { mutableStateOf<String?>(null) }
@@ -74,7 +75,7 @@ fun LoginScreen(auth: AuthService) {
             try {
                 when (mode) {
                     Mode.SIGN_IN -> auth.signIn(email.trim(), password)
-                    Mode.SIGN_UP -> auth.signUp(name.trim(), email.trim(), password)
+                    Mode.SIGN_UP -> auth.signUp(name.trim(), email.trim(), password, referral)
                     Mode.RESET -> {
                         auth.sendPasswordReset(email.trim())
                         info = "Check your inbox for a link to reset your password."
@@ -133,7 +134,10 @@ fun LoginScreen(auth: AuthService) {
                         )
                     },
                 )
-                if (mode == Mode.SIGN_UP) Text("At least 8 characters, with letters and numbers.", style = Type.small)
+                if (mode == Mode.SIGN_UP) {
+                    Text("At least 8 characters, with letters and numbers.", style = Type.small)
+                    Field(referral, { referral = it.uppercase().take(12) }, "Referral code (optional)")
+                }
             }
             error?.let { Text(it, style = Type.small.copy(color = Palette.danger)) }
             info?.let { Text(it, style = Type.small.copy(color = Palette.leaf)) }

@@ -46,12 +46,12 @@ import kotlin.math.abs
 import kotlin.math.min
 
 object Type {
-    val screenTitle = TextStyle(fontSize = 28.sp, fontWeight = FontWeight.Black, color = Palette.ink, letterSpacing = 0.5.sp)
-    val h2 = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, color = Palette.ink)
-    val title = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Bold, color = Palette.ink)
-    val body = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Medium, color = Palette.ink)
-    val small = TextStyle(fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = Palette.muted)
-    val tiny = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Palette.muted, letterSpacing = 0.6.sp)
+    val screenTitle get() = TextStyle(fontSize = 28.sp, fontWeight = FontWeight.Black, color = Palette.ink, letterSpacing = 0.5.sp)
+    val h2 get() = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, color = Palette.ink)
+    val title get() = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Bold, color = Palette.ink)
+    val body get() = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Medium, color = Palette.ink)
+    val small get() = TextStyle(fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = Palette.muted)
+    val tiny get() = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Palette.muted, letterSpacing = 0.6.sp)
 }
 
 @Composable
@@ -90,7 +90,7 @@ fun ScreenHeader(title: String, action: (@Composable () -> Unit)? = null) {
 fun RoundButton(
     onClick: () -> Unit,
     size: Dp = 44.dp,
-    color: Color = Color.White,
+    color: Color = Palette.card,
     content: @Composable () -> Unit,
 ) {
     Box(

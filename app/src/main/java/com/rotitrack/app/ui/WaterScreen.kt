@@ -76,7 +76,7 @@ fun WaterScreen(store: AppStore) {
         item {
             ScreenHeader("WATER") {
                 Row(
-                    Modifier.clip(RoundedCornerShape(50)).background(Color.White).padding(horizontal = 14.dp, vertical = 10.dp),
+                    Modifier.clip(RoundedCornerShape(50)).background(Palette.card).padding(horizontal = 14.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text("🔥 ${store.streak()}-day streak", style = Type.small.copy(color = Palette.ink))
@@ -115,7 +115,7 @@ fun WaterScreen(store: AppStore) {
                         modifier = Modifier.weight(1f), height = 56.dp,
                     )
                 }
-                PillButton("Other", { customOpen = true }, Modifier.weight(0.8f), color = Color.White, textColor = Palette.brand, height = 56.dp)
+                PillButton("Other", { customOpen = true }, Modifier.weight(0.8f), color = Palette.card, textColor = Palette.brand, height = 56.dp)
             }
             if (drink.hydration < 1.0) {
                 Text(
@@ -163,7 +163,7 @@ fun WaterScreen(store: AppStore) {
 private fun DrinkChip(d: Drink, selected: Boolean, onClick: () -> Unit) {
     Column(
         Modifier.width(74.dp).clip(RoundedCornerShape(16.dp))
-            .background(if (selected) Palette.brand else Color.White)
+            .background(if (selected) Palette.brand else Palette.card)
             .clickable(onClick = onClick).padding(vertical = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -203,7 +203,7 @@ fun WaterGlass(progress: Float, modifier: Modifier = Modifier) {
     val phase by rememberInfiniteTransition(label = "wave").animateFloat(
         0f, (2 * PI).toFloat(), infiniteRepeatable(tween(2600), RepeatMode.Restart), label = "phase",
     )
-    Canvas(modifier.clip(CircleShape).background(Color(0xFFE9F0FF))) {
+    Canvas(modifier.clip(CircleShape).background(Palette.glassBg)) {
         val w = size.width
         val h = size.height
         val surface = h * (1 - (0.06f + 0.94f * level))
