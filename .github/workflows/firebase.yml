@@ -1,0 +1,90 @@
+name: Deploy Firebase
+
+# Deploys the payment server (Cloud Functions) and the Firestore rules to the
+# roti-track Firebase project. Runs when they change, or from the Actions tab.
+#
+# Repository secrets (Settings → Secrets and variables → Actions):
+#   FIREBASE_SERVICE_ACCOUNT   the JSON key from Firebase → Project settings → Service accounts
+#   RAZORPAY_KEY_ID            rzp_test_… or rzp_live_…
+#   RAZORPAY_KEY_SECRET
+#   RAZORPAY_WEBHOOK_SECRET    any long random string; the same one goes in Razorpay → Webhooks
+#   RAZORPAY_PLAN_MONTHLY      plan_… for ₹259/month
+#   RAZORPAY_PLAN_YEARLY       plan_… for ₹990/year
+# The Key ID and plan IDs aren't secret, so they may be repository variables instead.
+on:
+  push:
+    branches: [main]
+    paths: [functions/**, firestore.rules, firebase.json, .github/workflows/firebase.yml]
+  workflow_dispatch:
+
+concurrency:
+  group: firebase-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT: roti-track
+      SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+      RAZORPAY_KEY_ID: ${{ secrets.RAZORPAY_KEY_ID || vars.RAZORPAY_KEY_ID }}
+      RAZORPAY_KEY_SECRET: ${{ secrets.RAZORPAY_KEY_SECRET }}
+      RAZORPAY_WEBHOOK_SECRET: ${{ secrets.RAZORPAY_WEBHOOK_SECRET }}
+      RAZORPAY_PLAN_MONTHLY: ${{ secrets.RAZORPAY_PLAN_MONTHLY || vars.RAZORPAY_PLAN_MONTHLY }}
+      RAZORPAY_PLAN_YEARLY: ${{ secrets.RAZORPAY_PLAN_YEARLY || vars.RAZORPAY_PLAN_YEARLY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check settings
+        run: |
+          missing=""
+          for name in SERVICE_ACCOUNT RAZORPAY_KEY_ID RAZORPAY_KEY_SECRET RAZORPAY_WEBHOOK_SECRET RAZORPAY_PLAN_MONTHLY RAZORPAY_PLAN_YEARLY; do
+            [ -z "${!name}" ] && missing="$missing $name"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repository secrets:${missing/SERVICE_ACCOUNT/FIREBASE_SERVICE_ACCOUNT}"
+            exit 1
+          fi
+          case "$RAZORPAY_KEY_ID" in rzp_test_*|rzp_live_*) ;; *) echo "::error::RAZORPAY_KEY_ID should start with rzp_test_ or rzp_live_"; exit 1;; esac
+          for p in "$RAZORPAY_PLAN_MONTHLY" "$RAZORPAY_PLAN_YEARLY"; do
+            case "$p" in plan_*) ;; *) echo "::error::Plan IDs should start with plan_"; exit 1;; esac
+          done
+          echo "Mode: $([ "${RAZORPAY_KEY_ID#rzp_live_}" != "$RAZORPAY_KEY_ID" ] && echo LIVE || echo TEST)"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install and test functions
+        working-directory: functions
+        run: |
+          npm ci
+          npm test
+
+      - name: Sign in to Google Cloud
+        run: |
+          printf '%s' "$SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/sa.json" >> "$GITHUB_ENV"
+
+      - name: Write plan IDs
+        run: |
+          printf 'RAZORPAY_PLAN_MONTHLY=%s\nRAZORPAY_PLAN_YEARLY=%s\n' "$RAZORPAY_PLAN_MONTHLY" "$RAZORPAY_PLAN_YEARLY" > functions/.env
+
+      - name: Store Razorpay keys in Secret Manager
+        run: |
+          for name in RAZORPAY_KEY_ID RAZORPAY_KEY_SECRET RAZORPAY_WEBHOOK_SECRET; do
+            printf '%s' "${!name}" | npx -y firebase-tools@13 functions:secrets:set "$name" \
+              --data-file=- --project "$PROJECT" --force --non-interactive
+          done
+
+      - name: Deploy functions and Firestore rules
+        run: npx -y firebase-tools@13 deploy --only functions,firestore:rules --project "$PROJECT" --force --non-interactive
+
+      - name: Webhook URL
+        run: |
+          echo "Add this URL in Razorpay → Account & Settings → Webhooks, with the same webhook secret and the subscription.* events:"
+          echo "https://asia-south1-$PROJECT.cloudfunctions.net/razorpayWebhook"
+
+      - name: Remove key file
+        if: always()
+        run: rm -f "$RUNNER_TEMP/sa.json"
