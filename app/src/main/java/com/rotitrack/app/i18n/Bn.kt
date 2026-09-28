@@ -796,4 +796,7 @@ internal val BN: Map<String, String> = mapOf(
     "Tandoori Chicken Plate" to "তন্দুরি চিকেন প্লেট",
     "Grilled Chicken Bowl" to "গ্রিলড চিকেন বোল",
     "Fish Curry & Roti" to "মাছের ঝোল ও রুটি",
+    "🔊 Voice reminders" to "🔊 ভয়েস রিমাইন্ডার",
+    "Food reminders are read out loud in the app's language. Quiet when the phone is on silent or Do Not Disturb." to "খাবারের রিমাইন্ডার অ্যাপের ভাষায় জোরে পড়ে শোনানো হয়। ফোন সাইলেন্ট বা Do Not Disturb-এ থাকলে শোনা যাবে না।",
+    "▶ Try it" to "▶ শুনে দেখুন",
 )

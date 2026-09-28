@@ -1,6 +1,8 @@
 package com.rotitrack.app.reminders
 
+import com.rotitrack.app.i18n.I18n
 import com.rotitrack.app.i18n.t
+import com.rotitrack.app.i18n.tIn
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
@@ -65,10 +67,12 @@ object MealReminders {
     }
 
     @SuppressLint("MissingPermission") // checked on the first line
-    fun notify(context: Context, id: Int, title: String, text: String) {
+    /** Returns false when notifications aren't allowed, so nothing was shown. */
+    fun notify(context: Context, id: Int, title: String, text: String): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
-        ) return
+        ) return false
+        if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) return false
         val open = PendingIntent.getActivity(
             context, id, Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
             PendingIntent.FLAG_IMMUTABLE,
@@ -81,6 +85,18 @@ object MealReminders {
             .setAutoCancel(true)
             .build()
         NotificationManagerCompat.from(context).notify(id, n)
+        return true
+    }
+}
+
+/** Title and text of a meal reminder in the language [code]. */
+fun mealReminderText(key: String, code: String): Pair<String, String> {
+    val slot = MealSlot.entries.firstOrNull { it.name.equals(key, ignoreCase = true) }
+    return if (slot == null) {
+        tIn(code, "Wrap up your day 🌙") to tIn(code, "Log everything you ate today in one go.")
+    } else {
+        tIn(code, "Time to log your {0} {1}", tIn(code, slot.shortEn).lowercase(), slot.emoji) to
+            tIn(code, "Tap to add what you ate. It takes a few seconds.")
     }
 }
 
@@ -90,18 +106,18 @@ class MealReminderWorker(context: Context, params: WorkerParameters) : Worker(co
         val store = applicationContext.rotiTrack.activeStore ?: return Result.success()
         val key = inputData.getString("key") ?: return Result.success()
         val meals = store.mealsForDay(Days.today())
-        val (title, text) = when (key) {
-            "end_of_day" -> {
-                if (MealSlot.entries.all { s -> meals.any { it.slot == s } }) return Result.success()
-                t("Wrap up your day 🌙") to t("Log everything you ate today in one go.")
-            }
-            else -> {
-                val slot = MealSlot.entries.firstOrNull { it.name.equals(key, ignoreCase = true) } ?: return Result.success()
-                if (meals.any { it.slot == slot }) return Result.success()
-                t("Time to log your {0} {1}", slot.short.lowercase(), slot.emoji) to t("Tap to add what you ate. It takes a few seconds.")
-            }
+        if (key == "end_of_day") {
+            if (MealSlot.entries.all { s -> meals.any { it.slot == s } }) return Result.success()
+        } else {
+            val slot = MealSlot.entries.firstOrNull { it.name.equals(key, ignoreCase = true) } ?: return Result.success()
+            if (meals.any { it.slot == slot }) return Result.success()
         }
-        MealReminders.notify(applicationContext, 100 + Math.floorMod(key.hashCode(), 100), title, text)
+        val (title, text) = mealReminderText(key, I18n.lang)
+        val shown = MealReminders.notify(applicationContext, 100 + Math.floorMod(key.hashCode(), 100), title, text)
+        if (shown && store.prefs.mealVoice && MealVoice.allowed(applicationContext)) {
+            val (enTitle, enText) = mealReminderText(key, "en")
+            MealVoice.speakAndWait(applicationContext, MealVoice.sentence(title, text), MealVoice.sentence(enTitle, enText))
+        }
         return Result.success()
     }
 }

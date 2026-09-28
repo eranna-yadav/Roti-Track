@@ -36,8 +36,12 @@ object I18n {
  * Translates [key], the English text. Placeholders {0}, {1}… are filled with [args] in order,
  * so translations can move them around the sentence.
  */
-fun t(key: String, vararg args: Any?): String {
-    val template = I18n.lookup(key) ?: key
+fun t(key: String, vararg args: Any?): String = fill(I18n.lookup(key) ?: key, args)
+
+/** Like [t], but in the language [code] whatever the app is showing, e.g. "en" for a fallback. */
+fun tIn(code: String, key: String, vararg args: Any?): String = fill(I18n.table(code)[key] ?: key, args)
+
+private fun fill(template: String, args: Array<out Any?>): String {
     if (args.isEmpty()) return template
     val sb = StringBuilder(template.length + 16)
     var i = 0

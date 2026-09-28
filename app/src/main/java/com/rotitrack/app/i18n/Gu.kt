@@ -796,4 +796,7 @@ internal val GU: Map<String, String> = mapOf(
     "Tandoori Chicken Plate" to "તંદૂરી ચિકન પ્લેટ",
     "Grilled Chicken Bowl" to "ગ્રિલ્ડ ચિકન બાઉલ",
     "Fish Curry & Roti" to "ફિશ કરી અને રોટલી",
+    "🔊 Voice reminders" to "🔊 અવાજ રિમાઇન્ડર",
+    "Food reminders are read out loud in the app's language. Quiet when the phone is on silent or Do Not Disturb." to "ભોજનના રિમાઇન્ડર ઍપની ભાષામાં મોટેથી વાંચવામાં આવે છે. ફોન સાયલન્ટ અથવા Do Not Disturb પર હોય તો અવાજ આવતો નથી.",
+    "▶ Try it" to "▶ સાંભળી જુઓ",
 )

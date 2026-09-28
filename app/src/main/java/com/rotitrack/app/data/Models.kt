@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
 
     val label: String get() = t(labelEn)
 }
-@Serializable enum class MealSlot(private val labelEn: String, private val shortEn: String, val emoji: String, val share: Double, val time: String) {
+@Serializable enum class MealSlot(private val labelEn: String, val shortEn: String, val emoji: String, val share: Double, val time: String) {
     BREAKFAST("Breakfast", "Breakfast", "🌅", 0.25, "8:00 AM"),
     LUNCH("Lunch", "Lunch", "🍛", 0.35, "1:00 PM"),
     SNACK("Evening Snack", "Snack", "☕", 0.10, "5:00 PM"),
@@ -192,6 +192,8 @@ data class Prefs(
     val customTimes: List<ReminderTime> = DEFAULT_CUSTOM_TIMES,
     /** No water reminders on Saturday and Sunday. */
     val weekendMode: Boolean = false,
+    /** Meal reminders are also read out loud by the phone's text-to-speech voice. */
+    val mealVoice: Boolean = true,
     val soundOn: Boolean = true,
     val sound: WaterSound = WaterSound.DROP_1,
     val soundVolume: Float = 0.6f,

@@ -796,4 +796,7 @@ internal val KN: Map<String, String> = mapOf(
     "Tandoori Chicken Plate" to "ತಂದೂರಿ ಚಿಕನ್ ಪ್ಲೇಟ್",
     "Grilled Chicken Bowl" to "ಗ್ರಿಲ್ಡ್ ಚಿಕನ್ ಬೌಲ್",
     "Fish Curry & Roti" to "ಮೀನು ಸಾರು ಮತ್ತು ರೊಟ್ಟಿ",
+    "🔊 Voice reminders" to "🔊 ಧ್ವನಿ ಜ್ಞಾಪನೆಗಳು",
+    "Food reminders are read out loud in the app's language. Quiet when the phone is on silent or Do Not Disturb." to "ಊಟದ ಜ್ಞಾಪನೆಗಳನ್ನು ಆ್ಯಪ್‌ನ ಭಾಷೆಯಲ್ಲಿ ಗಟ್ಟಿಯಾಗಿ ಓದಲಾಗುತ್ತದೆ. ಫೋನ್ ಸೈಲೆಂಟ್ ಅಥವಾ Do Not Disturb ನಲ್ಲಿದ್ದರೆ ಧ್ವನಿ ಇರುವುದಿಲ್ಲ.",
+    "▶ Try it" to "▶ ಕೇಳಿ ನೋಡಿ",
 )

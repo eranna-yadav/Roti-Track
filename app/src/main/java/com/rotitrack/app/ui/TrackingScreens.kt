@@ -87,6 +87,22 @@ fun TrackingRemindersScreen(store: AppStore, platform: Platform, onWaterReminder
             }
         }
 
+        Spacer(Modifier.height(16.dp))
+        SettingsGroup {
+            Column(Modifier.padding(vertical = 8.dp)) {
+                ToggleLine(
+                    t("🔊 Voice reminders"), prefs.mealVoice,
+                    t("Food reminders are read out loud in the app's language. Quiet when the phone is on silent or Do Not Disturb."),
+                ) { on -> store.updatePrefs { it.copy(mealVoice = on) } }
+                if (prefs.mealVoice) {
+                    Text(
+                        t("▶ Try it"), style = Type.body.copy(color = Palette.brand, fontWeight = FontWeight.Bold),
+                        modifier = Modifier.clickable { platform.previewMealVoice() }.padding(vertical = 8.dp),
+                    )
+                }
+            }
+        }
+
         SectionLabel(t("Water reminders"))
         SettingsGroup {
             SettingsRow(

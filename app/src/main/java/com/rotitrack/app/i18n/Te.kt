@@ -796,4 +796,7 @@ internal val TE: Map<String, String> = mapOf(
     "Tandoori Chicken Plate" to "తందూరి చికెన్ ప్లేట్",
     "Grilled Chicken Bowl" to "గ్రిల్డ్ చికెన్ బౌల్",
     "Fish Curry & Roti" to "చేపల పులుసు & రొట్టె",
+    "🔊 Voice reminders" to "🔊 వాయిస్ రిమైండర్‌లు",
+    "Food reminders are read out loud in the app's language. Quiet when the phone is on silent or Do Not Disturb." to "ఆహార రిమైండర్‌లు యాప్ భాషలో బిగ్గరగా చదవబడతాయి. ఫోన్ సైలెంట్ లేదా Do Not Disturbలో ఉంటే వినిపించవు.",
+    "▶ Try it" to "▶ విని చూడండి",
 )

@@ -59,6 +59,8 @@ interface Platform {
     fun playSound(sound: WaterSound, volume: Float)
     fun stopSound()
     fun vibrate()
+    /** Reads a sample meal reminder out loud, as the voice reminders will. */
+    fun previewMealVoice() {}
     /** Renders the report as a PDF and opens the share sheet. */
     fun exportReport(report: Report)
     /** Light or dark status/navigation bar icons to match the theme. */

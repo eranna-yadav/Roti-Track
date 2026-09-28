@@ -29,7 +29,10 @@ import com.rotitrack.app.data.Prefs
 import com.rotitrack.app.data.Profile
 import com.rotitrack.app.data.WaterSound
 import com.rotitrack.app.domain.Report
+import com.rotitrack.app.i18n.I18n
 import com.rotitrack.app.reminders.MealReminders
+import com.rotitrack.app.reminders.MealVoice
+import com.rotitrack.app.reminders.mealReminderText
 import com.rotitrack.app.report.PdfReport
 import com.rotitrack.app.reminders.Reminders
 import com.rotitrack.app.reminders.WaterSounds
@@ -138,6 +141,12 @@ class MainActivity : ComponentActivity(), Platform, PaymentResultWithDataListene
     override fun stopSound() = WaterSounds.stop()
 
     override fun vibrate() = WaterSounds.vibrate(this)
+
+    override fun previewMealVoice() {
+        val (title, text) = mealReminderText("lunch", I18n.lang)
+        val (enTitle, enText) = mealReminderText("lunch", "en")
+        MealVoice.speak(this, MealVoice.sentence(title, text), MealVoice.sentence(enTitle, enText))
+    }
 
     override fun exportReport(report: Report) {
         val file = PdfReport.write(this, report)

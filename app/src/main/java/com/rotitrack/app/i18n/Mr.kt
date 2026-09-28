@@ -796,4 +796,7 @@ internal val MR: Map<String, String> = mapOf(
     "Tandoori Chicken Plate" to "तंदुरी चिकन प्लेट",
     "Grilled Chicken Bowl" to "ग्रिल्ड चिकन बाउल",
     "Fish Curry & Roti" to "फिश करी आणि पोळी",
+    "🔊 Voice reminders" to "🔊 आवाज स्मरणपत्रे",
+    "Food reminders are read out loud in the app's language. Quiet when the phone is on silent or Do Not Disturb." to "जेवणाची स्मरणपत्रे ॲपच्या भाषेत मोठ्याने वाचली जातात. फोन सायलेंट किंवा Do Not Disturb वर असल्यास आवाज येत नाही.",
+    "▶ Try it" to "▶ ऐकून पहा",
 )
