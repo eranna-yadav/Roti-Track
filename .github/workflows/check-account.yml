@@ -1,0 +1,65 @@
+name: Check account
+
+# Read-only: shows whether an account exists in Firebase Auth and Firestore,
+# and whether its referral code links up. Helps when someone can't sign in.
+on:
+  workflow_dispatch:
+    inputs:
+      email:
+        description: Email the account signed up with
+        required: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+      EMAIL: ${{ inputs.email }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install
+        working-directory: functions
+        run: npm ci --omit=dev
+
+      - name: Check
+        working-directory: functions
+        run: |
+          printf '%s' "$SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
+          node -e '
+            const admin = require("firebase-admin");
+            admin.initializeApp({ projectId: "roti-track" });
+            const db = admin.firestore();
+            (async () => {
+              const email = process.env.EMAIL.trim().toLowerCase();
+              const user = await admin.auth().getUserByEmail(email).catch(() => null);
+              if (!user) { console.log("Auth account: NOT FOUND"); return; }
+              console.log("Auth account: found");
+              console.log("  created:", user.metadata.creationTime);
+              console.log("  last sign-in:", user.metadata.lastSignInTime);
+              console.log("  disabled:", user.disabled);
+              const doc = await db.doc(`users/${user.uid}`).get();
+              if (!doc.exists) { console.log("Firestore users doc: MISSING"); return; }
+              const d = doc.data();
+              console.log("Firestore users doc: found; fields:", Object.keys(d).sort().join(", "));
+              console.log("  blocked:", d.blocked === true, " role:", d.role || "-");
+              console.log("  referralCode:", d.referralCode || "-", " referredByCode:", d.referredByCode || "-");
+              if (d.referralCode) {
+                const own = await db.doc(`referralCodes/${d.referralCode}`).get();
+                console.log("  own code registered:", own.exists);
+              }
+              if (d.referredByCode) {
+                const ref = await db.doc(`referralCodes/${d.referredByCode}`).get();
+                console.log("  referrer code registered:", ref.exists);
+              }
+            })().catch(e => { console.error(e.message); process.exit(1); });
+          '
+
+      - name: Remove key file
+        if: always()
+        run: rm -f "$RUNNER_TEMP/sa.json"
