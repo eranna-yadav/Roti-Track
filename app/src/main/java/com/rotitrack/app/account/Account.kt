@@ -97,11 +97,14 @@ interface UserDirectory {
 /** ₹ paid to a user when a friend who signed up with their code buys Pro. */
 const val REFERRAL_REWARD_RUPEES = 500
 
-/** A stable, shareable code for a user, e.g. "RTK7P2QX". No 0/O/1/I to avoid mix-ups. */
-fun referralCodeFor(uid: String): String {
+/**
+ * A stable, shareable code for a user, e.g. "RTK7P2QX". No 0/O/1/I to avoid mix-ups.
+ * [attempt] 0 is the usual code; later attempts give other codes for when one is already taken.
+ */
+fun referralCodeFor(uid: String, attempt: Int = 0): String {
     val alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
     var h = 1125899906842597L
-    for (c in uid) h = 31 * h + c.code
+    for (c in if (attempt == 0) uid else "$uid#$attempt") h = 31 * h + c.code
     val sb = StringBuilder("RT")
     var x = h and Long.MAX_VALUE
     repeat(6) {
@@ -109,6 +112,19 @@ fun referralCodeFor(uid: String): String {
         x /= alphabet.length
     }
     return sb.toString()
+}
+
+/** How many codes to try before giving up; a clash on all of them is practically impossible. */
+const val REFERRAL_CODE_ATTEMPTS = 20
+
+/** The user's first code that nobody else holds. [ownerOf] returns who holds a code, or null if it's free. */
+fun firstFreeReferralCode(uid: String, ownerOf: (String) -> String?): String {
+    for (attempt in 0 until REFERRAL_CODE_ATTEMPTS) {
+        val code = referralCodeFor(uid, attempt)
+        val owner = ownerOf(code)
+        if (owner == null || owner == uid) return code
+    }
+    throw IllegalStateException("No free referral code")
 }
 
 fun normalizeReferralCode(code: String?): String? =

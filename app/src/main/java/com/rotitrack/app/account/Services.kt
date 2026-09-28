@@ -28,7 +28,6 @@ fun summarize(account: Account, store: AppStore, plan: Plan?): UserSummary {
         streak = store.streak(),
         daysLogged = (s.water.map { it.day } + s.meals.map { it.day }).toSet().size,
         diet = s.profile.diet.name.lowercase(),
-        referralCode = referralCodeFor(account.uid),
         payoutUpi = s.prefs.payoutUpi,
     )
 }

@@ -23,6 +23,7 @@ import com.rotitrack.app.account.AuthService
 import com.rotitrack.app.account.UserDirectory
 import com.rotitrack.app.account.UserSummary
 import com.rotitrack.app.account.normalizeReferralCode
+import com.rotitrack.app.account.REFERRAL_CODE_ATTEMPTS
 import com.rotitrack.app.account.referralCodeFor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -146,29 +147,54 @@ class FirestoreDirectory : UserDirectory {
     private val users = FirebaseFirestore.getInstance().collection("users")
 
     private val codes = FirebaseFirestore.getInstance().collection("referralCodes")
-    private var codeRegistered = false
+    private val db = FirebaseFirestore.getInstance()
+    private var codeChecked = false
 
     suspend fun create(uid: String, name: String, email: String, referredByCode: String?) {
         val now = System.currentTimeMillis()
-        val code = referralCodeFor(uid)
+        val code = claimReferralCode(uid)
         users.document(uid).set(
             mapOf(
                 "name" to name, "email" to email, "createdAt" to now, "lastActive" to now,
                 "referralCode" to code, "referredByCode" to referredByCode,
             )
         ).await()
-        registerCode(uid)
+        codeChecked = true
     }
 
     suspend fun referralCodeExists(code: String): Boolean =
         withTimeout(15_000) { codes.document(code).get(Source.SERVER).await().exists() }
 
-    /** referralCodes/{code} → {uid}: lets sign-up check a code and the server find the referrer. */
-    private suspend fun registerCode(uid: String) {
-        if (codeRegistered) return
-        val doc = codes.document(referralCodeFor(uid))
-        if (!doc.get().await().exists()) doc.set(mapOf("uid" to uid)).await()
-        codeRegistered = true
+    /**
+     * referralCodes/{code} → {uid} lets sign-up check a code and the server find the referrer.
+     * Takes the user's first code nobody else holds, atomically, so two users never share one.
+     */
+    private suspend fun claimReferralCode(uid: String): String {
+        for (attempt in 0 until REFERRAL_CODE_ATTEMPTS) {
+            val code = referralCodeFor(uid, attempt)
+            val ref = codes.document(code)
+            val mine = db.runTransaction { t ->
+                val snap = t.get(ref)
+                when {
+                    !snap.exists() -> { t.set(ref, mapOf("uid" to uid)); true }
+                    else -> snap.getString("uid") == uid
+                }
+            }.await()
+            if (mine) return code
+        }
+        throw IllegalStateException("No free referral code")
+    }
+
+    /** Once per session: make sure the user's saved code is registered to them (older accounts, interrupted sign-ups). */
+    private suspend fun ensureReferralCode(uid: String) {
+        if (codeChecked) return
+        val saved = users.document(uid).get().await().getString("referralCode")
+        val ok = saved != null && codes.document(saved).get().await().getString("uid") == uid
+        if (!ok) {
+            val code = claimReferralCode(uid)
+            users.document(uid).set(mapOf("referralCode" to code), SetOptions.merge()).await()
+        }
+        codeChecked = true
     }
 
     override suspend fun publish(s: UserSummary) {
@@ -183,12 +209,11 @@ class FirestoreDirectory : UserDirectory {
                 "streak" to s.streak,
                 "daysLogged" to s.daysLogged,
                 "diet" to s.diet,
-                "referralCode" to s.referralCode,
                 "payoutUpi" to s.payoutUpi,
             ),
             SetOptions.merge(),
         ).await()
-        runCatching { registerCode(s.uid) }
+        runCatching { ensureReferralCode(s.uid) }
     }
 
     override suspend fun get(uid: String): UserSummary? = users.document(uid).get().await().toSummary()

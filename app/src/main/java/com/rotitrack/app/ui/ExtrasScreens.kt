@@ -35,7 +35,6 @@ import androidx.compose.ui.unit.sp
 import com.rotitrack.app.account.Account
 import com.rotitrack.app.account.REFERRAL_REWARD_RUPEES
 import com.rotitrack.app.account.UserSummary
-import com.rotitrack.app.account.referralCodeFor
 import com.rotitrack.app.domain.Reports
 import com.rotitrack.app.store.AppStore
 import com.rotitrack.app.store.Badge
@@ -48,9 +47,10 @@ import java.util.Locale
 
 @Composable
 fun ReferralScreen(store: AppStore, account: Account, summary: UserSummary?, platform: Platform, onBack: () -> Unit) {
-    val code = referralCodeFor(account.uid)
+    // The code is assigned by the server at sign-up; show it once the account details have loaded.
+    val code = summary?.referralCode?.takeIf { it.isNotBlank() }
     var upi by remember { mutableStateOf(store.prefs.payoutUpi) }
-    val shareText = "I track my Indian diet, calories and water with Roti Track. Join with my code $code " +
+    val shareText = "I track my Indian diet, calories and water with Roti Track. Join with my code ${code.orEmpty()} " +
         "when you sign up and get healthier with me!"
 
     SubScreen("Refer & earn", onBack) {
@@ -64,10 +64,10 @@ fun ReferralScreen(store: AppStore, account: Account, summary: UserSummary?, pla
         }
         AppCard {
             Text("Your promo code", style = Type.small)
-            Text(code, fontSize = 32.sp, fontWeight = FontWeight.Black, color = Palette.brand, letterSpacing = 3.sp, modifier = Modifier.padding(vertical = 6.dp))
+            Text(code ?: "Loading…", fontSize = if (code == null) 22.sp else 32.sp, fontWeight = FontWeight.Black, color = Palette.brand, letterSpacing = 3.sp, modifier = Modifier.padding(vertical = 6.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                PillButton("Copy code", { platform.copyText(code) }, Modifier.weight(1f), color = Palette.chip, textColor = Palette.brand, height = 46.dp)
-                PillButton("Share", { platform.share(shareText) }, Modifier.weight(1f), height = 46.dp)
+                PillButton("Copy code", { code?.let(platform::copyText) }, Modifier.weight(1f), color = Palette.chip, textColor = Palette.brand, enabled = code != null, height = 46.dp)
+                PillButton("Share", { platform.share(shareText) }, Modifier.weight(1f), enabled = code != null, height = 46.dp)
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {

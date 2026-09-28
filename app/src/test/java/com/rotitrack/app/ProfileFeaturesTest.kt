@@ -153,3 +153,21 @@ class ProfileFeaturesTest {
     @Suppress("unused")
     private val billing = DemoBilling(Mem()) { null }
 }
+
+class ReferralCodeTest {
+    @Test fun firstAttemptKeepsTheOriginalCode() {
+        val uid = "abc123"
+        org.junit.Assert.assertEquals(com.rotitrack.app.account.referralCodeFor(uid), com.rotitrack.app.account.referralCodeFor(uid, 0))
+        org.junit.Assert.assertNotEquals(com.rotitrack.app.account.referralCodeFor(uid), com.rotitrack.app.account.referralCodeFor(uid, 1))
+        org.junit.Assert.assertTrue(com.rotitrack.app.account.referralCodeFor(uid, 3).matches(Regex("RT[A-HJ-NP-Z2-9]{6}")))
+    }
+
+    @Test fun takenCodeMovesToTheNextOne() {
+        val uid = "user-b"
+        val first = com.rotitrack.app.account.referralCodeFor(uid)
+        val code = com.rotitrack.app.account.firstFreeReferralCode(uid) { if (it == first) "user-a" else null }
+        org.junit.Assert.assertEquals(com.rotitrack.app.account.referralCodeFor(uid, 1), code)
+        // A code the user already holds is theirs.
+        org.junit.Assert.assertEquals(first, com.rotitrack.app.account.firstFreeReferralCode(uid) { if (it == first) uid else null })
+    }
+}

@@ -70,10 +70,11 @@ class LocalAuth(private val storage: Storage, private val directory: LocalDirect
         state = state.copy(users = state.users + u, sessionUid = u.uid)
         save()
         val code = normalizeReferralCode(referralCode)
+        val holders = directory.all().associate { it.referralCode to it.uid }
         directory.create(
             UserSummary(
                 u.uid, u.name, u.email, createdAt = u.createdAt, lastActive = u.createdAt, isAdmin = u.isAdmin,
-                referralCode = referralCodeFor(u.uid), referredByCode = code,
+                referralCode = firstFreeReferralCode(u.uid) { holders[it] }, referredByCode = code,
             )
         )
         account = u.toAccount()
@@ -127,6 +128,8 @@ class LocalDirectory(private val storage: Storage) : UserDirectory {
             referredByCode = old.referredByCode, referralEarnings = old.referralEarnings,
             referralCount = old.referralCount, referralCredited = old.referralCredited, referralPaid = old.referralPaid,
             createdAt = if (old.createdAt > 0) old.createdAt else s.createdAt,
+            // The code is chosen once, at sign-up.
+            referralCode = old.referralCode,
         )
         // Stand-in for the server: the first time a referred user is on a paid plan, pay their referrer.
         val referrer = merged.referredByCode?.let { code -> users.values.firstOrNull { it.referralCode == code } }
