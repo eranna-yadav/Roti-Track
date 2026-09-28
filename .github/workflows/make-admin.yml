@@ -1,0 +1,58 @@
+name: Make admin
+
+# Gives a signed-up Roti Track account the admin role (or takes it away), so the
+# Admin dashboard appears under Profile. Run it from the Actions tab.
+on:
+  workflow_dispatch:
+    inputs:
+      email:
+        description: Email the account signed up with
+        required: true
+      remove:
+        description: Remove admin instead of granting it
+        type: boolean
+        default: false
+
+jobs:
+  admin:
+    runs-on: ubuntu-latest
+    env:
+      SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+      EMAIL: ${{ inputs.email }}
+      REMOVE: ${{ inputs.remove }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install
+        working-directory: functions
+        run: npm ci --omit=dev
+
+      - name: Set role
+        working-directory: functions
+        run: |
+          printf '%s' "$SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
+          node -e '
+            const admin = require("firebase-admin");
+            admin.initializeApp({ projectId: "roti-track" });
+            (async () => {
+              const email = process.env.EMAIL.trim().toLowerCase();
+              const user = await admin.auth().getUserByEmail(email).catch(() => null);
+              if (!user) {
+                console.error(`::error::No Roti Track account uses ${email}. Sign up in the app first.`);
+                process.exit(1);
+              }
+              const remove = process.env.REMOVE === "true";
+              await admin.firestore().doc(`users/${user.uid}`).set(
+                { role: remove ? admin.firestore.FieldValue.delete() : "admin" }, { merge: true });
+              console.log(`${email} is ${remove ? "no longer an admin" : "now an admin"}.`);
+            })();
+          '
+
+      - name: Remove key file
+        if: always()
+        run: rm -f "$RUNNER_TEMP/sa.json"
