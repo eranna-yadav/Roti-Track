@@ -1,9 +1,13 @@
 package com.rotitrack.app.store
 
 import com.rotitrack.app.data.AppState
+import com.rotitrack.app.i18n.t
 import com.rotitrack.app.domain.Days
 
-data class Badge(val id: String, val emoji: String, val title: String, val description: String)
+data class Badge(val id: String, val emoji: String, private val titleEn: String, private val descriptionEn: String) {
+    val title: String get() = t(titleEn)
+    val description: String get() = t(descriptionEn)
+}
 
 /** Every badge, in display order, with the rule that unlocks it. */
 object Badges {

@@ -1,5 +1,6 @@
 package com.rotitrack.app.ui
 
+import com.rotitrack.app.i18n.t
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -65,11 +66,11 @@ fun TrackingRemindersScreen(store: AppStore, platform: Platform, onWaterReminder
         }
     }
 
-    SubScreen("Tracking Reminders", onBack) {
+    SubScreen(t("Tracking Reminders"), onBack) {
         if (!platform.notificationsEnabled()) {
             Banner(
-                "Notifications are currently turned off for Roti Track.\nTo get reminders, allow notifications in system settings.",
-                "Open Settings",
+                t("Notifications are currently turned off for Roti Track.\nTo get reminders, allow notifications in system settings."),
+                t("Open Settings"),
             ) { platform.openNotificationSettings() }
         }
 
@@ -82,15 +83,15 @@ fun TrackingRemindersScreen(store: AppStore, platform: Platform, onWaterReminder
         endOfDay?.let { r ->
             SettingsGroup {
                 ReminderRow(r, last = true, onTime = { editing = r }, onToggle = { save(r.copy(enabled = it)) })
-                Text("Get one daily reminder and log all your meals at once.", style = Type.small, modifier = Modifier.padding(bottom = 16.dp))
+                Text(t("Get one daily reminder and log all your meals at once."), style = Type.small, modifier = Modifier.padding(bottom = 16.dp))
             }
         }
 
-        SectionLabel("Water reminders")
+        SectionLabel(t("Water reminders"))
         SettingsGroup {
             SettingsRow(
-                "💧", "Water reminders",
-                subtitle = if (p.remindersOn) "${prefs.waterReminderMode.label} mode" else "Off",
+                "💧", t("Water reminders"),
+                subtitle = if (p.remindersOn) t("{0} mode", prefs.waterReminderMode.label) else t("Off"),
                 last = true, onClick = onWaterReminders,
             )
         }
@@ -108,7 +109,7 @@ fun TrackingRemindersScreen(store: AppStore, platform: Platform, onWaterReminder
 private fun ReminderRow(r: MealReminder, last: Boolean, onTime: () -> Unit, onToggle: (Boolean) -> Unit) {
     Column {
         Row(Modifier.fillMaxWidth().padding(vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(r.label, style = Type.title, modifier = Modifier.weight(1f))
+            Text(t(r.label), style = Type.title, modifier = Modifier.weight(1f))
             Box(
                 Modifier.clip(RoundedCornerShape(50)).background(Palette.chip).clickable(onClick = onTime)
                     .padding(horizontal = 14.dp, vertical = 8.dp),
@@ -126,8 +127,8 @@ fun TimeDialog(hour: Int, minute: Int, onDismiss: () -> Unit, onPick: (Int, Int)
     val state = rememberTimePickerState(initialHour = hour, initialMinute = minute, is24Hour = false)
     AlertDialog(
         onDismissRequest = onDismiss,
-        confirmButton = { TextButton(onClick = { onPick(state.hour, state.minute) }) { Text("OK") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        confirmButton = { TextButton(onClick = { onPick(state.hour, state.minute) }) { Text(t("OK")) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(t("Cancel")) } },
         text = { TimePicker(state = state) },
     )
 }
@@ -148,18 +149,18 @@ fun FastingScreen(store: AppStore, onBack: () -> Unit) {
     }
     val targetMs = f.targetHours * 3_600_000L
     val elapsed = f.activeStart?.let { now - it } ?: 0L
-    val fmt = SimpleDateFormat("EEE h:mm a", Locale.getDefault())
+    val fmt = SimpleDateFormat("EEE h:mm a", com.rotitrack.app.i18n.I18n.locale)
 
-    SubScreen("Intermittent Fasting", onBack) {
-        Text("Plan", style = Type.small, modifier = Modifier.padding(bottom = 8.dp))
+    SubScreen(t("Intermittent Fasting"), onBack) {
+        Text(t("Plan"), style = Type.small, modifier = Modifier.padding(bottom = 8.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             FAST_PLANS.forEach { (h, label) ->
                 Chip(label, f.targetHours == h, { if (f.activeStart == null) store.setFastTarget(h) }, Modifier.weight(1f), hPadding = 2.dp)
             }
         }
         Text(
-            if (f.targetHours == 23) "One meal a day: fast 23 hours, eat within 1 hour."
-            else "Fast ${f.targetHours} hours, then eat within a ${24 - f.targetHours}-hour window.",
+            if (f.targetHours == 23) t("One meal a day: fast 23 hours, eat within 1 hour.")
+            else t("Fast {0} hours, then eat within a {1}-hour window.", f.targetHours, 24 - f.targetHours),
             style = Type.small, modifier = Modifier.padding(top = 8.dp),
         )
 
@@ -179,13 +180,13 @@ fun FastingScreen(store: AppStore, onBack: () -> Unit) {
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     if (f.activeStart == null) {
-                        Text("Not fasting", style = Type.h2)
-                        Text("${f.targetHours} h goal", style = Type.small)
+                        Text(t("Not fasting"), style = Type.h2)
+                        Text(t("{0} h goal", f.targetHours), style = Type.small)
                     } else {
-                        Text(if (elapsed >= targetMs) "Goal reached! 🎉" else "Fasting", style = Type.small)
+                        Text(if (elapsed >= targetMs) t("Goal reached! 🎉") else t("Fasting"), style = Type.small)
                         Text(duration(elapsed), fontSize = 34.sp, fontWeight = FontWeight.ExtraBold, color = Palette.ink)
                         Text(
-                            if (elapsed < targetMs) "${duration(targetMs - elapsed)} to go" else "+${duration(elapsed - targetMs)} extra",
+                            if (elapsed < targetMs) t("{0} to go", duration(targetMs - elapsed)) else t("+{0} extra", duration(elapsed - targetMs)),
                             style = Type.small,
                         )
                     }
@@ -193,11 +194,11 @@ fun FastingScreen(store: AppStore, onBack: () -> Unit) {
             }
             Spacer(Modifier.height(12.dp))
             f.activeStart?.let {
-                Text("Started ${fmt.format(Date(it))} · ends ${fmt.format(Date(it + targetMs))}", style = Type.small, modifier = Modifier.fillMaxWidth())
+                Text(t("Started {0} · ends {1}", fmt.format(Date(it)), fmt.format(Date(it + targetMs))), style = Type.small, modifier = Modifier.fillMaxWidth())
                 Spacer(Modifier.height(10.dp))
             }
             PillButton(
-                if (f.activeStart == null) "Start fast" else "End fast",
+                if (f.activeStart == null) t("Start fast") else t("End fast"),
                 { if (f.activeStart == null) store.startFast() else store.endFast() },
                 Modifier.fillMaxWidth(),
                 color = if (f.activeStart == null) Palette.brand else Palette.saffron,
@@ -205,21 +206,21 @@ fun FastingScreen(store: AppStore, onBack: () -> Unit) {
         }
 
         if (f.history.isNotEmpty()) {
-            SectionLabel("Recent fasts")
+            SectionLabel(t("Recent fasts"))
             SettingsGroup {
                 val recent = f.history.takeLast(10).asReversed()
                 recent.forEachIndexed { i, r ->
                     val done = r.end - r.start >= r.targetHours * 3_600_000L
                     SettingsRow(
                         if (done) "✅" else "⏱️", duration(r.end - r.start),
-                        subtitle = "${fmt.format(Date(r.start))} · goal ${r.targetHours} h",
+                        subtitle = t("{0} · goal {1} h", fmt.format(Date(r.start)), r.targetHours),
                         last = i == recent.lastIndex,
                     )
                 }
             }
         }
         Text(
-            "Fasting isn't for everyone. Skip it if you're pregnant, diabetic, underweight or have had an eating disorder, and talk to a doctor first.",
+            t("Fasting isn't for everyone. Skip it if you're pregnant, diabetic, underweight or have had an eating disorder, and talk to a doctor first."),
             style = Type.small, modifier = Modifier.padding(top = 16.dp),
         )
     }

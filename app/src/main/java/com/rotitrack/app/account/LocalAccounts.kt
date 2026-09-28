@@ -1,5 +1,6 @@
 package com.rotitrack.app.account
 
+import com.rotitrack.app.i18n.t
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -49,9 +50,9 @@ class LocalAuth(private val storage: Storage, private val directory: LocalDirect
     override suspend fun signIn(email: String, password: String) {
         val u = state.users.firstOrNull { it.email.equals(email.trim(), ignoreCase = true) }
         if (u == null || !MessageDigest.isEqual(hash(password, u.salt).toByteArray(), u.hash.toByteArray())) {
-            throw AuthException("Email or password is incorrect")
+            throw AuthException(t("Email or password is incorrect"))
         }
-        if (directory.get(u.uid)?.blocked == true) throw AuthException("This account has been blocked. Contact support.")
+        if (directory.get(u.uid)?.blocked == true) throw AuthException(t("This account has been blocked. Contact support."))
         state = state.copy(sessionUid = u.uid)
         save()
         account = u.toAccount()
@@ -60,9 +61,9 @@ class LocalAuth(private val storage: Storage, private val directory: LocalDirect
     override suspend fun signUp(name: String, email: String, password: String, referralCode: String?) {
         validateEmail(email)?.let { throw AuthException(it) }
         validatePassword(password)?.let { throw AuthException(it) }
-        if (state.users.any { it.email.equals(email.trim(), ignoreCase = true) }) throw AuthException("An account with this email already exists")
+        if (state.users.any { it.email.equals(email.trim(), ignoreCase = true) }) throw AuthException(t("An account with this email already exists"))
         normalizeReferralCode(referralCode)?.let { code ->
-            if (directory.all().none { it.referralCode == code }) throw AuthException("That referral code doesn't exist. Check it or leave it empty.")
+            if (directory.all().none { it.referralCode == code }) throw AuthException(t("That referral code doesn't exist. Check it or leave it empty."))
         }
         val salt = ByteArray(16).also { SecureRandom().nextBytes(it) }.let { Base64.getEncoder().encodeToString(it) }
         val u = LocalUser(UUID.randomUUID().toString(), name.trim(), email.trim().lowercase(), salt, hash(password, salt),
@@ -81,7 +82,7 @@ class LocalAuth(private val storage: Storage, private val directory: LocalDirect
     }
 
     override suspend fun sendPasswordReset(email: String) {
-        throw AuthException("Password reset needs the online (Firebase) setup. On this device, create a new account instead.")
+        throw AuthException(t("Password reset needs the online (Firebase) setup. On this device, create a new account instead."))
     }
 
     override fun signOut() {

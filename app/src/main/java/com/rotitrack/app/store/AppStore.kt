@@ -164,7 +164,7 @@ class AppStore(private val storage: Storage) {
 
     fun addExercise(activity: ExerciseType, minutes: Int, day: String) = update {
         val kcal = burnedKcal(activity, it.profile.weightKg, minutes)
-        it.copy(exercises = it.exercises + ExerciseEntry(uid(), day, System.currentTimeMillis(), activity.id, activity.name, activity.emoji, minutes, kcal))
+        it.copy(exercises = it.exercises + ExerciseEntry(uid(), day, System.currentTimeMillis(), activity.id, activity.nameEn, activity.emoji, minutes, kcal))
     }
 
     fun removeExercise(id: String) = update { s -> s.copy(exercises = s.exercises.filterNot { it.id == id }) }

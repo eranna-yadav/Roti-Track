@@ -1,5 +1,6 @@
 package com.rotitrack.app.ui
 
+import com.rotitrack.app.i18n.t
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
@@ -86,12 +87,12 @@ fun WaterScreen(store: AppStore, platform: Platform, onReminders: () -> Unit) {
                     Modifier.clip(RoundedCornerShape(50)).background(Palette.card).padding(horizontal = 14.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text("🔥 ${store.streak()}-day streak", style = Type.small.copy(color = Palette.ink))
+                    Text(t("🔥 {0}-day streak", store.streak()), style = Type.small.copy(color = Palette.ink))
                 }
                 Spacer(Modifier.weight(1f))
-                HeaderIcon(TabIcons.Bell, "Water reminders", if (p.remindersOn) Palette.brand else Palette.ink, onReminders)
+                HeaderIcon(TabIcons.Bell, t("Water reminders"), if (p.remindersOn) Palette.brand else Palette.ink, onReminders)
                 Spacer(Modifier.width(10.dp))
-                HeaderIcon(TabIcons.Speaker, "Sounds & Effects", if (prefs.soundOn) Palette.brand else Palette.muted) { soundsOpen = true }
+                HeaderIcon(TabIcons.Speaker, t("Sounds & Effects"), if (prefs.soundOn) Palette.brand else Palette.muted) { soundsOpen = true }
             }
         }
         item {
@@ -100,13 +101,16 @@ fun WaterScreen(store: AppStore, platform: Platform, onReminders: () -> Unit) {
                     WaterGlass(progress, Modifier.size(210.dp))
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(liters(total), fontSize = 44.sp, fontWeight = FontWeight.ExtraBold, color = Palette.ink)
-                        Text("of ${liters(p.waterGoalMl)} · ${(progress * 100).toInt()}%", style = Type.small.copy(color = Palette.inkSoft))
+                        Text(t("of {0} · {1}%", liters(p.waterGoalMl), (progress * 100).toInt()), style = Type.small.copy(color = Palette.inkSoft))
                     }
                 }
                 Spacer(Modifier.height(14.dp))
                 Text(
-                    if (progress >= 1f) "🏆 Goal reached — nicely done!"
-                    else "${liters(p.waterGoalMl - total)} to go · about ${((p.waterGoalMl - total) / p.cupMl.toFloat()).let { kotlin.math.ceil(it).toInt() }} more ${if (p.cupMl >= 400) "bottles" else "glasses"}",
+                    if (progress >= 1f) t("🏆 Goal reached — nicely done!")
+                    else ((p.waterGoalMl - total) / p.cupMl.toFloat()).let { kotlin.math.ceil(it).toInt() }.let { n ->
+                        if (p.cupMl >= 400) t("{0} to go · about {1} more bottles", liters(p.waterGoalMl - total), n)
+                        else t("{0} to go · about {1} more glasses", liters(p.waterGoalMl - total), n)
+                    },
                     style = Type.body.copy(color = Palette.inkSoft),
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
@@ -114,7 +118,7 @@ fun WaterScreen(store: AppStore, platform: Platform, onReminders: () -> Unit) {
             }
         }
         item {
-            Text("What are you drinking?", style = Type.title, modifier = Modifier.padding(vertical = 8.dp))
+            Text(t("What are you drinking?"), style = Type.title, modifier = Modifier.padding(vertical = 8.dp))
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(DRINKS) { d -> DrinkChip(d, d == drink) { drink = d } }
             }
@@ -122,23 +126,23 @@ fun WaterScreen(store: AppStore, platform: Platform, onReminders: () -> Unit) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 listOf(p.cupMl, 150, 500).distinct().forEach { ml ->
                     PillButton(
-                        "+ $ml ml", { add(ml) },
+                        t("+ {0} ml", ml), { add(ml) },
                         modifier = Modifier.weight(1f), height = 56.dp,
                     )
                 }
-                PillButton("Other", { customOpen = true }, Modifier.weight(0.8f), color = Palette.card, textColor = Palette.brand, height = 56.dp)
+                PillButton(t("Other"), { customOpen = true }, Modifier.weight(0.8f), color = Palette.card, textColor = Palette.brand, height = 56.dp)
             }
             if (drink.hydration < 1.0) {
                 Text(
-                    "${drink.name} counts as ${(drink.hydration * 100).toInt()}% hydration.",
+                    t("{0} counts as {1}% hydration.", drink.name, (drink.hydration * 100).toInt()),
                     style = Type.small, modifier = Modifier.padding(top = 8.dp),
                 )
             }
             Spacer(Modifier.height(18.dp))
-            Text("Today's log", style = Type.title, modifier = Modifier.padding(bottom = 8.dp))
+            Text(t("Today's log"), style = Type.title, modifier = Modifier.padding(bottom = 8.dp))
         }
         if (entries.isEmpty()) {
-            item { Text("Nothing yet. Start with a glass of water 💧", style = Type.body.copy(color = Palette.muted)) }
+            item { Text(t("Nothing yet. Start with a glass of water 💧"), style = Type.body.copy(color = Palette.muted)) }
         }
         items(entries, key = { it.id }) { e ->
             val d = drinkById(e.drinkId)
@@ -147,11 +151,11 @@ fun WaterScreen(store: AppStore, platform: Platform, onReminders: () -> Unit) {
                     Text(d.emoji, fontSize = 24.sp)
                     Spacer(Modifier.width(12.dp))
                     Column(Modifier.weight(1f)) {
-                        Text("${e.ml} ml ${d.name}", style = Type.title)
+                        Text(t("{0} ml {1}", e.ml, d.name), style = Type.title)
                         Text(clock(e.ts), style = Type.small)
                     }
                     IconButton(onClick = { store.removeWater(e.id) }) {
-                        Icon(Icons.Filled.Delete, contentDescription = "Delete", tint = Palette.muted)
+                        Icon(Icons.Filled.Delete, contentDescription = t("Delete"), tint = Palette.muted)
                     }
                 }
             }
@@ -161,7 +165,7 @@ fun WaterScreen(store: AppStore, platform: Platform, onReminders: () -> Unit) {
     if (soundsOpen) SoundsSheet(store, platform) { soundsOpen = false }
     if (customOpen) {
         AmountDialog(
-            title = "Add ${drink.name}",
+            title = t("Add {0}", drink.name),
             onDismiss = { customOpen = false },
             onConfirm = { ml ->
                 add(ml)
@@ -198,13 +202,13 @@ fun AmountDialog(title: String, onDismiss: () -> Unit, onConfirm: (Int) -> Unit)
             OutlinedTextField(
                 value = text,
                 onValueChange = { v -> text = v.filter { it.isDigit() }.take(4) },
-                label = { Text("Amount (ml)") },
+                label = { Text(t("Amount (ml)")) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             )
         },
-        confirmButton = { TextButton(onClick = { ml?.let(onConfirm) }, enabled = ml != null) { Text("Add") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        confirmButton = { TextButton(onClick = { ml?.let(onConfirm) }, enabled = ml != null) { Text(t("Add")) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(t("Cancel")) } },
     )
 }
 
@@ -235,6 +239,6 @@ fun WaterGlass(progress: Float, modifier: Modifier = Modifier) {
     }
 }
 
-fun liters(ml: Int): String = if (ml >= 1000 || ml == 0) "%.1f L".format(ml / 1000f) else "$ml ml"
+fun liters(ml: Int): String = if (ml >= 1000 || ml == 0) "%.1f L".format(ml / 1000f) else t("{0} ml", ml)
 
 fun clock(ts: Long): String = SimpleDateFormat("h:mm a", Locale.getDefault()).format(Date(ts))

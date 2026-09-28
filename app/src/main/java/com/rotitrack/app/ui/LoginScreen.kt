@@ -1,5 +1,6 @@
 package com.rotitrack.app.ui
 
+import com.rotitrack.app.i18n.t
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.size
@@ -62,8 +63,8 @@ fun LoginScreen(auth: AuthService) {
         error = null
         info = null
         val problem = when (mode) {
-            Mode.SIGN_UP -> if (name.isBlank()) "Enter your name" else validateEmail(email) ?: validatePassword(password)
-            Mode.SIGN_IN -> validateEmail(email) ?: if (password.isEmpty()) "Enter your password" else null
+            Mode.SIGN_UP -> if (name.isBlank()) t("Enter your name") else validateEmail(email) ?: validatePassword(password)
+            Mode.SIGN_IN -> validateEmail(email) ?: if (password.isEmpty()) t("Enter your password") else null
             Mode.RESET -> validateEmail(email)
         }
         if (problem != null) {
@@ -78,12 +79,12 @@ fun LoginScreen(auth: AuthService) {
                     Mode.SIGN_UP -> auth.signUp(name.trim(), email.trim(), password, referral)
                     Mode.RESET -> {
                         auth.sendPasswordReset(email.trim())
-                        info = "Check your inbox for a link to reset your password."
+                        info = t("Check your inbox for a link to reset your password.")
                         mode = Mode.SIGN_IN
                     }
                 }
             } catch (e: Exception) {
-                error = e.message ?: "Something went wrong. Try again."
+                error = e.message ?: t("Something went wrong. Try again.")
             } finally {
                 busy = false
             }
@@ -97,13 +98,13 @@ fun LoginScreen(auth: AuthService) {
     ) {
         Spacer(Modifier.height(32.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Image(RotiLogo, contentDescription = "Roti Track logo", modifier = Modifier.size(64.dp))
+            Image(RotiLogo, contentDescription = t("Roti Track logo"), modifier = Modifier.size(64.dp))
             Spacer(Modifier.width(10.dp))
             Image(WaterDropLogo, contentDescription = null, modifier = Modifier.size(width = 48.dp, height = 64.dp))
         }
         Text("ROTI TRACK", fontSize = 36.sp, fontWeight = FontWeight.Black, color = Color.White, modifier = Modifier.padding(top = 8.dp))
         Text(
-            "Indian diet planner, calorie & water tracker",
+            t("Indian diet planner, calorie & water tracker"),
             style = Type.body.copy(color = Color.White.copy(alpha = 0.8f)), textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(28.dp))
@@ -114,45 +115,45 @@ fun LoginScreen(auth: AuthService) {
         ) {
             Text(
                 when (mode) {
-                    Mode.SIGN_IN -> "Welcome back"
-                    Mode.SIGN_UP -> "Create your account"
-                    Mode.RESET -> "Reset password"
+                    Mode.SIGN_IN -> t("Welcome back")
+                    Mode.SIGN_UP -> t("Create your account")
+                    Mode.RESET -> t("Reset password")
                 },
                 style = Type.h2,
             )
-            if (mode == Mode.SIGN_UP) Field(name, { name = it }, "Full name")
-            Field(email, { email = it }, "Email", KeyboardType.Email)
+            if (mode == Mode.SIGN_UP) Field(name, { name = it }, t("Full name"))
+            Field(email, { email = it }, t("Email"), KeyboardType.Email)
             if (mode != Mode.RESET) {
                 Field(
-                    password, { password = it }, "Password", KeyboardType.Password,
+                    password, { password = it }, t("Password"), KeyboardType.Password,
                     hidden = !showPassword,
                     trailing = {
                         Text(
-                            if (showPassword) "Hide" else "Show",
+                            if (showPassword) t("Hide") else t("Show"),
                             style = Type.small.copy(color = Palette.brand),
                             modifier = Modifier.clickable { showPassword = !showPassword }.padding(12.dp),
                         )
                     },
                 )
                 if (mode == Mode.SIGN_UP) {
-                    Text("At least 8 characters, with letters and numbers.", style = Type.small)
-                    Field(referral, { referral = it.uppercase().take(12) }, "Referral code (optional)")
+                    Text(t("At least 8 characters, with letters and numbers."), style = Type.small)
+                    Field(referral, { referral = it.uppercase().take(12) }, t("Referral code (optional)"))
                 }
             }
             error?.let { Text(it, style = Type.small.copy(color = Palette.danger)) }
             info?.let { Text(it, style = Type.small.copy(color = Palette.leaf)) }
 
             PillButton(
-                if (busy) "Please wait…" else when (mode) {
-                    Mode.SIGN_IN -> "Sign in"
-                    Mode.SIGN_UP -> "Create account"
-                    Mode.RESET -> "Send reset link"
+                if (busy) t("Please wait…") else when (mode) {
+                    Mode.SIGN_IN -> t("Sign in")
+                    Mode.SIGN_UP -> t("Create account")
+                    Mode.RESET -> t("Send reset link")
                 },
                 ::submit, Modifier.fillMaxWidth(), enabled = !busy,
             )
             if (mode == Mode.SIGN_IN) {
                 Text(
-                    "Forgot password?", style = Type.small.copy(color = Palette.brand),
+                    t("Forgot password?"), style = Type.small.copy(color = Palette.brand),
                     modifier = Modifier.clickable { mode = Mode.RESET; error = null }.padding(vertical = 4.dp),
                 )
             }
@@ -160,11 +161,11 @@ fun LoginScreen(auth: AuthService) {
 
         Row(Modifier.padding(top = 20.dp)) {
             Text(
-                if (mode == Mode.SIGN_UP) "Already have an account? " else "New to Roti Track? ",
+                if (mode == Mode.SIGN_UP) t("Already have an account? ") else t("New to Roti Track? "),
                 style = Type.body.copy(color = Color.White.copy(alpha = 0.8f)),
             )
             Text(
-                if (mode == Mode.SIGN_UP) "Sign in" else "Create account",
+                if (mode == Mode.SIGN_UP) t("Sign in") else t("Create account"),
                 style = Type.body.copy(color = Color.White, fontWeight = FontWeight.ExtraBold),
                 modifier = Modifier.clickable {
                     mode = if (mode == Mode.SIGN_UP) Mode.SIGN_IN else Mode.SIGN_UP
@@ -206,11 +207,11 @@ fun BlockedScreen(onSignOut: () -> Unit) {
         verticalArrangement = Arrangement.Center,
     ) {
         Text("🚫", fontSize = 56.sp)
-        Text("Account blocked", style = Type.h2, modifier = Modifier.padding(top = 12.dp))
+        Text(t("Account blocked"), style = Type.h2, modifier = Modifier.padding(top = 12.dp))
         Text(
-            "This account has been blocked by an administrator. Contact support if you think this is a mistake.",
+            t("This account has been blocked by an administrator. Contact support if you think this is a mistake."),
             style = Type.body.copy(color = Palette.inkSoft), textAlign = TextAlign.Center, modifier = Modifier.padding(vertical = 12.dp),
         )
-        PillButton("Sign out", onSignOut, Modifier.fillMaxWidth())
+        PillButton(t("Sign out"), onSignOut, Modifier.fillMaxWidth())
     }
 }

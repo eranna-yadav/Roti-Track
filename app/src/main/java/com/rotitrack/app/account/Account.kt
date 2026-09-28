@@ -1,13 +1,18 @@
 package com.rotitrack.app.account
 
+import com.rotitrack.app.i18n.t
+
 import kotlinx.serialization.Serializable
 
 data class Account(val uid: String, val name: String, val email: String, val isAdmin: Boolean)
 
 /** Play Console product IDs. Create two auto-renewing subscriptions with these IDs. */
-enum class Plan(val productId: String, val label: String, val fallbackPrice: String, val period: String, val rupees: Int) {
+enum class Plan(val productId: String, private val labelEn: String, val fallbackPrice: String, private val periodEn: String, val rupees: Int) {
     MONTHLY("rotitrack_pro_monthly", "Monthly", "₹359", "month", 359),
     YEARLY("rotitrack_pro_yearly", "Yearly", "₹990", "year", 990);
+
+    val label: String get() = t(labelEn)
+    val period: String get() = t(periodEn)
 
     companion object {
         fun byProductId(id: String?): Plan? = entries.firstOrNull { it.productId == id }
@@ -179,7 +184,7 @@ interface RazorpayGateway {
 }
 
 /** Used when there is no payments server (no Firebase config). */
-class NoRazorpay(override val unavailableReason: String = "Razorpay needs the online (Firebase) setup.") : RazorpayGateway {
+class NoRazorpay(override val unavailableReason: String = t("Razorpay needs the online (Firebase) setup.")) : RazorpayGateway {
     override val busy = false
     override val message: String? = null
     override val version = 0
@@ -189,10 +194,10 @@ class NoRazorpay(override val unavailableReason: String = "Razorpay needs the on
 }
 
 fun validateEmail(email: String): String? =
-    if (Regex("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$").matches(email.trim())) null else "Enter a valid email address"
+    if (Regex("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$").matches(email.trim())) null else t("Enter a valid email address")
 
 fun validatePassword(password: String): String? = when {
-    password.length < 8 -> "Use at least 8 characters"
-    !password.any { it.isDigit() } || !password.any { it.isLetter() } -> "Use letters and numbers"
+    password.length < 8 -> t("Use at least 8 characters")
+    !password.any { it.isDigit() } || !password.any { it.isLetter() } -> t("Use letters and numbers")
     else -> null
 }

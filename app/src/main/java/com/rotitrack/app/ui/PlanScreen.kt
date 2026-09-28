@@ -1,5 +1,6 @@
 package com.rotitrack.app.ui
 
+import com.rotitrack.app.i18n.t
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -30,15 +31,16 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rotitrack.app.data.DIET_TIPS
+import com.rotitrack.app.data.Region
 import com.rotitrack.app.data.Diet
 import com.rotitrack.app.domain.Days
 import com.rotitrack.app.domain.formatServings
 import com.rotitrack.app.store.AppStore
 
 private fun dietLabel(d: Diet) = when (d) {
-    Diet.VEG -> "Vegetarian"
-    Diet.EGG -> "Eggetarian"
-    Diet.NONVEG -> "Non-vegetarian"
+    Diet.VEG -> t("Vegetarian")
+    Diet.EGG -> t("Eggetarian")
+    Diet.NONVEG -> t("Non-vegetarian")
 }
 
 @Composable
@@ -52,7 +54,7 @@ fun PlanScreen(store: AppStore, isPro: Boolean, onUpgrade: () -> Unit, onOpenArt
 
     LazyColumn(Modifier.fillMaxSize(), contentPadding = ScreenPadding) {
         item {
-            ScreenHeader("DIET PLAN") {
+            ScreenHeader(t("DIET PLAN")) {
                 RoundButton(onEditProfile) { Text("⚙️", fontSize = 18.sp) }
             }
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 10.dp)) {
@@ -67,7 +69,7 @@ fun PlanScreen(store: AppStore, isPro: Boolean, onUpgrade: () -> Unit, onOpenArt
                         verticalArrangement = Arrangement.Center,
                     ) {
                         Text(
-                            if (d == todayKey) "Today" else if (locked) "🔒" else Days.weekdayShort(d),
+                            if (d == todayKey) t("Today") else if (locked) "🔒" else Days.weekdayShort(d),
                             style = Type.small.copy(color = if (active) Color.White else Palette.muted),
                         )
                         Text("${Days.parse(d).dayOfMonth}", style = Type.h2.copy(color = if (active) Color.White else Palette.ink))
@@ -79,11 +81,11 @@ fun PlanScreen(store: AppStore, isPro: Boolean, onUpgrade: () -> Unit, onOpenArt
             AppCard(color = Palette.saffronSoft) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
-                        Text("Planned for the day", style = Type.small.copy(color = Palette.inkSoft))
-                        Text("${plan.sumOf { it.kcal }} / ${p.calorieGoal} kcal", style = Type.h2)
+                        Text(t("Planned for the day"), style = Type.small.copy(color = Palette.inkSoft))
+                        Text(t("{0} / {1} kcal", plan.sumOf { it.kcal }, p.calorieGoal), style = Type.h2)
                         Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             Tag(dietLabel(p.diet))
-                            Tag(p.region.label + if (p.region.name == "ALL") "" else " Indian")
+                            Tag(if (p.region == Region.ALL) p.region.label else t("{0} Indian", p.region.label))
                         }
                     }
                     Text("🍱", fontSize = 44.sp)
@@ -98,9 +100,9 @@ fun PlanScreen(store: AppStore, isPro: Boolean, onUpgrade: () -> Unit, onOpenArt
                     Spacer(Modifier.width(12.dp))
                     Column(Modifier.weight(1f)) {
                         Text("${meal.slot.label.uppercase()} · ${meal.slot.time}", style = Type.tiny)
-                        Text(meal.name, style = Type.title)
+                        Text(t(meal.name), style = Type.title)
                     }
-                    Text("${meal.kcal} kcal", style = Type.title)
+                    Text(t("{0} kcal", meal.kcal), style = Type.title)
                 }
                 Spacer(Modifier.height(8.dp))
                 meal.items.forEach { i ->
@@ -108,7 +110,7 @@ fun PlanScreen(store: AppStore, isPro: Boolean, onUpgrade: () -> Unit, onOpenArt
                     Row(Modifier.padding(vertical = 7.dp), verticalAlignment = Alignment.CenterVertically) {
                         DietMark(i.food.diet, 11.dp)
                         Text(
-                            "  ${i.food.emoji} ${i.food.name}", style = Type.body,
+                            "  ${i.food.emoji} ${t(i.food.name)}", style = Type.body,
                             maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f),
                         )
                         Text(
@@ -120,12 +122,12 @@ fun PlanScreen(store: AppStore, isPro: Boolean, onUpgrade: () -> Unit, onOpenArt
                 Text("P ${meal.protein} g · C ${meal.carbs} g · F ${meal.fat} g", style = Type.small, modifier = Modifier.padding(top = 4.dp))
                 Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     PillButton(
-                        if (isPro) "⇄  Swap" else "🔒 Swap", { if (isPro) store.swapMeal(day, meal.slot) else onUpgrade() }, Modifier.weight(1f),
+                        if (isPro) t("⇄  Swap") else t("🔒 Swap"), { if (isPro) store.swapMeal(day, meal.slot) else onUpgrade() }, Modifier.weight(1f),
                         color = Palette.chip, textColor = Palette.brand, enabled = !logged, height = 42.dp,
                     )
                     if (day == todayKey) {
                         PillButton(
-                            if (logged) "✓ Logged" else "I ate this", { store.logPlannedMeal(day, meal) }, Modifier.weight(1f),
+                            if (logged) t("✓ Logged") else t("I ate this"), { store.logPlannedMeal(day, meal) }, Modifier.weight(1f),
                             color = if (logged) Palette.leafSoft else Palette.leaf,
                             textColor = if (logged) Palette.leaf else Color.White,
                             enabled = !logged, height = 42.dp,
@@ -136,22 +138,21 @@ fun PlanScreen(store: AppStore, isPro: Boolean, onUpgrade: () -> Unit, onOpenArt
         }
         item {
             AppCard(color = Palette.leafSoft) {
-                Text("💡 Tip of the day", style = Type.title.copy(color = Palette.leaf))
-                Text(tip, style = Type.body.copy(color = Palette.inkSoft, lineHeight = 21.sp), modifier = Modifier.padding(top = 6.dp))
+                Text(t("💡 Tip of the day"), style = Type.title.copy(color = Palette.leaf))
+                Text(t(tip), style = Type.body.copy(color = Palette.inkSoft, lineHeight = 21.sp), modifier = Modifier.padding(top = 6.dp))
             }
             AppCard(onClick = onOpenArticles) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("📚", fontSize = 26.sp)
                     Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
-                        Text("Health articles", style = Type.title)
-                        Text("Indian nutrition, hydration and habits", style = Type.small)
+                        Text(t("Health articles"), style = Type.title)
+                        Text(t("Indian nutrition, hydration and habits"), style = Type.small)
                     }
                     Text("›", fontSize = 26.sp, color = Palette.muted)
                 }
             }
             Text(
-                "Plans are general guidance built from home-style Indian meals. If you have diabetes, thyroid, " +
-                    "kidney or heart conditions, or are pregnant, check with a doctor or dietitian first.",
+                t("Plans are general guidance built from home-style Indian meals. If you have diabetes, thyroid, kidney or heart conditions, or are pregnant, check with a doctor or dietitian first."),
                 style = Type.small.copy(lineHeight = 18.sp),
             )
         }

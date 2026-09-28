@@ -1,5 +1,6 @@
 package com.rotitrack.app.reminders
 
+import com.rotitrack.app.i18n.t
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
@@ -34,7 +35,7 @@ object MealReminders {
     private val KEYS = listOf("breakfast", "lunch", "snack", "dinner", "end_of_day")
 
     fun createChannel(context: Context) {
-        val channel = NotificationChannel(CHANNEL, "Meal logging reminders", NotificationManager.IMPORTANCE_DEFAULT)
+        val channel = NotificationChannel(CHANNEL, t("Meal logging reminders"), NotificationManager.IMPORTANCE_DEFAULT)
         context.getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
     }
 
@@ -92,12 +93,12 @@ class MealReminderWorker(context: Context, params: WorkerParameters) : Worker(co
         val (title, text) = when (key) {
             "end_of_day" -> {
                 if (MealSlot.entries.all { s -> meals.any { it.slot == s } }) return Result.success()
-                "Wrap up your day 🌙" to "Log everything you ate today in one go."
+                t("Wrap up your day 🌙") to t("Log everything you ate today in one go.")
             }
             else -> {
                 val slot = MealSlot.entries.firstOrNull { it.name.equals(key, ignoreCase = true) } ?: return Result.success()
                 if (meals.any { it.slot == slot }) return Result.success()
-                "Time to log your ${slot.short.lowercase()} ${slot.emoji}" to "Tap to add what you ate. It takes a few seconds."
+                t("Time to log your {0} {1}", slot.short.lowercase(), slot.emoji) to t("Tap to add what you ate. It takes a few seconds.")
             }
         }
         MealReminders.notify(applicationContext, 100 + Math.floorMod(key.hashCode(), 100), title, text)

@@ -1,5 +1,6 @@
 package com.rotitrack.app.cloud
 
+import com.rotitrack.app.i18n.t
 import android.app.Activity
 import android.content.Context
 import androidx.compose.runtime.getValue
@@ -55,7 +56,7 @@ class PlayBilling(
     private var details by mutableStateOf<Map<Plan, ProductDetails>>(emptyMap())
     private var purchases by mutableStateOf<List<Purchase>>(emptyList())
 
-    override var unavailableReason: String? by mutableStateOf("Connecting to Google Play…")
+    override var unavailableReason: String? by mutableStateOf(t("Connecting to Google Play…"))
         private set
 
     override val activePlan: Plan?
@@ -77,12 +78,12 @@ class PlayBilling(
                     loadProducts()
                     restore()
                 } else {
-                    unavailableReason = "Google Play Billing isn't available. Install Roti Track from Google Play to subscribe."
+                    unavailableReason = t("Google Play Billing isn't available. Install Roti Track from Google Play to subscribe.")
                 }
             }
 
             override fun onBillingServiceDisconnected() {
-                unavailableReason = "Lost connection to Google Play. Reopen this screen to try again."
+                unavailableReason = t("Lost connection to Google Play. Reopen this screen to try again.")
             }
         })
     }
@@ -99,7 +100,7 @@ class PlayBilling(
         client.queryProductDetailsAsync(params) { result, list ->
             if (result.responseCode == BillingClient.BillingResponseCode.OK) {
                 details = list.mapNotNull { pd -> Plan.byProductId(pd.productId)?.let { it to pd } }.toMap()
-                if (details.isEmpty()) unavailableReason = "Pro plans aren't available yet. Please try again later."
+                if (details.isEmpty()) unavailableReason = t("Pro plans aren't available yet. Please try again later.")
             }
         }
     }

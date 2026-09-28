@@ -1,5 +1,6 @@
 package com.rotitrack.app.ui
 
+import com.rotitrack.app.i18n.t
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -41,7 +42,7 @@ private fun BackBar(title: String, onBack: () -> Unit) {
 @Composable
 fun ArticlesScreen(onOpen: (String) -> Unit, onBack: () -> Unit) {
     Column(Modifier.fillMaxSize()) {
-        BackBar("Health articles", onBack)
+        BackBar(t("Health articles"), onBack)
         LazyColumn(contentPadding = PaddingValues(bottom = 24.dp)) {
             items(ARTICLES) { cat ->
                 Text(cat.title, style = Type.h2, modifier = Modifier.padding(start = 16.dp, top = 12.dp, bottom = 10.dp))
@@ -56,7 +57,7 @@ fun ArticlesScreen(onOpen: (String) -> Unit, onBack: () -> Unit) {
                             }
                             Column(Modifier.fillMaxWidth().background(Palette.card.copy(alpha = 0.6f)).padding(12.dp)) {
                                 Text(a.title, color = Color(cat.fg), fontWeight = FontWeight.ExtraBold, fontSize = 15.sp, maxLines = 3)
-                                Text("${a.minutes} min read", style = Type.tiny.copy(color = Color(cat.fg)), modifier = Modifier.padding(top = 4.dp))
+                                Text(t("{0} min read", a.minutes), style = Type.tiny.copy(color = Color(cat.fg)), modifier = Modifier.padding(top = 4.dp))
                             }
                         }
                     }

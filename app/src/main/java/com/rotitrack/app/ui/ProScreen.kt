@@ -1,5 +1,6 @@
 package com.rotitrack.app.ui
 
+import com.rotitrack.app.i18n.t
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -39,15 +40,15 @@ import com.rotitrack.app.account.Plan
 import com.rotitrack.app.account.yearlySavingPercent
 import kotlinx.coroutines.launch
 
-private val FEATURES = listOf(
-    Triple("Water tracking & reminders", true, true),
-    Triple("Calorie & macro tracking", true, true),
-    Triple("142 Indian foods", true, true),
-    Triple("Today's meal plan", true, true),
-    Triple("Full 7-day meal plan", false, true),
-    Triple("Swap any meal", false, true),
-    Triple("30-day trends", false, true),
-    Triple("Your own recipes", false, true),
+private val FEATURES get() = listOf(
+    Triple(t("Water tracking & reminders"), true, true),
+    Triple(t("Calorie & macro tracking"), true, true),
+    Triple(t("142 Indian foods"), true, true),
+    Triple(t("Today's meal plan"), true, true),
+    Triple(t("Full 7-day meal plan"), false, true),
+    Triple(t("Swap any meal"), false, true),
+    Triple(t("30-day trends"), false, true),
+    Triple(t("Your own recipes"), false, true),
 )
 
 @Composable
@@ -77,16 +78,16 @@ fun ProScreen(
         }
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp)) {
             Text("👑", fontSize = 48.sp)
-            Text("Roti Track Pro", style = Type.screenTitle.copy(color = Color.White))
+            Text(t("Roti Track Pro"), style = Type.screenTitle.copy(color = Color.White))
             Text(
-                "Plan every meal of the week and see the bigger picture.",
+                t("Plan every meal of the week and see the bigger picture."),
                 style = Type.body.copy(color = Color.White.copy(alpha = 0.75f)), modifier = Modifier.padding(top = 4.dp, bottom = 16.dp),
             )
 
             Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Color.White.copy(alpha = 0.08f)).padding(16.dp)) {
                 Row {
                     Spacer(Modifier.weight(1f))
-                    Text("FREE", style = Type.tiny.copy(color = Color.White.copy(alpha = 0.6f)), modifier = Modifier.width(52.dp), textAlign = TextAlign.Center)
+                    Text(t("FREE"), style = Type.tiny.copy(color = Color.White.copy(alpha = 0.6f)), modifier = Modifier.width(52.dp), textAlign = TextAlign.Center)
                     Text("PRO", style = Type.tiny.copy(color = Palette.saffron), modifier = Modifier.width(52.dp), textAlign = TextAlign.Center)
                 }
                 FEATURES.forEach { (name, free, pro) ->
@@ -101,32 +102,32 @@ fun ProScreen(
 
             when {
                 playPlan != null -> Status(
-                    "You're Pro 🎉",
-                    "${playPlan.label} plan via Google Play · ${billing.price(playPlan)}/${playPlan.period}. Renews automatically until you cancel.",
+                    t("You're Pro 🎉"),
+                    t("{0} plan via Google Play · {1}/{2}. Renews automatically until you cancel.", playPlan.label, billing.price(playPlan), playPlan.period),
                 )
                 rzpPlan != null -> Status(
-                    "You're Pro 🎉",
+                    t("You're Pro 🎉"),
                     if (summary?.razorpayStatus == "cancelled") {
-                        "Auto-renew is off. Pro stays on until ${longDate(summary.razorpayUntil)}."
+                        t("Auto-renew is off. Pro stays on until {0}.", longDate(summary.razorpayUntil))
                     } else {
-                        "${rzpPlan.label} plan via Razorpay · ${rzpPlan.fallbackPrice}/${rzpPlan.period}. Next renewal ${longDate(summary!!.razorpayUntil)}."
+                        t("{0} plan via Razorpay · {1}/{2}. Next renewal {3}.", rzpPlan.label, rzpPlan.fallbackPrice, rzpPlan.period, longDate(summary!!.razorpayUntil))
                     },
                 )
-                compPro -> Status("You're Pro 🎉", "Pro access has been granted to your account by the Roti Track team.")
+                compPro -> Status(t("You're Pro 🎉"), t("Pro access has been granted to your account by the Roti Track team."))
                 else -> {
                     PlanCard(
                         Plan.YEARLY, billing.price(Plan.YEARLY), selected == Plan.YEARLY,
-                        note = "Just ₹${Plan.YEARLY.rupees / 12}/month · save $yearlySavingPercent%",
-                        badge = "BEST VALUE",
+                        note = t("Just ₹{0}/month · save {1}%", Plan.YEARLY.rupees / 12, yearlySavingPercent),
+                        badge = t("BEST VALUE"),
                     ) { selected = Plan.YEARLY }
                     Spacer(Modifier.height(10.dp))
-                    PlanCard(Plan.MONTHLY, billing.price(Plan.MONTHLY), selected == Plan.MONTHLY, note = "Billed every month") { selected = Plan.MONTHLY }
+                    PlanCard(Plan.MONTHLY, billing.price(Plan.MONTHLY), selected == Plan.MONTHLY, note = t("Billed every month")) { selected = Plan.MONTHLY }
                     Text(
                         when {
-                            usePlay && billing.offersAlternative -> "Next, choose Google Play or Razorpay (UPI, cards, netbanking, wallets)."
-                            usePlay -> "Payment through Google Play."
-                            useRazorpay -> "Pay securely with UPI, cards, netbanking or wallets via Razorpay."
-                            demo -> "Demo mode: no payment service is connected, so no money is charged."
+                            usePlay && billing.offersAlternative -> t("Next, choose Google Play or Razorpay (UPI, cards, netbanking, wallets).")
+                            usePlay -> t("Payment through Google Play.")
+                            useRazorpay -> t("Pay securely with UPI, cards, netbanking or wallets via Razorpay.")
+                            demo -> t("Demo mode: no payment service is connected, so no money is charged.")
                             else -> billing.unavailableReason ?: razorpay.unavailableReason.orEmpty()
                         },
                         style = Type.small.copy(color = if (demo) Palette.carbs else Color.White.copy(alpha = 0.75f)),
@@ -138,8 +139,7 @@ fun ProScreen(
                 Text(it, style = Type.small.copy(color = Palette.carbs), modifier = Modifier.padding(top = 12.dp))
             }
             Text(
-                "Subscriptions renew automatically until cancelled. Google Play subscriptions are managed in Play Store → " +
-                    "Payments & subscriptions; Razorpay ones from this screen. Prices include GST.",
+                t("Subscriptions renew automatically until cancelled. Google Play subscriptions are managed in Play Store → Payments & subscriptions; Razorpay ones from this screen. Prices include GST."),
                 style = Type.small.copy(color = Color.White.copy(alpha = 0.5f)), modifier = Modifier.padding(vertical = 16.dp),
             )
         }
@@ -147,20 +147,20 @@ fun ProScreen(
         Column(Modifier.fillMaxWidth().padding(20.dp)) {
             val light = Modifier.fillMaxWidth()
             when {
-                playPlan != null && billing is DemoBilling -> PillButton("Cancel subscription (demo)", { billing.cancel() }, light, color = Color.White, textColor = Palette.night)
+                playPlan != null && billing is DemoBilling -> PillButton(t("Cancel subscription (demo)"), { billing.cancel() }, light, color = Color.White, textColor = Palette.night)
                 playPlan != null -> PillButton(
-                    "Manage subscription",
+                    t("Manage subscription"),
                     { platform.openUrl("https://play.google.com/store/account/subscriptions?sku=${playPlan.productId}&package=com.rotitrack.app") },
                     light, color = Color.White, textColor = Palette.night,
                 )
                 rzpPlan != null && summary?.razorpayStatus != "cancelled" -> PillButton(
-                    if (razorpay.busy) "Please wait…" else "Turn off auto-renew",
+                    if (razorpay.busy) t("Please wait…") else t("Turn off auto-renew"),
                     { scope.launch { runCatching { razorpay.cancel() } } },
                     light, color = Color.White, textColor = Palette.night, enabled = !razorpay.busy,
                 )
-                rzpPlan != null || compPro -> PillButton("Done", onBack, light, color = Color.White, textColor = Palette.night)
+                rzpPlan != null || compPro -> PillButton(t("Done"), onBack, light, color = Color.White, textColor = Palette.night)
                 else -> PillButton(
-                    if (razorpay.busy) "Please wait…" else "Subscribe · ${billing.price(selected)}/${selected.period}",
+                    if (razorpay.busy) t("Please wait…") else t("Subscribe · {0}/{1}", billing.price(selected), selected.period),
                     {
                         when {
                             usePlay || demo -> billing.purchase(selected)
@@ -172,7 +172,7 @@ fun ProScreen(
             }
             if (playPlan == null && rzpPlan == null && !compPro && usePlay) {
                 Text(
-                    "Restore purchases", style = Type.small.copy(color = Color.White.copy(alpha = 0.7f)),
+                    t("Restore purchases"), style = Type.small.copy(color = Color.White.copy(alpha = 0.7f)),
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth().clickable { billing.restore() }.padding(top = 12.dp),
                 )
@@ -181,7 +181,7 @@ fun ProScreen(
     }
 }
 
-private fun longDate(t: Long): String = java.text.SimpleDateFormat("d MMM yyyy", java.util.Locale.getDefault()).format(java.util.Date(t))
+private fun longDate(t: Long): String = java.text.SimpleDateFormat("d MMM yyyy", com.rotitrack.app.i18n.I18n.locale).format(java.util.Date(t))
 
 @Composable
 private fun PlanCard(plan: Plan, price: String, selected: Boolean, note: String, badge: String? = null, onClick: () -> Unit) {

@@ -1,5 +1,6 @@
 package com.rotitrack.app.ui
 
+import com.rotitrack.app.i18n.t
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -51,73 +52,72 @@ fun ReferralScreen(store: AppStore, account: Account, summary: UserSummary?, pla
     // The code is assigned by the server at sign-up; show it once the account details have loaded.
     val code = summary?.referralCode?.takeIf { it.isNotBlank() }
     var upi by remember { mutableStateOf(store.prefs.payoutUpi) }
-    val shareText = "I track my Indian diet, calories and water with Roti Track. Join with my code ${code.orEmpty()} " +
-        "when you sign up and get healthier with me!"
+    val shareText = t("I track my Indian diet, calories and water with Roti Track. Join with my code {0} when you sign up and get healthier with me!", code.orEmpty())
 
-    SubScreen("Refer & earn", onBack) {
+    SubScreen(t("Refer & earn"), onBack) {
         AppCard(color = Palette.saffronSoft) {
             Text("🎁", fontSize = 40.sp)
-            Text("Earn up to ₹$REFERRAL_REWARD_RUPEES per friend", style = Type.h2)
+            Text(t("Earn up to ₹{0} per friend", REFERRAL_REWARD_RUPEES), style = Type.h2)
             Text(
-                "Share your code. When a friend signs up with it and buys Pro, you earn a reward.",
+                t("Share your code. When a friend signs up with it and buys Pro, you earn a reward."),
                 style = Type.body.copy(color = Palette.inkSoft), modifier = Modifier.padding(top = 4.dp),
             )
         }
         AppCard {
-            Text("Your promo code", style = Type.small)
-            Text(code ?: "Loading…", fontSize = if (code == null) 22.sp else 32.sp, fontWeight = FontWeight.Black, color = Palette.brand, letterSpacing = 3.sp, modifier = Modifier.padding(vertical = 6.dp))
+            Text(t("Your promo code"), style = Type.small)
+            Text(code ?: t("Loading…"), fontSize = if (code == null) 22.sp else 32.sp, fontWeight = FontWeight.Black, color = Palette.brand, letterSpacing = 3.sp, modifier = Modifier.padding(vertical = 6.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                PillButton("Copy code", { code?.let(platform::copyText) }, Modifier.weight(1f), color = Palette.chip, textColor = Palette.brand, enabled = code != null, height = 46.dp)
-                PillButton("Share", { platform.share(shareText) }, Modifier.weight(1f), enabled = code != null, height = 46.dp)
+                PillButton(t("Copy code"), { code?.let(platform::copyText) }, Modifier.weight(1f), color = Palette.chip, textColor = Palette.brand, enabled = code != null, height = 46.dp)
+                PillButton(t("Share"), { platform.share(shareText) }, Modifier.weight(1f), enabled = code != null, height = 46.dp)
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Stat("Friends joined Pro", "${summary?.referralCount ?: 0}", Modifier.weight(1f))
-            Stat("Earned", "₹${summary?.referralEarnings ?: 0}", Modifier.weight(1f))
-            Stat("Paid to you", "₹${summary?.referralPaid ?: 0}", Modifier.weight(1f))
+            Stat(t("Friends joined Pro"), "${summary?.referralCount ?: 0}", Modifier.weight(1f))
+            Stat(t("Earned"), "₹${summary?.referralEarnings ?: 0}", Modifier.weight(1f))
+            Stat(t("Paid to you"), "₹${summary?.referralPaid ?: 0}", Modifier.weight(1f))
         }
-        SectionLabel("Get paid")
+        SectionLabel(t("Get paid"))
         AppCard {
             OutlinedTextField(
-                upi, { upi = it.trim().take(60) }, label = { Text("Your UPI ID (e.g. name@okaxis)") },
+                upi, { upi = it.trim().take(60) }, label = { Text(t("Your UPI ID (e.g. name@okaxis)")) },
                 singleLine = true, modifier = Modifier.fillMaxWidth(),
             )
             Spacer(Modifier.height(8.dp))
-            PillButton("Save UPI ID", { store.updatePrefs { it.copy(payoutUpi = upi) } }, Modifier.fillMaxWidth(), height = 46.dp,
+            PillButton(t("Save UPI ID"), { store.updatePrefs { it.copy(payoutUpi = upi) } }, Modifier.fillMaxWidth(), height = 46.dp,
                 enabled = upi != store.prefs.payoutUpi && (upi.isEmpty() || upi.contains('@')))
-            Text("We send your earnings to this UPI ID after checking your friend's payment.", style = Type.small, modifier = Modifier.padding(top = 8.dp))
+            Text(t("We send your earnings to this UPI ID after checking your friend's payment."), style = Type.small, modifier = Modifier.padding(top = 8.dp))
         }
-        SectionLabel("How it works")
+        SectionLabel(t("How it works"))
         SettingsGroup {
-            SettingsRow("1️⃣", "Share your code", subtitle = "Send it on WhatsApp or anywhere you like")
-            SettingsRow("2️⃣", "Your friend signs up", subtitle = "They enter ${code ?: "your code"} when creating an account")
-            SettingsRow("3️⃣", "They buy Pro, you earn up to ₹$REFERRAL_REWARD_RUPEES", subtitle = "See the referral rules for details")
-            SettingsRow("📜", "Referral rules", last = true, onClick = onRules)
+            SettingsRow("1️⃣", t("Share your code"), subtitle = t("Send it on WhatsApp or anywhere you like"))
+            SettingsRow("2️⃣", t("Your friend signs up"), subtitle = t("They enter {0} when creating an account", code ?: t("your code")))
+            SettingsRow("3️⃣", t("They buy Pro, you earn up to ₹{0}", REFERRAL_REWARD_RUPEES), subtitle = t("See the referral rules for details"))
+            SettingsRow("📜", t("Referral rules"), last = true, onClick = onRules)
         }
     }
 }
 
 /** The referral programme's rules, shown from Profile and from Refer & earn. */
-val REFERRAL_RULES = listOf(
-    "Share your promo code" to "Find it under Profile → Refer a friend. Your friend must enter it while creating their Roti Track account; it can't be added later.",
-    "Yearly plan: ₹$REFERRAL_REWARD_RUPEES" to "When your friend buys the yearly plan (₹990), you earn ₹$REFERRAL_REWARD_RUPEES once their payment is confirmed.",
-    "Monthly plan: ₹$REFERRAL_MONTHLY_INSTALMENT + ₹$REFERRAL_MONTHLY_INSTALMENT" to "When your friend buys the monthly plan (₹359), you earn ₹$REFERRAL_MONTHLY_INSTALMENT after their 1st month's payment and another ₹$REFERRAL_MONTHLY_INSTALMENT after their 2nd month's payment: ₹$REFERRAL_REWARD_RUPEES in total.",
-    "If they stop after one month" to "If your friend cancels or their 2nd monthly payment doesn't go through, you keep the first ₹$REFERRAL_MONTHLY_INSTALMENT but don't earn the second.",
-    "Switching to yearly" to "If your friend moves from monthly to yearly, you earn the rest of the ₹$REFERRAL_REWARD_RUPEES when the yearly payment is confirmed.",
-    "Most ₹$REFERRAL_REWARD_RUPEES per friend" to "Each friend earns you at most ₹$REFERRAL_REWARD_RUPEES in total, however long they stay Pro. There's no limit on how many friends you invite.",
-    "Which payments count" to "Only Pro plans your friend pays for in the Roti Track app with Razorpay (UPI, cards, netbanking or wallets). Free Pro given by Roti Track and refunded payments don't count.",
-    "Getting paid" to "Add your UPI ID on the Refer & earn screen. The Roti Track team checks each payment and sends your earnings to that UPI ID.",
-    "Fair use" to "Referring yourself, fake or duplicate accounts, and spam are not allowed. Rewards earned this way are cancelled and the account may be blocked.",
-    "Changes" to "We may change or end the programme with notice in the app. Rewards you have already earned will still be paid.",
+val REFERRAL_RULES get() = listOf(
+    t("Share your promo code") to t("Find it under Profile → Refer a friend. Your friend must enter it while creating their Roti Track account; it can't be added later."),
+    t("Yearly plan: ₹{0}", REFERRAL_REWARD_RUPEES) to t("When your friend buys the yearly plan (₹990), you earn ₹{0} once their payment is confirmed.", REFERRAL_REWARD_RUPEES),
+    t("Monthly plan: ₹{0} + ₹{1}", REFERRAL_MONTHLY_INSTALMENT, REFERRAL_MONTHLY_INSTALMENT) to t("When your friend buys the monthly plan (₹359), you earn ₹{0} after their 1st month's payment and another ₹{1} after their 2nd month's payment: ₹{2} in total.", REFERRAL_MONTHLY_INSTALMENT, REFERRAL_MONTHLY_INSTALMENT, REFERRAL_REWARD_RUPEES),
+    t("If they stop after one month") to t("If your friend cancels or their 2nd monthly payment doesn't go through, you keep the first ₹{0} but don't earn the second.", REFERRAL_MONTHLY_INSTALMENT),
+    t("Switching to yearly") to t("If your friend moves from monthly to yearly, you earn the rest of the ₹{0} when the yearly payment is confirmed.", REFERRAL_REWARD_RUPEES),
+    t("Most ₹{0} per friend", REFERRAL_REWARD_RUPEES) to t("Each friend earns you at most ₹{0} in total, however long they stay Pro. There's no limit on how many friends you invite.", REFERRAL_REWARD_RUPEES),
+    t("Which payments count") to t("Only Pro plans your friend pays for in the Roti Track app with Razorpay (UPI, cards, netbanking or wallets). Free Pro given by Roti Track and refunded payments don't count."),
+    t("Getting paid") to t("Add your UPI ID on the Refer & earn screen. The Roti Track team checks each payment and sends your earnings to that UPI ID."),
+    t("Fair use") to t("Referring yourself, fake or duplicate accounts, and spam are not allowed. Rewards earned this way are cancelled and the account may be blocked."),
+    t("Changes") to t("We may change or end the programme with notice in the app. Rewards you have already earned will still be paid."),
 )
 
 @Composable
 fun ReferralRulesScreen(onBack: () -> Unit) {
-    SubScreen("Referral rules", onBack) {
+    SubScreen(t("Referral rules"), onBack) {
         AppCard(color = Palette.saffronSoft) {
-            Text("Earn up to ₹$REFERRAL_REWARD_RUPEES per friend", style = Type.h2)
+            Text(t("Earn up to ₹{0} per friend", REFERRAL_REWARD_RUPEES), style = Type.h2)
             Text(
-                "Yearly plan: ₹$REFERRAL_REWARD_RUPEES at once.\nMonthly plan: ₹$REFERRAL_MONTHLY_INSTALMENT after the 1st payment + ₹$REFERRAL_MONTHLY_INSTALMENT after the 2nd.",
+                t("Yearly plan: ₹{0} at once.\nMonthly plan: ₹{1} after the 1st payment + ₹{2} after the 2nd.", REFERRAL_REWARD_RUPEES, REFERRAL_MONTHLY_INSTALMENT, REFERRAL_MONTHLY_INSTALMENT),
                 style = Type.body.copy(color = Palette.inkSoft, lineHeight = 22.sp), modifier = Modifier.padding(top = 4.dp),
             )
         }
@@ -141,9 +141,9 @@ private fun Stat(label: String, value: String, modifier: Modifier) {
 @Composable
 fun BadgesScreen(store: AppStore, onBack: () -> Unit) {
     val unlocked = store.state.badges
-    val date = SimpleDateFormat("d MMM yyyy", Locale.getDefault())
-    SubScreen("Badges", onBack) {
-        Text("${unlocked.size} of ${Badges.ALL.size} unlocked", style = Type.body.copy(color = Palette.muted), modifier = Modifier.padding(bottom = 12.dp))
+    val date = SimpleDateFormat("d MMM yyyy", com.rotitrack.app.i18n.I18n.locale)
+    SubScreen(t("Badges"), onBack) {
+        Text(t("{0} of {1} unlocked", unlocked.size, Badges.ALL.size), style = Type.body.copy(color = Palette.muted), modifier = Modifier.padding(bottom = 12.dp))
         Badges.ALL.chunked(2).forEach { row ->
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.padding(bottom = 10.dp)) {
                 row.forEach { b ->
@@ -168,8 +168,8 @@ fun BadgesScreen(store: AppStore, onBack: () -> Unit) {
 fun BadgeCelebration(badge: Badge, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        confirmButton = { TextButton(onClick = onDismiss) { Text("Awesome!") } },
-        title = { Text("New badge unlocked!", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth()) },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(t("Awesome!")) } },
+        title = { Text(t("New badge unlocked!"), textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth()) },
         text = {
             Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Box(Modifier.size(96.dp).clip(CircleShape).background(Palette.saffronSoft), contentAlignment = Alignment.Center) {
@@ -201,30 +201,30 @@ fun ReportScreen(store: AppStore, account: Account, isPro: Boolean, platform: Pl
                 Text("📄", fontSize = 64.sp)
             }
         }
-        Heading("Get your PDF Summary Report", "Here's what you'll get in your summary report:")
+        Heading(t("Get your PDF Summary Report"), t("Here's what you'll get in your summary report:"))
         SettingsGroup {
-            SettingsRow("🍴", "Meal history", subtitle = "All logged meals and nutrition details")
-            SettingsRow("🏃", "Exercise history", subtitle = "Logged workouts and activity sessions")
-            SettingsRow("📈", "Weight progress", subtitle = "Weekly trend of recorded weight changes")
-            SettingsRow("🥧", "Calorie & macros breakdown", subtitle = "Daily calories, protein, carbs, fat and water", last = true)
+            SettingsRow("🍴", t("Meal history"), subtitle = t("All logged meals and nutrition details"))
+            SettingsRow("🏃", t("Exercise history"), subtitle = t("Logged workouts and activity sessions"))
+            SettingsRow("📈", t("Weight progress"), subtitle = t("Weekly trend of recorded weight changes"))
+            SettingsRow("🥧", t("Calorie & macros breakdown"), subtitle = t("Daily calories, protein, carbs, fat and water"), last = true)
         }
-        SectionLabel("Period")
+        SectionLabel(t("Period"))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             listOf(7, 30, 90).forEach { d ->
                 val locked = d > 7 && !isPro
-                Chip(if (locked) "$d days 🔒" else "$d days", days == d, { if (locked) onUpgrade() else days = d }, Modifier.weight(1f))
+                Chip(if (locked) t("{0} days 🔒", d) else t("{0} days", d), days == d, { if (locked) onUpgrade() else days = d }, Modifier.weight(1f))
             }
         }
         LaunchedEffect(isPro) { if (!isPro) days = 7 }
         Spacer(Modifier.height(20.dp))
-        PillButton("Next", {
+        PillButton(t("Next"), {
             status = runCatching {
                 platform.exportReport(Reports.build(store, store.profile.name.ifBlank { account.name }, days))
                 null
-            }.getOrElse { "Couldn't create the report: ${it.message}" }
+            }.getOrElse { t("Couldn't create the report: {0}", it.message) }
         }, Modifier.fillMaxWidth(), color = Palette.night, height = 56.dp)
         status?.let { Text(it, style = Type.small.copy(color = Palette.danger), modifier = Modifier.padding(top = 8.dp)) }
-        Text("The PDF opens in the share menu, so you can save it or send it to your doctor or dietitian.", style = Type.small, modifier = Modifier.padding(top = 12.dp))
+        Text(t("The PDF opens in the share menu, so you can save it or send it to your doctor or dietitian."), style = Type.small, modifier = Modifier.padding(top = 12.dp))
     }
 }
 
@@ -232,7 +232,7 @@ fun ReportScreen(store: AppStore, account: Account, isPro: Boolean, platform: Pl
 
 @Composable
 fun LegalScreen(terms: Boolean, onBack: () -> Unit) {
-    SubScreen(if (terms) "Terms and Conditions" else "Privacy Policy", onBack) {
+    SubScreen(if (terms) t("Terms and Conditions") else t("Privacy Policy"), onBack) {
         val paragraphs = if (terms) TERMS else PRIVACY
         paragraphs.forEach { (h, body) ->
             Text(h, style = Type.title, modifier = Modifier.padding(top = 14.dp, bottom = 4.dp))

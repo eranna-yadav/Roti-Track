@@ -1,7 +1,11 @@
 package com.rotitrack.app.data
 
+import com.rotitrack.app.i18n.t
+
 /** [hydration] is the share of the volume that counts toward the water goal. */
-data class Drink(val id: String, val name: String, val emoji: String, val hydration: Double, val defaultMl: Int)
+data class Drink(val id: String, private val nameEn: String, val emoji: String, val hydration: Double, val defaultMl: Int) {
+    val name: String get() = t(nameEn)
+}
 
 val DRINKS = listOf(
     Drink("water", "Water", "💧", 1.0, 250),

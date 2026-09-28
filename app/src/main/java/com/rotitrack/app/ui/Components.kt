@@ -1,5 +1,6 @@
 package com.rotitrack.app.ui
 
+import com.rotitrack.app.i18n.t
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -183,16 +184,16 @@ fun FoodRow(food: Food, onClick: () -> Unit, trailing: (@Composable () -> Unit)?
             Row(verticalAlignment = Alignment.CenterVertically) {
                 DietMark(food.diet, 12.dp)
                 Spacer(Modifier.width(6.dp))
-                Text(food.name, style = Type.title.copy(fontSize = 16.sp), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(t(food.name), style = Type.title.copy(fontSize = 16.sp), maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
             Text(
-                "${food.serving} · P ${fmt(food.protein)} · C ${fmt(food.carbs)} · F ${fmt(food.fat)}",
+                t("{0} · P {1} · C {2} · F {3}", t(food.serving), fmt(food.protein), fmt(food.carbs), fmt(food.fat)),
                 style = Type.small.copy(fontWeight = FontWeight.Medium),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
         }
-        if (trailing != null) trailing() else Text("${food.kcal} kcal", style = Type.title.copy(fontSize = 15.sp))
+        if (trailing != null) trailing() else Text(t("{0} kcal", food.kcal), style = Type.title.copy(fontSize = 15.sp))
     }
 }
 
@@ -216,7 +217,7 @@ fun CalorieRing(eaten: Int, goal: Int, size: Dp = 160.dp) {
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text("${abs(goal - eaten)}", fontSize = 34.sp, fontWeight = FontWeight.ExtraBold, color = Palette.ink)
-            Text(if (over) "kcal over" else "kcal left", style = Type.small)
+            Text(if (over) t("kcal over") else t("kcal left"), style = Type.small)
         }
     }
 }

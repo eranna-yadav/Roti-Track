@@ -1,33 +1,46 @@
 package com.rotitrack.app.data
 
+import com.rotitrack.app.i18n.t
 import kotlinx.serialization.Serializable
 
 @Serializable enum class Gender { FEMALE, MALE, OTHER }
 @Serializable enum class Diet { VEG, EGG, NONVEG }
-@Serializable enum class Region(val label: String) {
-    ALL("All India"), NORTH("North"), SOUTH("South"), WEST("West"), EAST("East")
+@Serializable enum class Region(private val labelEn: String) {
+    ALL("All India"), NORTH("North"), SOUTH("South"), WEST("West"), EAST("East");
+
+    val label: String get() = t(labelEn)
 }
-@Serializable enum class Activity(val label: String, val hint: String, val factor: Double) {
+@Serializable enum class Activity(private val labelEn: String, private val hintEn: String, val factor: Double) {
     SEDENTARY("Sedentary", "Desk job, little exercise", 1.2),
     LIGHT("Lightly active", "Walks, exercise 1–3 days a week", 1.375),
     MODERATE("Moderately active", "Exercise 3–5 days a week", 1.55),
     ACTIVE("Very active", "Hard exercise 6–7 days a week", 1.725),
-    ATHLETE("Athlete", "Physical job or twice-a-day training", 1.9),
+    ATHLETE("Athlete", "Physical job or twice-a-day training", 1.9);
+
+    val label: String get() = t(labelEn)
+    val hint: String get() = t(hintEn)
 }
-@Serializable enum class WeightGoal(val label: String, val emoji: String, val delta: Int) {
-    LOSE("Lose weight", "📉", -500), MAINTAIN("Stay fit", "⚖️", 0), GAIN("Gain weight", "💪", 300)
+@Serializable enum class WeightGoal(private val labelEn: String, val emoji: String, val delta: Int) {
+    LOSE("Lose weight", "📉", -500), MAINTAIN("Stay fit", "⚖️", 0), GAIN("Gain weight", "💪", 300);
+
+    val label: String get() = t(labelEn)
 }
-@Serializable enum class MealSlot(val label: String, val short: String, val emoji: String, val share: Double, val time: String) {
+@Serializable enum class MealSlot(private val labelEn: String, private val shortEn: String, val emoji: String, val share: Double, val time: String) {
     BREAKFAST("Breakfast", "Breakfast", "🌅", 0.25, "8:00 AM"),
     LUNCH("Lunch", "Lunch", "🍛", 0.35, "1:00 PM"),
     SNACK("Evening Snack", "Snack", "☕", 0.10, "5:00 PM"),
-    DINNER("Dinner", "Dinner", "🌙", 0.30, "8:00 PM"),
+    DINNER("Dinner", "Dinner", "🌙", 0.30, "8:00 PM");
+
+    val label: String get() = t(labelEn)
+    val short: String get() = t(shortEn)
 }
 
-enum class FoodCategory(val label: String) {
+enum class FoodCategory(private val labelEn: String) {
     BREAKFAST("Breakfast"), BREADS("Rotis"), RICE("Rice"), DAL("Dals"), SABZI("Sabzi"),
     NONVEG("Non-veg"), DAIRY("Dairy"), SNACKS("Snacks"), SWEETS("Sweets"),
-    BEVERAGES("Drinks"), FRUITS("Fruits"), CUSTOM("My foods"),
+    BEVERAGES("Drinks"), FRUITS("Fruits"), CUSTOM("My foods");
+
+    val label: String get() = t(labelEn)
 }
 
 /** Nutrition is per one serving as described by [serving]. */
@@ -101,7 +114,11 @@ data class Profile(
     val sleepHour: Int = 22,
 )
 
-@Serializable enum class Appearance(val label: String) { LIGHT("Light"), DARK("Dark"), SYSTEM("System") }
+@Serializable enum class Appearance(private val labelEn: String) {
+    LIGHT("Light"), DARK("Dark"), SYSTEM("System");
+
+    val label: String get() = t(labelEn)
+}
 
 /** A daily nudge to log a meal (or everything at once, for "End of Day"). */
 @Serializable
@@ -115,10 +132,13 @@ val DEFAULT_MEAL_REMINDERS = listOf(
     MealReminder("end_of_day", "End of Day", 21, 0),
 )
 
-@Serializable enum class WaterReminderMode(val label: String, val blurb: String) {
+@Serializable enum class WaterReminderMode(private val labelEn: String, private val blurbEn: String) {
     STANDARD("Standard", "Based on your sleep and meal schedule"),
     INTERVAL("Interval", "A reminder every so often while you're awake"),
-    CUSTOM("Custom", "Customize all reminders by yourself"),
+    CUSTOM("Custom", "Customize all reminders by yourself");
+
+    val label: String get() = t(labelEn)
+    val blurb: String get() = t(blurbEn)
 }
 
 /** One water reminder time. Standard ones also carry a [label] such as "Before Lunch". */
@@ -143,12 +163,14 @@ val DEFAULT_CUSTOM_TIMES = (0 until 12).map { i ->
     ReminderTime(m / 60, m % 60, enabled = i in 1..10)
 }
 
-@Serializable enum class WaterSound(val label: String, val seconds: Int) {
+@Serializable enum class WaterSound(private val labelEn: String, val seconds: Int) {
     DROP_1("Water drop 1", 1),
     DROP_2("Water drop 2", 3),
     FLOWING_1("Water flowing 1", 5),
     FLOWING_2("Water flowing 2", 7),
-    FLOWING_3("Water flowing 3", 8),
+    FLOWING_3("Water flowing 3", 8);
+
+    val label: String get() = t(labelEn)
 }
 
 @Serializable
@@ -159,7 +181,8 @@ data class Prefs(
     val addBurnedCalories: Boolean = false,
     /** Up to 200 kcal left over yesterday are added to today's goal. */
     val rolloverCalories: Boolean = false,
-    val language: String = "en",
+    /** A code from I18n.SUPPORTED; empty means follow the phone's language. */
+    val language: String = "",
     val mealReminders: List<MealReminder> = DEFAULT_MEAL_REMINDERS,
     /** Where referral earnings are paid. */
     val payoutUpi: String = "",

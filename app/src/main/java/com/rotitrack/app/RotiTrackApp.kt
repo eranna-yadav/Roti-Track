@@ -18,6 +18,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import com.rotitrack.app.i18n.I18n
 import com.rotitrack.app.reminders.MealReminders
 import com.rotitrack.app.reminders.Reminders
 import com.rotitrack.app.store.AndroidStorage
@@ -48,6 +49,8 @@ class RotiTrackApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        // Notifications and reminder workers speak the signed-in user's language too.
+        I18n.lang = I18n.resolve(activeUid?.let { storeFor(it).prefs.language }.orEmpty())
         Reminders.createChannel(this)
         MealReminders.createChannel(this)
 

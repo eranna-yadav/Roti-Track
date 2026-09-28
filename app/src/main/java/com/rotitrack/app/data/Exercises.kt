@@ -1,7 +1,11 @@
 package com.rotitrack.app.data
 
+import com.rotitrack.app.i18n.t
+
 /** [met] is the Compendium of Physical Activities value: kcal ≈ MET × kg × hours. */
-data class ExerciseType(val id: String, val name: String, val emoji: String, val met: Double)
+data class ExerciseType(val id: String, val nameEn: String, val emoji: String, val met: Double) {
+    val name: String get() = t(nameEn)
+}
 
 val ACTIVITIES = listOf(
     ExerciseType("walk", "Walking", "🚶", 3.5),

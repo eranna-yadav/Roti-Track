@@ -1,5 +1,6 @@
 package com.rotitrack.app.ui
 
+import com.rotitrack.app.i18n.t
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -51,44 +52,44 @@ private fun Tile(emoji: String, label: String, selected: Boolean, onClick: () ->
 /** Body data and diet preferences. Used by onboarding and the Me tab. */
 @Composable
 fun ProfileForm(p: Profile, onChange: (Profile) -> Unit, showWeight: Boolean = true) {
-    FormLabel("Gender")
+    FormLabel(t("Gender"))
     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        listOf(Triple(Gender.FEMALE, "👩", "Female"), Triple(Gender.MALE, "👨", "Male"), Triple(Gender.OTHER, "🧑", "Other"))
+        listOf(Triple(Gender.FEMALE, "👩", t("Female")), Triple(Gender.MALE, "👨", t("Male")), Triple(Gender.OTHER, "🧑", t("Other")))
             .forEach { (g, e, l) -> Tile(e, l, p.gender == g, { onChange(p.copy(gender = g)) }, Modifier.weight(1f)) }
     }
 
-    FormLabel("Body")
+    FormLabel(t("Body"))
     AppCard {
         if (showWeight) {
-            Text("Weight", style = Type.small)
+            Text(t("Weight"), style = Type.small)
             Stepper(
-                "${fmt(p.weightKg)} kg",
+                t("{0} kg", fmt(p.weightKg)),
                 onMinus = { onChange(p.copy(weightKg = ((p.weightKg - 0.5).coerceAtLeast(25.0) * 2).roundToInt() / 2.0)) },
                 onPlus = { onChange(p.copy(weightKg = ((p.weightKg + 0.5).coerceAtMost(250.0) * 2).roundToInt() / 2.0)) },
             )
             Spacer(Modifier.height(10.dp))
         }
-        Text("Height", style = Type.small)
+        Text(t("Height"), style = Type.small)
         Stepper(
-            "${p.heightCm} cm",
+            t("{0} cm", p.heightCm),
             onMinus = { onChange(p.copy(heightCm = (p.heightCm - 1).coerceAtLeast(120))) },
             onPlus = { onChange(p.copy(heightCm = (p.heightCm + 1).coerceAtMost(220))) },
         )
         Spacer(Modifier.height(10.dp))
-        Text("Age", style = Type.small)
+        Text(t("Age"), style = Type.small)
         Stepper(
-            "${p.age} years",
+            t("{0} years", p.age),
             onMinus = { onChange(p.copy(age = (p.age - 1).coerceAtLeast(12))) },
             onPlus = { onChange(p.copy(age = (p.age + 1).coerceAtMost(100))) },
         )
     }
 
-    FormLabel("Goal")
+    FormLabel(t("Goal"))
     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         WeightGoal.entries.forEach { g -> Tile(g.emoji, g.label, p.goal == g, { onChange(p.copy(goal = g)) }, Modifier.weight(1f)) }
     }
 
-    FormLabel("Activity")
+    FormLabel(t("Activity"))
     AppCard {
         Activity.entries.forEachIndexed { i, a ->
             if (i > 0) Divider()
@@ -105,13 +106,13 @@ fun ProfileForm(p: Profile, onChange: (Profile) -> Unit, showWeight: Boolean = t
         }
     }
 
-    FormLabel("Food preference")
+    FormLabel(t("Food preference"))
     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        listOf(Triple(Diet.VEG, "🥦", "Veg"), Triple(Diet.EGG, "🥚", "Egg"), Triple(Diet.NONVEG, "🍗", "Non-veg"))
+        listOf(Triple(Diet.VEG, "🥦", t("Veg")), Triple(Diet.EGG, "🥚", t("Egg")), Triple(Diet.NONVEG, "🍗", t("Non-veg")))
             .forEach { (d, e, l) -> Tile(e, l, p.diet == d, { onChange(p.copy(diet = d)) }, Modifier.weight(1f)) }
     }
 
-    FormLabel("Cuisine for meal plans")
+    FormLabel(t("Cuisine for meal plans"))
     ChipRow(Region.entries.toList(), p.region, label = { it.label }, onSelect = { onChange(p.copy(region = it)) })
 }
 

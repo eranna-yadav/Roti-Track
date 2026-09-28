@@ -2,7 +2,8 @@ package com.rotitrack.app.domain
 
 import java.time.LocalDate
 import java.time.format.TextStyle
-import java.util.Locale
+import com.rotitrack.app.i18n.I18n
+import com.rotitrack.app.i18n.t
 
 /** Days are keyed as ISO dates ("2026-09-25"), which also sort correctly as strings. */
 object Days {
@@ -11,16 +12,16 @@ object Days {
     fun shift(key: String, days: Long): String = parse(key).plusDays(days).toString()
 
     fun weekdayShort(key: String): String =
-        parse(key).dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())
+        parse(key).dayOfWeek.getDisplayName(TextStyle.SHORT, I18n.locale)
 
     /** "28 Sep". */
     fun short(key: String): String =
-        parse(key).let { "${it.dayOfMonth} ${it.month.getDisplayName(TextStyle.SHORT, Locale.getDefault())}" }
+        parse(key).let { "${it.dayOfMonth} ${it.month.getDisplayName(TextStyle.SHORT, I18n.locale)}" }
 
     fun label(key: String, today: String = today()): String = when (key) {
-        today -> "Today"
-        shift(today, -1) -> "Yesterday"
-        else -> parse(key).let { "${it.dayOfMonth} ${it.month.getDisplayName(TextStyle.SHORT, Locale.getDefault())}" }
+        today -> t("Today")
+        shift(today, -1) -> t("Yesterday")
+        else -> parse(key).let { "${it.dayOfMonth} ${it.month.getDisplayName(TextStyle.SHORT, I18n.locale)}" }
     }
 
     /** The [count] day keys ending with [end], oldest first. */

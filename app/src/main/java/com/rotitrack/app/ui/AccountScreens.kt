@@ -1,5 +1,7 @@
 package com.rotitrack.app.ui
 
+import com.rotitrack.app.i18n.I18n
+import com.rotitrack.app.i18n.t
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -56,14 +58,14 @@ fun PersonalDetailsScreen(store: AppStore, platform: Platform, onBack: () -> Uni
         platform.scheduleReminders(store.profile)
     }
 
-    SubScreen("Personal details", onBack) {
+    SubScreen(t("Personal details"), onBack) {
         OutlinedTextField(
             name, { name = it.take(40); store.updateProfile { pr -> pr.copy(name = name.trim()) } },
-            label = { Text("Your name") }, singleLine = true, modifier = Modifier.fillMaxWidth(),
+            label = { Text(t("Your name")) }, singleLine = true, modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
         )
 
-        FormLabel("Weight")
+        FormLabel(t("Weight"))
         AppCard {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 OutlinedTextField(
@@ -72,7 +74,7 @@ fun PersonalDetailsScreen(store: AppStore, platform: Platform, onBack: () -> Uni
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 )
                 Spacer(Modifier.width(12.dp))
-                PillButton("Log weight", {
+                PillButton(t("Log weight"), {
                     weightText.toDoubleOrNull()?.takeIf { it in 25.0..250.0 }?.let { store.logWeight((it * 10).roundToInt() / 10.0) }
                 }, Modifier.width(132.dp), height = 52.dp)
             }
@@ -80,14 +82,14 @@ fun PersonalDetailsScreen(store: AppStore, platform: Platform, onBack: () -> Uni
                 Spacer(Modifier.height(14.dp))
                 val first = weights.first()
                 Text(
-                    if (weights.size == 1) "Logged ${fmt(first.kg)} kg on ${Days.short(first.day)}. Log again on another day to see your progress."
-                    else "Change since ${Days.short(first.day)}: ${signed(p.weightKg - first.kg)} kg",
+                    if (weights.size == 1) t("Logged {0} kg on {1}. Log again on another day to see your progress.", fmt(first.kg), Days.short(first.day))
+                    else t("Change since {0}: {1} kg", Days.short(first.day), signed(p.weightKg - first.kg)),
                     style = Type.small.copy(color = Palette.inkSoft),
                 )
                 Spacer(Modifier.height(10.dp))
                 WeightChart(weights.takeLast(7))
             } else {
-                Text("Log your weight regularly to see your progress here and in your PDF report.", style = Type.small, modifier = Modifier.padding(top = 8.dp))
+                Text(t("Log your weight regularly to see your progress here and in your PDF report."), style = Type.small, modifier = Modifier.padding(top = 8.dp))
             }
         }
 
@@ -104,39 +106,39 @@ fun NutritionGoalsScreen(store: AppStore, onBack: () -> Unit) {
     val suggestedWater = Nutrition.recommendedWaterMl(p.weightKg, p.gender)
     val macros = store.macroTargets()
 
-    SubScreen("Nutrition goals", onBack) {
-        FormLabel("Goal")
+    SubScreen(t("Nutrition goals"), onBack) {
+        FormLabel(t("Goal"))
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             WeightGoal.entries.forEach { g ->
                 Chip("${g.emoji} ${g.label}", p.goal == g, { store.updateProfile { it.copy(goal = g) } }, Modifier.weight(1f), hPadding = 4.dp)
             }
         }
 
-        FormLabel("Daily calories")
+        FormLabel(t("Daily calories"))
         AppCard {
-            Text("${p.calorieGoal} kcal", style = Type.screenTitle)
-            Text("Protein ${macros.protein} g · Carbs ${macros.carbs} g · Fat ${macros.fat} g", style = Type.small)
+            Text(t("{0} kcal", p.calorieGoal), style = Type.screenTitle)
+            Text(t("Protein {0} g · Carbs {1} g · Fat {2} g", macros.protein, macros.carbs, macros.fat), style = Type.small)
             Spacer(Modifier.height(12.dp))
-            ToggleLine("Set my own target", p.calorieGoalCustom) { on ->
+            ToggleLine(t("Set my own target"), p.calorieGoalCustom) { on ->
                 store.updateProfile { it.copy(calorieGoalCustom = on, calorieGoal = if (on) it.calorieGoal else suggested) }
             }
             if (p.calorieGoalCustom) {
                 Stepper(
-                    "${p.calorieGoal} kcal",
+                    t("{0} kcal", p.calorieGoal),
                     onMinus = { store.updateProfile { it.copy(calorieGoal = (it.calorieGoal - 50).coerceAtLeast(1000)) } },
                     onPlus = { store.updateProfile { it.copy(calorieGoal = (it.calorieGoal + 50).coerceAtMost(4500)) } },
                     modifier = Modifier.padding(top = 8.dp),
                 )
-                Text("Suggested for you: $suggested kcal", style = Type.small, modifier = Modifier.padding(top = 8.dp))
+                Text(t("Suggested for you: {0} kcal", suggested), style = Type.small, modifier = Modifier.padding(top = 8.dp))
             } else {
-                Text("Worked out from your body, activity and goal (Mifflin–St Jeor).", style = Type.small)
+                Text(t("Worked out from your body, activity and goal (Mifflin–St Jeor)."), style = Type.small)
             }
         }
 
-        FormLabel("Water")
+        FormLabel(t("Water"))
         AppCard {
-            Text(liters(p.waterGoalMl) + " a day", style = Type.h2)
-            ToggleLine("Set my own water goal", p.waterGoalCustom) { on ->
+            Text(t("{0} a day", liters(p.waterGoalMl)), style = Type.h2)
+            ToggleLine(t("Set my own water goal"), p.waterGoalCustom) { on ->
                 store.updateProfile { it.copy(waterGoalCustom = on, waterGoalMl = if (on) it.waterGoalMl else suggestedWater) }
             }
             if (p.waterGoalCustom) {
@@ -147,9 +149,9 @@ fun NutritionGoalsScreen(store: AppStore, onBack: () -> Unit) {
                 )
             }
             Spacer(Modifier.height(10.dp))
-            Text("Usual glass", style = Type.small)
+            Text(t("Usual glass"), style = Type.small)
             Stepper(
-                "${p.cupMl} ml",
+                t("{0} ml", p.cupMl),
                 onMinus = { store.updateProfile { it.copy(cupMl = (it.cupMl - 50).coerceAtLeast(100)) } },
                 onPlus = { store.updateProfile { it.copy(cupMl = (it.cupMl + 50).coerceAtMost(1000)) } },
             )
@@ -161,10 +163,10 @@ fun NutritionGoalsScreen(store: AppStore, onBack: () -> Unit) {
 fun PreferencesScreen(store: AppStore, onBack: () -> Unit) {
     val prefs = store.prefs
     var menu by remember { mutableStateOf(false) }
-    SubScreen("Preferences", onBack) {
+    SubScreen(t("Preferences"), onBack) {
         SettingsGroup {
             SettingsRow(
-                "🎨", "Appearance", subtitle = "Choose light, dark, or system appearance", last = true,
+                "🎨", t("Appearance"), subtitle = t("Choose light, dark, or system appearance"), last = true,
                 onClick = { menu = true },
                 trailing = {
                     Column {
@@ -184,15 +186,15 @@ fun PreferencesScreen(store: AppStore, onBack: () -> Unit) {
         Spacer(Modifier.height(16.dp))
         SettingsGroup {
             Column(Modifier.padding(vertical = 8.dp)) {
-                ToggleLine("Badge Celebrations", prefs.badgeCelebrations, "Show celebrations when you unlock new badges") { on ->
+                ToggleLine(t("Badge Celebrations"), prefs.badgeCelebrations, t("Show celebrations when you unlock new badges")) { on ->
                     store.updatePrefs { it.copy(badgeCelebrations = on) }
                 }
                 Divider()
-                ToggleLine("Add Burned Calories", prefs.addBurnedCalories, "Add calories burned in exercise to your daily goal") { on ->
+                ToggleLine(t("Add Burned Calories"), prefs.addBurnedCalories, t("Add calories burned in exercise to your daily goal")) { on ->
                     store.updatePrefs { it.copy(addBurnedCalories = on) }
                 }
                 Divider()
-                ToggleLine("Rollover calories", prefs.rolloverCalories, "Add up to 200 left-over calories from yesterday to today's goal") { on ->
+                ToggleLine(t("Rollover calories"), prefs.rolloverCalories, t("Add up to 200 left-over calories from yesterday to today's goal")) { on ->
                     store.updatePrefs { it.copy(rolloverCalories = on) }
                 }
             }
@@ -202,22 +204,28 @@ fun PreferencesScreen(store: AppStore, onBack: () -> Unit) {
 
 @Composable
 fun LanguageScreen(store: AppStore, onBack: () -> Unit) {
-    SubScreen("Language", onBack) {
+    SubScreen(t("Language"), onBack) {
         Text(
-            "Roti Track is in English today. Indian languages are being translated. Pick yours and we'll switch you over as soon as it's ready.",
+            t("Choose the language for Roti Track. Food names and screens change straight away."),
             style = Type.body.copy(color = Palette.inkSoft), modifier = Modifier.padding(bottom = 12.dp),
         )
         SettingsGroup {
             LANGUAGES.forEachIndexed { i, (code, name) ->
                 SettingsRow(
                     if (code == "en") "🇬🇧" else "🇮🇳", name,
-                    subtitle = if (code == "en") null else "Coming soon",
                     last = i == LANGUAGES.lastIndex,
-                    onClick = { store.updatePrefs { it.copy(language = code) } },
-                    trailing = { Radio(store.prefs.language == code) },
+                    onClick = {
+                        store.updatePrefs { it.copy(language = code) }
+                        I18n.lang = code
+                    },
+                    trailing = { Radio(I18n.lang == code) },
                 )
             }
         }
+        Text(
+            t("Health articles and the Terms and Privacy Policy are in English."),
+            style = Type.small, modifier = Modifier.padding(top = 12.dp),
+        )
     }
 }
 
@@ -252,7 +260,7 @@ fun WeightChart(entries: List<WeightEntry>, height: Dp = 130.dp) {
                 val c = point(i)
                 drawCircle(line, 6.dp.toPx(), c)
                 drawCircle(dot, 3.dp.toPx(), c)
-                val label = measurer.measure(fmt(entries[i].kg) + if (entries.size <= 4) " kg" else "", valueStyle)
+                val label = measurer.measure(fmt(entries[i].kg) + if (entries.size <= 4) t(" kg") else "", valueStyle)
                 drawText(label, topLeft = Offset(c.x - label.size.width / 2f, c.y - 10.dp.toPx() - label.size.height))
             }
         }

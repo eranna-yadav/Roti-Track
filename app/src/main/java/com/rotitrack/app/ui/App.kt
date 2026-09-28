@@ -1,5 +1,7 @@
 package com.rotitrack.app.ui
 
+import com.rotitrack.app.i18n.I18n
+import com.rotitrack.app.i18n.t
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -63,12 +65,14 @@ interface Platform {
     fun setDarkTheme(dark: Boolean)
 }
 
-enum class Tab(val label: String, val icon: ImageVector) {
+enum class Tab(private val labelEn: String, val icon: ImageVector) {
     HOME("Home", TabIcons.Home),
     WATER("Water", TabIcons.Water),
     FOOD("Food", TabIcons.Food),
     PLAN("Plan", TabIcons.Plan),
-    PROFILE("Profile", TabIcons.Me),
+    PROFILE("Profile", TabIcons.Me);
+
+    val label: String get() = t(labelEn)
 }
 
 sealed interface Route {
@@ -107,6 +111,7 @@ fun App(services: Services, platform: Platform, nav: Navigator = remember { Navi
         return
     }
     val store = remember(account.uid) { services.storeFor(account.uid) }
+    LaunchedEffect(store, store.prefs.language) { I18n.lang = I18n.resolve(store.prefs.language) }
     val dark = isDark(store.prefs.appearance)
     LaunchedEffect(dark) { platform.setDarkTheme(dark) }
     RotiTrackTheme(dark) { SignedIn(services, platform, nav, account, store) }
@@ -201,7 +206,7 @@ private fun SignedIn(services: Services, platform: Platform, nav: Navigator, acc
                                     store.resetAll()
                                     nav.tab(Tab.HOME)
                                 } catch (e: Exception) {
-                                    deleteError = e.message ?: "Couldn't delete the account. Try again."
+                                    deleteError = e.message ?: t("Couldn't delete the account. Try again.")
                                 }
                             }
                         },
@@ -239,9 +244,9 @@ private fun SignedIn(services: Services, platform: Platform, nav: Navigator, acc
     deleteError?.let { msg ->
         AlertDialog(
             onDismissRequest = { deleteError = null },
-            title = { Text("Account not deleted") },
+            title = { Text(t("Account not deleted")) },
             text = { Text(msg) },
-            confirmButton = { TextButton(onClick = { deleteError = null }) { Text("OK") } },
+            confirmButton = { TextButton(onClick = { deleteError = null }) { Text(t("OK")) } },
         )
     }
 }

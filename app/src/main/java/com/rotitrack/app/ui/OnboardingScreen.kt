@@ -1,5 +1,6 @@
 package com.rotitrack.app.ui
 
+import com.rotitrack.app.i18n.t
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.size
@@ -43,19 +44,19 @@ fun OnboardingScreen(store: AppStore, platform: Platform) {
         ) {
             Spacer(Modifier.weight(1f))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(RotiLogo, contentDescription = "Roti Track logo", modifier = Modifier.size(72.dp))
+                Image(RotiLogo, contentDescription = t("Roti Track logo"), modifier = Modifier.size(72.dp))
                 Spacer(Modifier.width(10.dp))
                 Image(WaterDropLogo, contentDescription = null, modifier = Modifier.size(width = 54.dp, height = 72.dp))
             }
             Text("ROTI TRACK", fontSize = 40.sp, fontWeight = FontWeight.Black, color = Color.White, modifier = Modifier.padding(top = 12.dp))
             Text(
-                "Indian diet planner, calorie & water tracker",
+                t("Indian diet planner, calorie & water tracker"),
                 style = Type.body.copy(color = Color.White.copy(alpha = 0.8f)),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
             )
             Spacer(Modifier.weight(1f))
-            PillButton("Get started", { started = true }, Modifier.fillMaxWidth(), color = Color.White, textColor = Palette.brand, height = 60.dp)
+            PillButton(t("Get started"), { started = true }, Modifier.fillMaxWidth(), color = Color.White, textColor = Palette.brand, height = 60.dp)
         }
         return
     }
@@ -64,18 +65,18 @@ fun OnboardingScreen(store: AppStore, platform: Platform) {
     val water = Nutrition.recommendedWaterMl(draft.weightKg, draft.gender)
     Box(Modifier.fillMaxSize().background(Palette.background).safeDrawingPadding()) {
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 100.dp)) {
-            ScreenHeader("ABOUT YOU")
-            Text("We use this to set your calorie and water targets and build your meal plan.", style = Type.body.copy(color = Palette.inkSoft))
+            ScreenHeader(t("ABOUT YOU"))
+            Text(t("We use this to set your calorie and water targets and build your meal plan."), style = Type.body.copy(color = Palette.inkSoft))
             ProfileForm(draft, { draft = it })
             Spacer(Modifier.height(16.dp))
             AppCard(color = Palette.saffronSoft) {
-                Text("Your starting targets", style = Type.small.copy(color = Palette.inkSoft))
-                Text("$kcal kcal · ${liters(water)} water", style = Type.h2)
-                Text("You can change these any time on the Me tab.", style = Type.small)
+                Text(t("Your starting targets"), style = Type.small.copy(color = Palette.inkSoft))
+                Text(t("{0} kcal · {1} water", kcal, liters(water)), style = Type.h2)
+                Text(t("You can change these any time on the Profile tab."), style = Type.small)
             }
         }
         PillButton(
-            "Start planning",
+            t("Start planning"),
             {
                 store.updateProfile { draft.copy(onboarded = true) }
                 platform.scheduleReminders(store.profile)

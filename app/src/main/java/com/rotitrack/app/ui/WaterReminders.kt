@@ -1,5 +1,6 @@
 package com.rotitrack.app.ui
 
+import com.rotitrack.app.i18n.t
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -93,7 +94,7 @@ fun WaterRemindersScreen(store: AppStore, platform: Platform, onBack: () -> Unit
             Box(Modifier.size(44.dp).clip(CircleShape).clickable(onClick = onBack), contentAlignment = Alignment.Center) {
                 Text("‹", fontSize = 34.sp, color = Color.White)
             }
-            Text("Reminder", fontSize = 26.sp, fontWeight = FontWeight.ExtraBold, color = Color.White, modifier = Modifier.weight(1f))
+            Text(t("Reminder"), fontSize = 26.sp, fontWeight = FontWeight.ExtraBold, color = Color.White, modifier = Modifier.weight(1f))
             Switch(
                 p.remindersOn, ::setOn,
                 colors = SwitchDefaults.colors(
@@ -122,9 +123,9 @@ fun WaterRemindersScreen(store: AppStore, platform: Platform, onBack: () -> Unit
                 .verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 22.dp),
         ) {
             if (!p.remindersOn) {
-                Banner("Water reminders are off. Turn them on with the switch at the top.", "Turn on", Palette.chip) { setOn(true) }
+                Banner(t("Water reminders are off. Turn them on with the switch at the top."), t("Turn on"), Palette.chip) { setOn(true) }
             } else if (!platform.notificationsEnabled()) {
-                Banner("Notifications are turned off for Roti Track, so reminders can't appear.", "Open Settings", Palette.chip) {
+                Banner(t("Notifications are turned off for Roti Track, so reminders can't appear."), t("Open Settings"), Palette.chip) {
                     platform.openNotificationSettings()
                 }
             }
@@ -133,7 +134,7 @@ fun WaterRemindersScreen(store: AppStore, platform: Platform, onBack: () -> Unit
                 Text(mode.label, style = Type.h2)
                 if (mode == WaterReminderMode.CUSTOM) {
                     Spacer(Modifier.width(6.dp))
-                    Icon(TabIcons.Info, "How it works", tint = Palette.muted, modifier = Modifier.size(20.dp))
+                    Icon(TabIcons.Info, t("How it works"), tint = Palette.muted, modifier = Modifier.size(20.dp))
                 }
             }
             Text(mode.blurb, style = Type.body.copy(color = Palette.muted))
@@ -150,7 +151,7 @@ fun WaterRemindersScreen(store: AppStore, platform: Platform, onBack: () -> Unit
                     }
                     WaterReminderMode.INTERVAL -> IntervalSettings(p, ::profile)
                     WaterReminderMode.CUSTOM -> {
-                        Text("Tap a time to turn it on or off. Press and hold to delete it.", style = Type.small, modifier = Modifier.padding(bottom = 12.dp))
+                        Text(t("Tap a time to turn it on or off. Press and hold to delete it."), style = Type.small, modifier = Modifier.padding(bottom = 12.dp))
                         TimeGrid(
                             prefs.customTimes,
                             onClick = { t -> prefs { pr -> pr.copy(customTimes = pr.customTimes.map { if (it == t) it.copy(enabled = !it.enabled) else it }) } },
@@ -162,14 +163,14 @@ fun WaterRemindersScreen(store: AppStore, platform: Platform, onBack: () -> Unit
             }
 
             Text(
-                "Can't receive reminders?",
+                t("Can't receive reminders?"),
                 style = Type.body.copy(color = Palette.muted, textDecoration = TextDecoration.Underline),
                 modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 20.dp, bottom = 16.dp).clickable { help = true },
             )
             Divider()
             Spacer(Modifier.height(16.dp))
             Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).background(Palette.chip).padding(horizontal = 18.dp, vertical = 8.dp)) {
-                ToggleLine("Reminder Weekend Mode", prefs.weekendMode, "No water reminders on Saturday and Sunday") { on ->
+                ToggleLine(t("Reminder Weekend Mode"), prefs.weekendMode, t("No water reminders on Saturday and Sunday")) { on ->
                     prefs { it.copy(weekendMode = on) }
                 }
             }
@@ -182,9 +183,9 @@ fun WaterRemindersScreen(store: AppStore, platform: Platform, onBack: () -> Unit
                 Icon(TabIcons.Speaker, null, tint = Palette.ink, modifier = Modifier.size(24.dp))
                 Spacer(Modifier.width(12.dp))
                 Column(Modifier.weight(1f)) {
-                    Text("Sounds & Effects", style = Type.title)
+                    Text(t("Sounds & Effects"), style = Type.title)
                     Text(
-                        listOfNotNull(if (prefs.soundOn) prefs.sound.label else "Silent", "vibration".takeIf { prefs.vibration }).joinToString(" · "),
+                        listOfNotNull(if (prefs.soundOn) prefs.sound.label else t("Silent"), t("vibration").takeIf { prefs.vibration }).joinToString(" · "),
                         style = Type.small,
                     )
                 }
@@ -193,8 +194,12 @@ fun WaterRemindersScreen(store: AppStore, platform: Platform, onBack: () -> Unit
             Spacer(Modifier.height(12.dp))
             val next = if (p.remindersOn) WaterSchedule.next(java.time.LocalDateTime.now(), p, prefs) else null
             Text(
-                (next?.let { "Next reminder: ${if (it.toLocalDate() == java.time.LocalDate.now()) "today" else it.dayOfWeek.name.lowercase().replaceFirstChar { c -> c.uppercase() }} at ${clockTime(it.hour, it.minute)}. " } ?: "") +
-                    "Reminders stop for the day once you reach your water goal.",
+                (next?.let { t("Next reminder: {0} at {1}. ",
+                    if (it.toLocalDate() == java.time.LocalDate.now()) t("today")
+                    else it.dayOfWeek.getDisplayName(java.time.format.TextStyle.FULL, com.rotitrack.app.i18n.I18n.locale),
+                    clockTime(it.hour, it.minute),
+                ) } ?: "") +
+                    t("Reminders stop for the day once you reach your water goal."),
                 style = Type.small,
             )
         }
@@ -219,14 +224,14 @@ fun WaterRemindersScreen(store: AppStore, platform: Platform, onBack: () -> Unit
     deleting?.let { t ->
         AlertDialog(
             onDismissRequest = { deleting = null },
-            title = { Text("Delete ${clockTime(t.hour, t.minute)}?") },
+            title = { Text(t("Delete {0}?", clockTime(t.hour, t.minute))) },
             confirmButton = {
                 TextButton(onClick = {
                     prefs { pr -> pr.copy(customTimes = pr.customTimes - t) }
                     deleting = null
-                }) { Text("Delete", color = Palette.danger) }
+                }) { Text(t("Delete"), color = Palette.danger) }
             },
-            dismissButton = { TextButton(onClick = { deleting = null }) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = { deleting = null }) { Text(t("Cancel")) } },
         )
     }
     if (help) CantReceiveDialog(platform) { help = false }
@@ -242,7 +247,7 @@ private fun ModeCard(label: String, selected: Boolean, onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            "$label\nMode", fontSize = 21.sp, lineHeight = 25.sp, maxLines = 2, softWrap = false, fontWeight = FontWeight.ExtraBold,
+            t("{0}\nMode", label), fontSize = 21.sp, lineHeight = 25.sp, maxLines = 2, softWrap = false, fontWeight = FontWeight.ExtraBold,
             color = if (selected) Palette.brandDeep else Color.White.copy(alpha = 0.45f),
             modifier = Modifier.weight(1f),
         )
@@ -254,17 +259,17 @@ private fun ModeCard(label: String, selected: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-private fun StandardRow(t: ReminderTime, last: Boolean, onEdit: () -> Unit, onToggle: (Boolean) -> Unit) {
+private fun StandardRow(time: ReminderTime, last: Boolean, onEdit: () -> Unit, onToggle: (Boolean) -> Unit) {
     Column {
         Row(Modifier.fillMaxWidth().padding(vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(t.label, style = Type.title.copy(fontSize = 18.sp), modifier = Modifier.weight(1f))
+            Text(t(time.label), style = Type.title.copy(fontSize = 18.sp), modifier = Modifier.weight(1f))
             Row(Modifier.clip(RoundedCornerShape(10.dp)).clickable(onClick = onEdit).padding(6.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(clockTime(t.hour, t.minute), style = Type.title.copy(color = if (t.enabled) Palette.inkSoft else Palette.muted, fontWeight = FontWeight.Medium))
+                Text(clockTime(time.hour, time.minute), style = Type.title.copy(color = if (time.enabled) Palette.inkSoft else Palette.muted, fontWeight = FontWeight.Medium))
                 Spacer(Modifier.width(4.dp))
-                Icon(TabIcons.Pencil, "Change time", tint = Palette.muted, modifier = Modifier.size(16.dp))
+                Icon(TabIcons.Pencil, t("Change time"), tint = Palette.muted, modifier = Modifier.size(16.dp))
             }
             Box(Modifier.padding(horizontal = 10.dp).width(1.dp).height(28.dp).background(Palette.divider))
-            Switch(t.enabled, onToggle, colors = SwitchDefaults.colors(checkedTrackColor = Palette.brand))
+            Switch(time.enabled, onToggle, colors = SwitchDefaults.colors(checkedTrackColor = Palette.brand))
         }
         if (!last) Divider()
     }
@@ -272,26 +277,26 @@ private fun StandardRow(t: ReminderTime, last: Boolean, onEdit: () -> Unit, onTo
 
 @Composable
 private fun IntervalSettings(p: Profile, change: ((Profile) -> Profile) -> Unit) {
-    Text("Remind me every", style = Type.small, modifier = Modifier.padding(top = 4.dp))
+    Text(t("Remind me every"), style = Type.small, modifier = Modifier.padding(top = 4.dp))
     Stepper(
-        if (p.reminderEveryMin % 60 == 0) "${p.reminderEveryMin / 60} h" else "${p.reminderEveryMin / 60} h ${p.reminderEveryMin % 60} min",
+        if (p.reminderEveryMin % 60 == 0) "${p.reminderEveryMin / 60} h" else t("{0} h {1} min", p.reminderEveryMin / 60, p.reminderEveryMin % 60),
         onMinus = { change { it.copy(reminderEveryMin = (it.reminderEveryMin - 30).coerceAtLeast(30)) } },
         onPlus = { change { it.copy(reminderEveryMin = (it.reminderEveryMin + 30).coerceAtMost(240)) } },
     )
-    Text("Wake-up time", style = Type.small, modifier = Modifier.padding(top = 12.dp))
+    Text(t("Wake-up time"), style = Type.small, modifier = Modifier.padding(top = 12.dp))
     Stepper(
         hour(p.wakeHour),
         onMinus = { change { it.copy(wakeHour = (it.wakeHour - 1).coerceAtLeast(4)) } },
         onPlus = { change { it.copy(wakeHour = (it.wakeHour + 1).coerceAtMost(it.sleepHour - 2)) } },
     )
-    Text("Bedtime", style = Type.small, modifier = Modifier.padding(top = 12.dp))
+    Text(t("Bedtime"), style = Type.small, modifier = Modifier.padding(top = 12.dp))
     Stepper(
         hour(p.sleepHour),
         onMinus = { change { it.copy(sleepHour = (it.sleepHour - 1).coerceAtLeast(it.wakeHour + 2)) } },
         onPlus = { change { it.copy(sleepHour = (it.sleepHour + 1).coerceAtMost(23)) } },
     )
     val times = WaterSchedule.intervalTimes(p.wakeHour, p.sleepHour, p.reminderEveryMin)
-    Text("${times.size} reminders a day", style = Type.title, modifier = Modifier.padding(top = 18.dp, bottom = 10.dp))
+    Text(t("{0} reminders a day", times.size), style = Type.title, modifier = Modifier.padding(top = 18.dp, bottom = 10.dp))
     TimeGrid(times.map { ReminderTime(it / 60, it % 60) }, onClick = null, onLongClick = null, trailing = null)
 }
 
@@ -338,24 +343,24 @@ private fun TimeGrid(
 private fun CantReceiveDialog(platform: Platform, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Can't receive reminders?") },
+        title = { Text(t("Can't receive reminders?")) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text("1. Allow notifications for Roti Track.", style = Type.body)
+                Text(t("1. Allow notifications for Roti Track."), style = Type.body)
                 Text(
-                    "Open notification settings ›", style = Type.title.copy(color = Palette.brand, fontSize = 15.sp),
+                    t("Open notification settings ›"), style = Type.title.copy(color = Palette.brand, fontSize = 15.sp),
                     modifier = Modifier.clickable { platform.openNotificationSettings() },
                 )
-                Text("2. Let Roti Track run in the background: set battery use to \"Unrestricted\" or \"Not optimised\".", style = Type.body)
+                Text(t("2. Let Roti Track run in the background: set battery use to \"Unrestricted\" or \"Not optimised\"."), style = Type.body)
                 Text(
-                    "Open battery settings ›", style = Type.title.copy(color = Palette.brand, fontSize = 15.sp),
+                    t("Open battery settings ›"), style = Type.title.copy(color = Palette.brand, fontSize = 15.sp),
                     modifier = Modifier.clickable { platform.openBatterySettings() },
                 )
-                Text("3. On Xiaomi, Vivo, Oppo, Realme and OnePlus phones, also turn on Autostart for Roti Track, and lock it in Recent apps.", style = Type.body)
-                Text("4. Check that Do Not Disturb is off and the phone isn't on silent.", style = Type.body)
+                Text(t("3. On Xiaomi, Vivo, Oppo, Realme and OnePlus phones, also turn on Autostart for Roti Track, and lock it in Recent apps."), style = Type.body)
+                Text(t("4. Check that Do Not Disturb is off and the phone isn't on silent."), style = Type.body)
             }
         },
-        confirmButton = { TextButton(onClick = onDismiss) { Text("Got it") } },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(t("Got it")) } },
     )
 }
 
@@ -372,9 +377,9 @@ fun SoundsSheet(store: AppStore, platform: Platform, onDismiss: () -> Unit) {
     }
     ModalBottomSheet(onDismissRequest = close, sheetState = state, containerColor = Palette.card) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 22.dp).navigationBarsPadding().padding(bottom = 16.dp)) {
-            Text("Sounds & Effects", style = Type.screenTitle.copy(fontSize = 28.sp))
+            Text(t("Sounds & Effects"), style = Type.screenTitle.copy(fontSize = 28.sp))
             Spacer(Modifier.height(12.dp))
-            SheetToggle(TabIcons.Speaker, "Sound effect", "Plays with each reminder and when you log a drink", prefs.soundOn) { on ->
+            SheetToggle(TabIcons.Speaker, t("Sound effect"), t("Plays with each reminder and when you log a drink"), prefs.soundOn) { on ->
                 store.updatePrefs { it.copy(soundOn = on) }
                 if (on) platform.playSound(store.prefs.sound, volume) else platform.stopSound()
             }
@@ -424,12 +429,12 @@ fun SoundsSheet(store: AppStore, platform: Platform, onDismiss: () -> Unit) {
                 )
                 TextButton(onClick = { nudge(0.1f) }, enabled = prefs.soundOn) { Text("+", fontSize = 26.sp, color = Palette.ink) }
             }
-            SheetToggle(TabIcons.Vibrate, "Vibration", "Buzz with each reminder", prefs.vibration) { on ->
+            SheetToggle(TabIcons.Vibrate, t("Vibration"), t("Buzz with each reminder"), prefs.vibration) { on ->
                 store.updatePrefs { it.copy(vibration = on) }
                 if (on) platform.vibrate()
             }
             Spacer(Modifier.height(18.dp))
-            PillButton("Done", close, Modifier.fillMaxWidth(), height = 58.dp)
+            PillButton(t("Done"), close, Modifier.fillMaxWidth(), height = 58.dp)
         }
     }
 }

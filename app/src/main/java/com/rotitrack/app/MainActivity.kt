@@ -1,5 +1,6 @@
 package com.rotitrack.app
 
+import com.rotitrack.app.i18n.t
 import android.Manifest
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -112,12 +113,12 @@ class MainActivity : ComponentActivity(), Platform, PaymentResultWithDataListene
 
     override fun share(text: String) {
         val send = Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, text)
-        startActivity(Intent.createChooser(send, "Share Roti Track"))
+        startActivity(Intent.createChooser(send, t("Share Roti Track")))
     }
 
     override fun copyText(text: String) {
         getSystemService(ClipboardManager::class.java).setPrimaryClip(ClipData.newPlainText("Roti Track", text))
-        Toast.makeText(this, "Copied $text", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, t("Copied {0}", text), Toast.LENGTH_SHORT).show()
     }
 
     override fun notificationsEnabled(): Boolean = NotificationManagerCompat.from(this).areNotificationsEnabled()
@@ -146,7 +147,7 @@ class MainActivity : ComponentActivity(), Platform, PaymentResultWithDataListene
             .putExtra(Intent.EXTRA_STREAM, uri)
             .putExtra(Intent.EXTRA_SUBJECT, "Roti Track summary report")
             .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        startActivity(Intent.createChooser(send, "Save or share your report"))
+        startActivity(Intent.createChooser(send, t("Save or share your report")))
     }
 
     override fun setDarkTheme(dark: Boolean) {

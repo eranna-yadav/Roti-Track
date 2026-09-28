@@ -1,5 +1,6 @@
 package com.rotitrack.app.ui
 
+import com.rotitrack.app.i18n.t
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -59,7 +60,7 @@ fun ProfileScreen(
     var confirmLogout by remember { mutableStateOf(false) }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(ScreenPadding)) {
-        ScreenHeader("Profile")
+        ScreenHeader(t("Profile"))
 
         Row(
             Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp)).background(Palette.card)
@@ -71,80 +72,80 @@ fun ProfileScreen(
             }
             Column(Modifier.weight(1f).padding(horizontal = 14.dp)) {
                 Text(p.name.ifBlank { account.name }, style = Type.h2)
-                Text("${p.age} years old", style = Type.body.copy(color = Palette.inkSoft))
+                Text(t("{0} years old", p.age), style = Type.body.copy(color = Palette.inkSoft))
             }
             if (isPro) Badge("PRO", Palette.saffron)
         }
 
-        SectionLabel("Invite friends")
+        SectionLabel(t("Invite friends"))
         SettingsGroup {
             SettingsRow(
-                "🎁", "Refer a friend and earn up to ₹$REFERRAL_REWARD_RUPEES",
-                subtitle = "For every friend who buys Pro with your promo code.",
+                "🎁", t("Refer a friend and earn up to ₹{0}", REFERRAL_REWARD_RUPEES),
+                subtitle = t("For every friend who buys Pro with your promo code."),
                 onClick = { onOpen(ProfilePage.REFERRAL) },
             )
             SettingsRow(
-                "📜", "Referral rules",
-                subtitle = "How and when rewards are paid",
+                "📜", t("Referral rules"),
+                subtitle = t("How and when rewards are paid"),
                 last = true, onClick = { onOpen(ProfilePage.REFERRAL_RULES) },
             )
         }
 
         Spacer(Modifier.height(12.dp))
         PillButton(
-            if (isPro) "👑 Roti Track Pro · manage" else "👑 Upgrade to Pro",
+            if (isPro) t("👑 Roti Track Pro · manage") else t("👑 Upgrade to Pro"),
             { onOpen(ProfilePage.PRO) }, Modifier.fillMaxWidth(),
             color = if (isPro) Palette.chip else Palette.saffron, textColor = if (isPro) Palette.brand else Color.White, height = 50.dp,
         )
 
-        SectionLabel("Account")
+        SectionLabel(t("Account"))
         SettingsGroup {
-            SettingsRow("🪪", "Personal details", onClick = { onOpen(ProfilePage.PERSONAL) })
-            SettingsRow("⚙️", "Preferences", onClick = { onOpen(ProfilePage.PREFERENCES) })
-            SettingsRow("🌐", "Language", value = languageName(store.prefs.language), last = true, onClick = { onOpen(ProfilePage.LANGUAGE) })
+            SettingsRow("🪪", t("Personal details"), onClick = { onOpen(ProfilePage.PERSONAL) })
+            SettingsRow("⚙️", t("Preferences"), onClick = { onOpen(ProfilePage.PREFERENCES) })
+            SettingsRow("🌐", t("Language"), value = languageName(com.rotitrack.app.i18n.I18n.lang), last = true, onClick = { onOpen(ProfilePage.LANGUAGE) })
         }
 
-        SectionLabel("Goals & Tracking")
+        SectionLabel(t("Goals & Tracking"))
         SettingsGroup {
-            SettingsRow("🎯", "Edit Nutrition Goals", value = "${p.calorieGoal} kcal", onClick = { onOpen(ProfilePage.GOALS) })
+            SettingsRow("🎯", t("Edit Nutrition Goals"), value = t("{0} kcal", p.calorieGoal), onClick = { onOpen(ProfilePage.GOALS) })
             SettingsRow(
-                "⏳", "Intermittent Fasting",
-                value = if (store.state.fasting.activeStart != null) "Fasting" else "${store.state.fasting.targetHours}:${24 - store.state.fasting.targetHours}",
+                "⏳", t("Intermittent Fasting"),
+                value = if (store.state.fasting.activeStart != null) t("Fasting") else "${store.state.fasting.targetHours}:${24 - store.state.fasting.targetHours}",
                 onClick = { onOpen(ProfilePage.FASTING) },
             )
-            SettingsRow("🔔", "Tracking Reminders", onClick = { onOpen(ProfilePage.REMINDERS) })
-            SettingsRow("🏅", "Badges", value = "${store.state.badges.size}", last = true, onClick = { onOpen(ProfilePage.BADGES) })
+            SettingsRow("🔔", t("Tracking Reminders"), onClick = { onOpen(ProfilePage.REMINDERS) })
+            SettingsRow("🏅", t("Badges"), value = "${store.state.badges.size}", last = true, onClick = { onOpen(ProfilePage.BADGES) })
         }
 
         if (isAdmin) {
-            SectionLabel("Admin")
+            SectionLabel(t("Admin"))
             SettingsGroup {
-                SettingsRow("🛠️", "Admin dashboard", subtitle = "Users, subscriptions, revenue and referrals", last = true, onClick = { onOpen(ProfilePage.ADMIN) })
+                SettingsRow("🛠️", t("Admin dashboard"), subtitle = t("Users, subscriptions, revenue and referrals"), last = true, onClick = { onOpen(ProfilePage.ADMIN) })
             }
         }
 
-        SectionLabel("Support & Legal")
+        SectionLabel(t("Support & Legal"))
         SettingsGroup {
-            SettingsRow("📣", "Request a Feature", onClick = {
+            SettingsRow("📣", t("Request a Feature"), onClick = {
                 platform.openUrl("mailto:$SUPPORT_EMAIL?subject=" + encode("Roti Track feature request"))
             })
-            SettingsRow("✉️", "Support Email", onClick = {
+            SettingsRow("✉️", t("Support Email"), onClick = {
                 platform.openUrl("mailto:$SUPPORT_EMAIL?subject=" + encode("Roti Track support ($APP_VERSION)"))
             })
-            SettingsRow("📄", "Export PDF Summary Report", onClick = { onOpen(ProfilePage.REPORT) })
-            SettingsRow("📚", "Health articles", onClick = { onOpen(ProfilePage.ARTICLES) })
-            SettingsRow("📃", "Terms and Conditions", onClick = { onOpen(ProfilePage.TERMS) })
-            SettingsRow("🛡️", "Privacy Policy", last = true, onClick = { onOpen(ProfilePage.PRIVACY) })
+            SettingsRow("📄", t("Export PDF Summary Report"), onClick = { onOpen(ProfilePage.REPORT) })
+            SettingsRow("📚", t("Health articles"), onClick = { onOpen(ProfilePage.ARTICLES) })
+            SettingsRow("📃", t("Terms and Conditions"), onClick = { onOpen(ProfilePage.TERMS) })
+            SettingsRow("🛡️", t("Privacy Policy"), last = true, onClick = { onOpen(ProfilePage.PRIVACY) })
         }
 
-        SectionLabel("Account Actions")
+        SectionLabel(t("Account Actions"))
         SettingsGroup {
-            SettingsRow("↪️", "Logout", onClick = { confirmLogout = true })
-            SettingsRow("🗑️", "Delete Account", titleColor = Palette.danger, last = true, onClick = { confirmDelete = true })
+            SettingsRow("↪️", t("Logout"), onClick = { confirmLogout = true })
+            SettingsRow("🗑️", t("Delete Account"), titleColor = Palette.danger, last = true, onClick = { confirmDelete = true })
         }
 
         Text(
-            "VERSION $APP_VERSION", style = Type.small.copy(color = Palette.inkSoft),
+            t("VERSION {0}", APP_VERSION), style = Type.small.copy(color = Palette.inkSoft),
             modifier = Modifier.fillMaxWidth().padding(vertical = 20.dp),
             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
         )
@@ -153,26 +154,25 @@ fun ProfileScreen(
     if (confirmLogout) {
         AlertDialog(
             onDismissRequest = { confirmLogout = false },
-            title = { Text("Log out?") },
-            text = { Text("Your logs stay on this phone and come back when you sign in again.") },
-            confirmButton = { TextButton(onClick = { confirmLogout = false; onSignOut() }) { Text("Log out") } },
-            dismissButton = { TextButton(onClick = { confirmLogout = false }) { Text("Cancel") } },
+            title = { Text(t("Log out?")) },
+            text = { Text(t("Your logs stay on this phone and come back when you sign in again.")) },
+            confirmButton = { TextButton(onClick = { confirmLogout = false; onSignOut() }) { Text(t("Log out")) } },
+            dismissButton = { TextButton(onClick = { confirmLogout = false }) { Text(t("Cancel")) } },
         )
     }
     if (confirmDelete) {
         AlertDialog(
             onDismissRequest = { confirmDelete = false },
-            title = { Text("Delete your account?") },
+            title = { Text(t("Delete your account?")) },
             text = {
                 Text(
-                    "This permanently deletes your account, profile, meals, water, exercise and weight logs. " +
-                        "It can't be undone. If you pay for Pro, cancel the subscription first (Google Play or the Pro screen)."
+                    t("This permanently deletes your account, profile, meals, water, exercise and weight logs. It can't be undone. If you pay for Pro, cancel the subscription first (Google Play or the Pro screen).")
                 )
             },
             confirmButton = {
-                TextButton(onClick = { confirmDelete = false; onDeleteAccount() }) { Text("Delete", color = Palette.danger) }
+                TextButton(onClick = { confirmDelete = false; onDeleteAccount() }) { Text(t("Delete"), color = Palette.danger) }
             },
-            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text(t("Cancel")) } },
         )
     }
 }

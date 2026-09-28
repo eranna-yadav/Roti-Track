@@ -1,5 +1,7 @@
 package com.rotitrack.app.domain
 
+import com.rotitrack.app.i18n.t
+
 import com.rotitrack.app.data.Gender
 import com.rotitrack.app.data.Profile
 import com.rotitrack.app.data.WeightGoal
@@ -58,9 +60,9 @@ object Nutrition {
 
     /** Asian-Indian BMI cut-offs, which sit lower than the WHO defaults. */
     fun bmiLabel(value: Double): String = when {
-        value < 18.5 -> "Underweight"
-        value < 23 -> "Healthy"
-        value < 25 -> "Overweight"
-        else -> "Obese"
+        value < 18.5 -> t("Underweight")
+        value < 23 -> t("Healthy")
+        value < 25 -> t("Overweight")
+        else -> t("Obese")
     }
 }

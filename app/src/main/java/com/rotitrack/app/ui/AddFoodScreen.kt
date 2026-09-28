@@ -1,5 +1,6 @@
 package com.rotitrack.app.ui
 
+import com.rotitrack.app.i18n.t
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -72,7 +73,7 @@ fun AddFoodScreen(store: AppStore, slot: MealSlot, day: String, isPro: Boolean, 
     val dietOk = { f: Food -> showAll || f.diet.ordinal <= pref.ordinal }
     val q = query.trim().lowercase()
     val results = when {
-        q.isNotEmpty() -> store.allFoods.filter { dietOk(it) && it.name.lowercase().contains(q) }
+        q.isNotEmpty() -> store.allFoods.filter { dietOk(it) && (it.name.lowercase().contains(q) || t(it.name).lowercase().contains(q)) }
         filter == Filter.Recent -> recent.filter(dietOk)
         (filter as Filter.Category).c == FoodCategory.CUSTOM -> store.state.customFoods
         else -> store.allFoods.filter { it.category == (filter as Filter.Category).c && dietOk(it) }
@@ -85,19 +86,19 @@ fun AddFoodScreen(store: AppStore, slot: MealSlot, day: String, isPro: Boolean, 
     Column(Modifier.fillMaxSize().background(Palette.card).imePadding()) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             Text("‹", fontSize = 34.sp, color = Palette.ink, modifier = Modifier.clickable(onClick = onBack).padding(horizontal = 12.dp))
-            Text("Add to ${slot.label}", style = Type.h2, modifier = Modifier.weight(1f))
+            Text(t("Add to {0}", slot.label), style = Type.h2, modifier = Modifier.weight(1f))
             if (added > 0) {
-                TextButton(onClick = onBack) { Text("Done ($added)", style = Type.title.copy(color = Palette.brand)) }
+                TextButton(onClick = onBack) { Text(t("Done ({0})", added), style = Type.title.copy(color = Palette.brand)) }
             }
         }
 
         TextField(
             value = query,
             onValueChange = { query = it },
-            placeholder = { Text("Search dal, roti, idli, paneer…") },
+            placeholder = { Text(t("Search dal, roti, idli, paneer…")) },
             leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
             trailingIcon = {
-                if (query.isNotEmpty()) IconButton(onClick = { query = "" }) { Icon(Icons.Filled.Clear, contentDescription = "Clear") }
+                if (query.isNotEmpty()) IconButton(onClick = { query = "" }) { Icon(Icons.Filled.Clear, contentDescription = t("Clear")) }
             },
             singleLine = true,
             shape = RoundedCornerShape(50),
@@ -114,7 +115,7 @@ fun AddFoodScreen(store: AppStore, slot: MealSlot, day: String, isPro: Boolean, 
             Box(Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
                 ChipRow(filters, filter, label = {
                     when (it) {
-                        Filter.Recent -> "Recent"
+                        Filter.Recent -> t("Recent")
                         is Filter.Category -> it.c.label
                     }
                 }, onSelect = { filter = it })
@@ -124,11 +125,11 @@ fun AddFoodScreen(store: AppStore, slot: MealSlot, day: String, isPro: Boolean, 
         if (pref != Diet.NONVEG) {
             Row(Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 4.dp)) {
                 Text(
-                    if (showAll) "Showing all foods" else "Showing ${if (pref == Diet.VEG) "vegetarian" else "veg + egg"} foods",
+                    if (showAll) t("Showing all foods") else if (pref == Diet.VEG) t("Showing vegetarian foods") else t("Showing veg + egg foods"),
                     style = Type.small, modifier = Modifier.weight(1f),
                 )
                 Text(
-                    if (showAll) "Filter" else "Show all",
+                    if (showAll) t("Filter") else t("Show all"),
                     style = Type.small.copy(color = Palette.brand),
                     modifier = Modifier.clickable { showAll = !showAll },
                 )
@@ -139,8 +140,8 @@ fun AddFoodScreen(store: AppStore, slot: MealSlot, day: String, isPro: Boolean, 
             if (results.isEmpty()) {
                 item {
                     Text(
-                        if (filter == Filter.Category(FoodCategory.CUSTOM) && q.isEmpty()) "No custom foods yet. Add your own recipes below."
-                        else "No match. Try another spelling, or add it as a custom food.",
+                        if (filter == Filter.Category(FoodCategory.CUSTOM) && q.isEmpty()) t("No custom foods yet. Add your own recipes below.")
+                        else t("No match. Try another spelling, or add it as a custom food."),
                         style = Type.body.copy(color = Palette.muted),
                         modifier = Modifier.padding(top = 40.dp),
                     )
@@ -153,7 +154,7 @@ fun AddFoodScreen(store: AppStore, slot: MealSlot, day: String, isPro: Boolean, 
                     trailing = if (food.category == FoodCategory.CUSTOM && q.isEmpty() && filter != Filter.Recent) {
                         {
                             IconButton(onClick = { store.removeCustomFood(food.id) }) {
-                                Icon(Icons.Filled.Delete, contentDescription = "Delete", tint = Palette.muted)
+                                Icon(Icons.Filled.Delete, contentDescription = t("Delete"), tint = Palette.muted)
                             }
                         }
                     } else null,
@@ -163,7 +164,7 @@ fun AddFoodScreen(store: AppStore, slot: MealSlot, day: String, isPro: Boolean, 
         }
 
         PillButton(
-            if (isPro) "＋ Create custom food" else "🔒 Create custom food · Pro", { if (isPro) customOpen = true else onUpgrade() },
+            if (isPro) t("＋ Create custom food") else t("🔒 Create custom food · Pro"), { if (isPro) customOpen = true else onUpgrade() },
             Modifier.fillMaxWidth().padding(16.dp), color = Palette.night,
         )
     }
@@ -206,12 +207,12 @@ fun LogFoodSheet(food: Food, initialSlot: MealSlot, onDismiss: () -> Unit, onLog
                 Text(food.emoji, fontSize = 40.sp)
                 Spacer(Modifier.width(12.dp))
                 Column {
-                    Text(food.name, style = Type.h2)
-                    Text("${food.serving} per serving", style = Type.small)
+                    Text(t(food.name), style = Type.h2)
+                    Text(t("{0} per serving", t(food.serving)), style = Type.small)
                 }
             }
             Stepper(
-                "${formatServings(servings)} serving${if (servings == 1.0) "" else "s"}",
+                if (servings == 1.0) t("{0} serving", formatServings(servings)) else t("{0} servings", formatServings(servings)),
                 onMinus = { servings = maxOf(step, servings - step) },
                 onPlus = { servings = minOf(20.0, servings + step) },
                 modifier = Modifier.padding(vertical = 20.dp, horizontal = 12.dp),
@@ -219,17 +220,17 @@ fun LogFoodSheet(food: Food, initialSlot: MealSlot, onDismiss: () -> Unit, onLog
             Row(
                 Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Palette.chip).padding(vertical = 14.dp),
             ) {
-                Nutri("Calories", "${(food.kcal * servings).roundToInt()}", Palette.leaf)
-                Nutri("Protein", "${fmt(food.protein * servings)} g", Palette.protein)
-                Nutri("Carbs", "${fmt(food.carbs * servings)} g", Palette.carbs)
-                Nutri("Fat", "${fmt(food.fat * servings)} g", Palette.fat)
+                Nutri(t("Calories"), "${(food.kcal * servings).roundToInt()}", Palette.leaf)
+                Nutri(t("Protein"), "${fmt(food.protein * servings)} g", Palette.protein)
+                Nutri(t("Carbs"), "${fmt(food.carbs * servings)} g", Palette.carbs)
+                Nutri(t("Fat"), "${fmt(food.fat * servings)} g", Palette.fat)
             }
             Row(Modifier.padding(vertical = 18.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 MealSlot.entries.forEach { s ->
                     Chip(s.short, s == slot, { slot = s }, Modifier.weight(1f), hPadding = 4.dp)
                 }
             }
-            PillButton("Add to ${slot.short}", { onLog(servings, slot) }, Modifier.fillMaxWidth())
+            PillButton(t("Add to {0}", slot.short), { onLog(servings, slot) }, Modifier.fillMaxWidth())
         }
     }
 }
@@ -250,7 +251,7 @@ fun CustomFoodDialog(
     onSave: (String, String, Int, Double, Double, Double, Diet) -> Unit,
 ) {
     var name by remember { mutableStateOf(initialName) }
-    var serving by remember { mutableStateOf("1 bowl") }
+    var serving by remember { mutableStateOf(t("1 bowl")) }
     var kcal by remember { mutableStateOf("") }
     var protein by remember { mutableStateOf("") }
     var carbs by remember { mutableStateOf("") }
@@ -265,20 +266,20 @@ fun CustomFoodDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Custom food") },
+        title = { Text(t("Custom food")) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(name, { name = it }, label = { Text("Name") }, singleLine = true)
-                OutlinedTextField(serving, { serving = it }, label = { Text("Serving size") }, singleLine = true)
-                NumberField(kcal, { kcal = it }, if (derived > 0) "Calories ($derived from macros)" else "Calories (kcal)")
+                OutlinedTextField(name, { name = it }, label = { Text(t("Name")) }, singleLine = true)
+                OutlinedTextField(serving, { serving = it }, label = { Text(t("Serving size")) }, singleLine = true)
+                NumberField(kcal, { kcal = it }, if (derived > 0) t("Calories ({0} from macros)", derived) else t("Calories (kcal)"))
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    NumberField(protein, { protein = it }, "Protein g", Modifier.weight(1f))
-                    NumberField(carbs, { carbs = it }, "Carbs g", Modifier.weight(1f))
-                    NumberField(fat, { fat = it }, "Fat g", Modifier.weight(1f))
+                    NumberField(protein, { protein = it }, t("Protein g"), Modifier.weight(1f))
+                    NumberField(carbs, { carbs = it }, t("Carbs g"), Modifier.weight(1f))
+                    NumberField(fat, { fat = it }, t("Fat g"), Modifier.weight(1f))
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Chip("🟢 Veg", !nonveg, { nonveg = false }, Modifier.weight(1f))
-                    Chip("🔴 Non-veg", nonveg, { nonveg = true }, Modifier.weight(1f))
+                    Chip(t("🟢 Veg"), !nonveg, { nonveg = false }, Modifier.weight(1f))
+                    Chip(t("🔴 Non-veg"), nonveg, { nonveg = true }, Modifier.weight(1f))
                 }
             }
         },
@@ -287,13 +288,13 @@ fun CustomFoodDialog(
                 enabled = valid,
                 onClick = {
                     onSave(
-                        name.trim(), serving.trim().ifBlank { "1 serving" }, calories,
+                        name.trim(), serving.trim().ifBlank { t("1 serving") }, calories,
                         num(protein), num(carbs), num(fat), if (nonveg) Diet.NONVEG else Diet.VEG,
                     )
                 },
-            ) { Text("Save") }
+            ) { Text(t("Save")) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(t("Cancel")) } },
     )
 }
 

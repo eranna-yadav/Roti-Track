@@ -1,5 +1,6 @@
 package com.rotitrack.app.ui
 
+import com.rotitrack.app.i18n.t
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -66,11 +67,11 @@ fun DashboardScreen(
         else -> MealSlot.DINNER
     }
     val next = store.plan(day).first { it.slot == nextSlot }
-    val firstName = (p.name.ifBlank { account.name }).substringBefore(' ').ifBlank { "there" }
+    val firstName = (p.name.ifBlank { account.name }).substringBefore(' ').ifBlank { t("there") }
     val greeting = when {
-        hour < 12 -> "Good morning"
-        hour < 17 -> "Good afternoon"
-        else -> "Good evening"
+        hour < 12 -> t("Good morning")
+        hour < 17 -> t("Good afternoon")
+        else -> t("Good evening")
     }
 
     LazyColumn(Modifier.fillMaxSize(), contentPadding = ScreenPadding) {
@@ -81,7 +82,7 @@ fun DashboardScreen(
                 }
                 Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
                     Text(
-                        "$greeting · " + LocalDate.now().format(DateTimeFormatter.ofPattern("EEE, d MMM", Locale.getDefault())),
+                        "$greeting · " + LocalDate.now().format(DateTimeFormatter.ofPattern("EEE, d MMM", com.rotitrack.app.i18n.I18n.locale)),
                         style = Type.small, maxLines = 1,
                     )
                     Text(firstName, style = Type.h2, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -89,22 +90,22 @@ fun DashboardScreen(
                 if (isPro) {
                     Badge("PRO", Palette.saffron)
                 } else {
-                    PillButton("Go Pro", onUpgrade, color = Palette.saffron, height = 36.dp, modifier = Modifier.width(92.dp))
+                    PillButton(t("Go Pro"), onUpgrade, color = Palette.saffron, height = 36.dp, modifier = Modifier.width(92.dp))
                 }
             }
         }
 
         item {
             AppCard(onClick = { onOpen(Tab.FOOD) }) {
-                Text("Today", style = Type.title)
+                Text(t("Today"), style = Type.title)
                 Spacer(Modifier.height(12.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     CalorieRing(totals.kcal, todayGoal, size = 128.dp)
                     Spacer(Modifier.width(16.dp))
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Progress("Calories", "${totals.kcal} / $todayGoal", totals.kcal.toFloat() / todayGoal, Palette.leaf)
-                        Progress("Water", "${liters(water)} / ${liters(p.waterGoalMl)}", water.toFloat() / p.waterGoalMl, Palette.aqua)
-                        Progress("Protein", "${totals.protein.toInt()} / ${macros.protein} g", (totals.protein / macros.protein).toFloat(), Palette.protein)
+                        Progress(t("Calories"), "${totals.kcal} / $todayGoal", totals.kcal.toFloat() / todayGoal, Palette.leaf)
+                        Progress(t("Water"), "${liters(water)} / ${liters(p.waterGoalMl)}", water.toFloat() / p.waterGoalMl, Palette.aqua)
+                        Progress(t("Protein"), "${totals.protein.toInt()} / ${macros.protein} g", (totals.protein / macros.protein).toFloat(), Palette.protein)
                     }
                 }
             }
@@ -112,24 +113,24 @@ fun DashboardScreen(
 
         item {
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                StatTile("🔥", "${store.streak()}", "day\nstreak", Modifier.weight(1f))
+                StatTile("🔥", "${store.streak()}", t("day\nstreak"), Modifier.weight(1f))
                 val bmi = Nutrition.bmi(p.weightKg, p.heightCm)
-                StatTile("⚖️", "%.1f".format(bmi), "BMI\n${Nutrition.bmiLabel(bmi)}", Modifier.weight(1f))
-                StatTile("🎯", fmt(p.weightKg), "kg now\n${p.goal.label}", Modifier.weight(1f))
+                StatTile("⚖️", "%.1f".format(bmi), t("BMI\n{0}", Nutrition.bmiLabel(bmi)), Modifier.weight(1f))
+                StatTile("🎯", fmt(p.weightKg), t("kg now\n{0}", p.goal.label), Modifier.weight(1f))
             }
             Spacer(Modifier.height(12.dp))
         }
 
         item {
             AppCard(color = Palette.saffronSoft, onClick = { onOpen(Tab.PLAN) }) {
-                Text("UP NEXT · ${next.slot.label.uppercase()} · ${next.slot.time}", style = Type.tiny)
+                Text(t("UP NEXT · {0} · {1}", next.slot.label.uppercase(), next.slot.time), style = Type.tiny)
                 Row(Modifier.padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(next.slot.emoji, fontSize = 30.sp)
                     Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
-                        Text(next.name, style = Type.title)
-                        Text(next.items.joinToString(" · ") { it.food.name }, style = Type.small, maxLines = 2)
+                        Text(t(next.name), style = Type.title)
+                        Text(next.items.joinToString(" · ") { t(it.food.name) }, style = Type.small, maxLines = 2)
                     }
-                    Text("${next.kcal} kcal", style = Type.title)
+                    Text(t("{0} kcal", next.kcal), style = Type.title)
                 }
             }
         }
@@ -139,17 +140,17 @@ fun DashboardScreen(
         if (!isPro) {
             item {
                 AppCard(color = Palette.night, onClick = onUpgrade) {
-                    Text("👑 Roti Track Pro", style = Type.h2.copy(color = Color.White))
+                    Text(t("👑 Roti Track Pro"), style = Type.h2.copy(color = Color.White))
                     Text(
-                        "7-day meal plans, unlimited swaps, 30-day trends and your own recipes. " +
-                            "From ${Plan.MONTHLY.fallbackPrice}/month or ${Plan.YEARLY.fallbackPrice}/year.",
+                        t("7-day meal plans, unlimited swaps, 30-day trends and your own recipes. ") +
+                            t("From {0}/month or {1}/year.", Plan.MONTHLY.fallbackPrice, Plan.YEARLY.fallbackPrice),
                         style = Type.body.copy(color = Color.White.copy(alpha = 0.8f)), modifier = Modifier.padding(vertical = 8.dp),
                     )
-                    PillButton("See plans", onUpgrade, color = Palette.saffron, height = 44.dp, modifier = Modifier.fillMaxWidth())
+                    PillButton(t("See plans"), onUpgrade, color = Palette.saffron, height = 44.dp, modifier = Modifier.fillMaxWidth())
                 }
             }
         } else if (plan != null) {
-            item { Text("Pro · ${plan.label} plan", style = Type.small, modifier = Modifier.padding(top = 4.dp)) }
+            item { Text(t("Pro · {0} plan", plan.label), style = Type.small, modifier = Modifier.padding(top = 4.dp)) }
         }
     }
 }
@@ -168,30 +169,30 @@ private fun Trends(store: AppStore, isPro: Boolean, onUpgrade: () -> Unit) {
     }
 
     Row(Modifier.padding(top = 8.dp, bottom = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text("Trends", style = Type.h2, modifier = Modifier.weight(1f))
-        Chip("7 days", range == 7, { range = 7 })
+        Text(t("Trends"), style = Type.h2, modifier = Modifier.weight(1f))
+        Chip(t("7 days"), range == 7, { range = 7 })
         Spacer(Modifier.width(8.dp))
-        Chip(if (isPro) "30 days" else "30 days 🔒", range == 30, { if (isPro) range = 30 else onUpgrade() })
+        Chip(if (isPro) t("30 days") else t("30 days 🔒"), range == 30, { if (isPro) range = 30 else onUpgrade() })
     }
     AppCard {
-        Text("💧 Water", style = Type.title)
+        Text(t("💧 Water"), style = Type.title)
         Spacer(Modifier.height(12.dp))
         BarChart(days.mapIndexed { i, d -> Bar(label(d), water[i].toFloat(), d == today) }, p.waterGoalMl.toFloat(), Palette.aqua, Palette.waterDeep)
         Row(Modifier.padding(top = 12.dp)) {
-            Summary("Daily average", liters(if (loggedWater.isEmpty()) 0 else loggedWater.average().toInt()), Modifier.weight(1f))
-            Summary("Goal met", "${water.count { it >= p.waterGoalMl }} / $range days", Modifier.weight(1f))
+            Summary(t("Daily average"), liters(if (loggedWater.isEmpty()) 0 else loggedWater.average().toInt()), Modifier.weight(1f))
+            Summary(t("Goal met"), t("{0} / {1} days", water.count { it >= p.waterGoalMl }, range), Modifier.weight(1f))
         }
     }
     AppCard {
-        Text("🍛 Calories", style = Type.title)
+        Text(t("🍛 Calories"), style = Type.title)
         Spacer(Modifier.height(12.dp))
         BarChart(days.mapIndexed { i, d -> Bar(label(d), kcal[i].toFloat(), d == today) }, p.calorieGoal.toFloat(), Palette.leaf, Palette.saffron)
         Row(Modifier.padding(top = 12.dp)) {
-            Summary("Daily average", "${if (loggedKcal.isEmpty()) 0 else loggedKcal.average().toInt()} kcal", Modifier.weight(1f))
-            Summary("Within goal", "${kcal.count { it in 1..p.calorieGoal }} / $range days", Modifier.weight(1f))
+            Summary(t("Daily average"), t("{0} kcal", if (loggedKcal.isEmpty()) 0 else loggedKcal.average().toInt()), Modifier.weight(1f))
+            Summary(t("Within goal"), t("{0} / {1} days", kcal.count { it in 1..p.calorieGoal }, range), Modifier.weight(1f))
         }
     }
-    Text("Averages only count days where something was logged.", style = Type.small, modifier = Modifier.padding(bottom = 12.dp))
+    Text(t("Averages only count days where something was logged."), style = Type.small, modifier = Modifier.padding(bottom = 12.dp))
 }
 
 @Composable

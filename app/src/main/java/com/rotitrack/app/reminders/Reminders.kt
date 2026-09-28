@@ -1,5 +1,6 @@
 package com.rotitrack.app.reminders
 
+import com.rotitrack.app.i18n.t
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
@@ -44,8 +45,8 @@ object Reminders {
     fun createChannel(context: Context) {
         val nm = context.getSystemService(NotificationManager::class.java)
         nm.deleteNotificationChannel(OLD_CHANNEL)
-        val channel = NotificationChannel(CHANNEL, "Water reminders", NotificationManager.IMPORTANCE_HIGH).apply {
-            description = "Nudges to drink water through the day"
+        val channel = NotificationChannel(CHANNEL, t("Water reminders"), NotificationManager.IMPORTANCE_HIGH).apply {
+            description = t("Nudges to drink water through the day")
             setSound(null, null)
             enableVibration(false)
         }
@@ -93,10 +94,10 @@ object Reminders {
         val left = (goal - total).coerceAtLeast(0)
         val n = NotificationCompat.Builder(context, CHANNEL)
             .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle("Time for a glass of water 💧")
-            .setContentText("$total of $goal ml so far — $left ml to go.")
+            .setContentTitle(t("Time for a glass of water 💧"))
+            .setContentText(t("{0} of {1} ml so far — {2} ml to go.", total, goal, left))
             .setContentIntent(open)
-            .addAction(0, "+ $cupMl ml", add)
+            .addAction(0, t("+ {0} ml", cupMl), add)
             .setAutoCancel(true)
             .build()
         NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, n)

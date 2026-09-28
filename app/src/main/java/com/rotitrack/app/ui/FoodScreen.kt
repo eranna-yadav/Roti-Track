@@ -1,5 +1,6 @@
 package com.rotitrack.app.ui
 
+import com.rotitrack.app.i18n.t
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -61,7 +62,7 @@ fun FoodScreen(store: AppStore, onAdd: (MealSlot, String) -> Unit) {
 
     LazyColumn(Modifier.fillMaxSize(), contentPadding = ScreenPadding) {
         item {
-            ScreenHeader("CALORIES")
+            ScreenHeader(t("CALORIES"))
             Row(Modifier.fillMaxWidth().padding(bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     "‹", fontSize = 32.sp, color = Palette.brand,
@@ -80,24 +81,24 @@ fun FoodScreen(store: AppStore, onAdd: (MealSlot, String) -> Unit) {
                     CalorieRing(totals.kcal, goal)
                     Spacer(Modifier.width(16.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Stat("Goal", "$goal kcal", Palette.brand)
-                        Stat("Eaten", "${totals.kcal} kcal", Palette.leaf)
-                        Stat("Burned", "$burned kcal", Palette.saffron)
-                        Stat("Water", "${liters(store.waterTotal(day))} / ${liters(p.waterGoalMl)}", Palette.aqua)
+                        Stat(t("Goal"), t("{0} kcal", goal), Palette.brand)
+                        Stat(t("Eaten"), t("{0} kcal", totals.kcal), Palette.leaf)
+                        Stat(t("Burned"), t("{0} kcal", burned), Palette.saffron)
+                        Stat(t("Water"), "${liters(store.waterTotal(day))} / ${liters(p.waterGoalMl)}", Palette.aqua)
                     }
                 }
                 val extras = listOfNotNull(
-                    burned.takeIf { store.prefs.addBurnedCalories && it > 0 }?.let { "+$it burned" },
-                    store.rollover(day).takeIf { store.prefs.rolloverCalories && it > 0 }?.let { "+$it rolled over" },
+                    burned.takeIf { store.prefs.addBurnedCalories && it > 0 }?.let { t("+{0} burned", it) },
+                    store.rollover(day).takeIf { store.prefs.rolloverCalories && it > 0 }?.let { t("+{0} rolled over", it) },
                 )
                 if (extras.isNotEmpty()) {
-                    Text("Goal includes ${extras.joinToString(" · ")}", style = Type.small, modifier = Modifier.padding(top = 8.dp))
+                    Text(t("Goal includes {0}", extras.joinToString(" · ")), style = Type.small, modifier = Modifier.padding(top = 8.dp))
                 }
                 Spacer(Modifier.height(16.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                    MacroBar("Protein", totals.protein, macros.protein, Palette.protein)
-                    MacroBar("Carbs", totals.carbs, macros.carbs, Palette.carbs)
-                    MacroBar("Fat", totals.fat, macros.fat, Palette.fat)
+                    MacroBar(t("Protein"), totals.protein, macros.protein, Palette.protein)
+                    MacroBar(t("Carbs"), totals.carbs, macros.carbs, Palette.carbs)
+                    MacroBar(t("Fat"), totals.fat, macros.fat, Palette.fat)
                 }
             }
         }
@@ -107,11 +108,11 @@ fun FoodScreen(store: AppStore, onAdd: (MealSlot, String) -> Unit) {
                     Text("🏃", fontSize = 26.sp)
                     Spacer(Modifier.width(12.dp))
                     Column(Modifier.weight(1f)) {
-                        Text("Exercise", style = Type.title)
-                        Text(if (burned > 0) "$burned kcal burned" else "Log a walk, yoga, gym or sport", style = Type.small)
+                        Text(t("Exercise"), style = Type.title)
+                        Text(if (burned > 0) t("{0} kcal burned", burned) else t("Log a walk, yoga, gym or sport"), style = Type.small)
                     }
                     RoundButton({ exerciseOpen = true }, size = 40.dp, color = Palette.saffron) {
-                        Icon(Icons.Filled.Add, contentDescription = "Add exercise", tint = Color.White)
+                        Icon(Icons.Filled.Add, contentDescription = t("Add exercise"), tint = Color.White)
                     }
                 }
                 exercises.forEach { e ->
@@ -120,12 +121,12 @@ fun FoodScreen(store: AppStore, onAdd: (MealSlot, String) -> Unit) {
                     Row(Modifier.padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                         Text(e.emoji, fontSize = 22.sp, modifier = Modifier.width(32.dp))
                         Column(Modifier.weight(1f)) {
-                            Text(e.name, style = Type.body)
-                            Text("${e.minutes} min", style = Type.small)
+                            Text(t(e.name), style = Type.body)
+                            Text(t("{0} min", e.minutes), style = Type.small)
                         }
                         Text("−${e.kcal}", style = Type.title.copy(color = Palette.saffron))
                         IconButton(onClick = { store.removeExercise(e.id) }) {
-                            Icon(Icons.Filled.Delete, contentDescription = "Remove", tint = Palette.muted)
+                            Icon(Icons.Filled.Delete, contentDescription = t("Remove"), tint = Palette.muted)
                         }
                     }
                 }
@@ -142,12 +143,12 @@ fun FoodScreen(store: AppStore, onAdd: (MealSlot, String) -> Unit) {
                         Column(Modifier.weight(1f)) {
                             Text(slot.label, style = Type.title)
                             Text(
-                                if (kcal > 0) "$kcal kcal" else "Suggested ${(p.calorieGoal * slot.share).roundToInt()} kcal",
+                                if (kcal > 0) t("{0} kcal", kcal) else t("Suggested {0} kcal", (p.calorieGoal * slot.share).roundToInt()),
                                 style = Type.small,
                             )
                         }
                         RoundButton({ onAdd(slot, day) }, size = 40.dp, color = Palette.brand) {
-                            Icon(Icons.Filled.Add, contentDescription = "Add to ${slot.label}", tint = Color.White)
+                            Icon(Icons.Filled.Add, contentDescription = t("Add to {0}", slot.label), tint = Color.White)
                         }
                     }
                     items.forEach { m ->
@@ -156,12 +157,12 @@ fun FoodScreen(store: AppStore, onAdd: (MealSlot, String) -> Unit) {
                         Row(Modifier.padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                             Text(m.emoji, fontSize = 22.sp, modifier = Modifier.width(32.dp))
                             Column(Modifier.weight(1f)) {
-                                Text(m.name, style = Type.body, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                Text("${formatServings(m.servings)} × ${m.serving}", style = Type.small, maxLines = 1)
+                                Text(t(m.name), style = Type.body, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                Text("${formatServings(m.servings)} × ${t(m.serving)}", style = Type.small, maxLines = 1)
                             }
                             Text("${m.kcal}", style = Type.title)
                             IconButton(onClick = { store.removeMeal(m.id) }) {
-                                Icon(Icons.Filled.Delete, contentDescription = "Remove", tint = Palette.muted)
+                                Icon(Icons.Filled.Delete, contentDescription = t("Remove"), tint = Palette.muted)
                             }
                         }
                     }
@@ -170,7 +171,7 @@ fun FoodScreen(store: AppStore, onAdd: (MealSlot, String) -> Unit) {
         }
         item {
             AppCard {
-                Text("Last 7 days", style = Type.title)
+                Text(t("Last 7 days"), style = Type.title)
                 Spacer(Modifier.height(12.dp))
                 BarChart(
                     bars = week.map { Bar(Days.weekdayShort(it).take(2), store.totals(it).kcal.toFloat(), it == day) },
@@ -179,7 +180,7 @@ fun FoodScreen(store: AppStore, onAdd: (MealSlot, String) -> Unit) {
                     overColor = Palette.saffron,
                     onBarClick = { day = week[it] },
                 )
-                Text("Dashed line is your ${p.calorieGoal} kcal goal.", style = Type.small, modifier = Modifier.padding(top = 8.dp))
+                Text(t("Dashed line is your {0} kcal goal.", p.calorieGoal), style = Type.small, modifier = Modifier.padding(top = 8.dp))
             }
         }
     }
@@ -203,7 +204,7 @@ fun ExerciseSheet(weightKg: Double, onDismiss: () -> Unit, onLog: (ExerciseType,
         containerColor = Palette.card,
     ) {
         Column(Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp)) {
-            Text("Log exercise", style = Type.h2)
+            Text(t("Log exercise"), style = Type.h2)
             Spacer(Modifier.height(12.dp))
             ACTIVITIES.chunked(3).forEach { row ->
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(bottom = 8.dp)) {
@@ -225,17 +226,17 @@ fun ExerciseSheet(weightKg: Double, onDismiss: () -> Unit, onLog: (ExerciseType,
                 }
             }
             Stepper(
-                "$minutes min",
+                t("{0} min", minutes),
                 onMinus = { minutes = (minutes - 5).coerceAtLeast(5) },
                 onPlus = { minutes = (minutes + 5).coerceAtMost(300) },
                 modifier = Modifier.padding(vertical = 12.dp),
             )
             Text(
-                "≈ ${burnedKcal(activity, weightKg, minutes)} kcal burned",
+                t("≈ {0} kcal burned", burnedKcal(activity, weightKg, minutes)),
                 style = Type.title.copy(color = Palette.saffron), textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(),
             )
             Spacer(Modifier.height(12.dp))
-            PillButton("Add ${activity.name}", { onLog(activity, minutes) }, Modifier.fillMaxWidth())
+            PillButton(t("Add {0}", activity.name), { onLog(activity, minutes) }, Modifier.fillMaxWidth())
         }
     }
 }

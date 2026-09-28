@@ -1,5 +1,6 @@
 package com.rotitrack.app.cloud
 
+import com.rotitrack.app.i18n.t
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -68,10 +69,10 @@ class FirebaseAuthService(private val directory: FirestoreDirectory) : AuthServi
     }
 
     override suspend fun signIn(email: String, password: String) = friendly {
-        val user = auth.signInWithEmailAndPassword(email, password).await().user ?: throw AuthException("Sign-in failed")
+        val user = auth.signInWithEmailAndPassword(email, password).await().user ?: throw AuthException(t("Sign-in failed"))
         if (directory.get(user.uid)?.blocked == true) {
             auth.signOut()
-            throw AuthException("This account has been blocked. Contact support.")
+            throw AuthException(t("This account has been blocked. Contact support."))
         }
         refresh(user)
     }
@@ -79,13 +80,13 @@ class FirebaseAuthService(private val directory: FirestoreDirectory) : AuthServi
     override suspend fun signUp(name: String, email: String, password: String, referralCode: String?) = friendly {
         val code = normalizeReferralCode(referralCode)
         if (code != null && !directory.referralCodeExists(code)) {
-            throw AuthException("That referral code doesn't exist. Check it or leave it empty.")
+            throw AuthException(t("That referral code doesn't exist. Check it or leave it empty."))
         }
         // Run in the service's scope so leaving the login screen can't cut the setup short.
         scope.async {
             signingUp = true
             try {
-                val user = auth.createUserWithEmailAndPassword(email, password).await().user ?: throw AuthException("Sign-up failed")
+                val user = auth.createUserWithEmailAndPassword(email, password).await().user ?: throw AuthException(t("Sign-up failed"))
                 runCatching { user.updateProfile(UserProfileChangeRequest.Builder().setDisplayName(name).build()).await() }
                 // The account exists now; a failed profile write is retried by the app's next publish.
                 runCatching { withTimeout(NETWORK_TIMEOUT_MS) { directory.create(user.uid, name, email, code) } }
@@ -102,7 +103,7 @@ class FirebaseAuthService(private val directory: FirestoreDirectory) : AuthServi
         try {
             user.delete().await()
         } catch (e: FirebaseAuthRecentLoginRequiredException) {
-            throw AuthException("For your security, sign out, sign in again, then delete your account.")
+            throw AuthException(t("For your security, sign out, sign in again, then delete your account."))
         }
     }
 
@@ -117,23 +118,23 @@ class FirebaseAuthService(private val directory: FirestoreDirectory) : AuthServi
     private suspend fun <T> friendly(block: suspend () -> T): T = try {
         withTimeout(2 * NETWORK_TIMEOUT_MS) { block() }
     } catch (e: TimeoutCancellationException) {
-        throw AuthException("The server is taking too long. Check your internet connection and try again.")
+        throw AuthException(t("The server is taking too long. Check your internet connection and try again."))
     } catch (e: AuthException) {
         throw e
     } catch (e: FirebaseAuthWeakPasswordException) {
-        throw AuthException("That password is too weak")
+        throw AuthException(t("That password is too weak"))
     } catch (e: FirebaseAuthUserCollisionException) {
-        throw AuthException("An account with this email already exists")
+        throw AuthException(t("An account with this email already exists"))
     } catch (e: FirebaseAuthInvalidUserException) {
-        throw AuthException("Email or password is incorrect")
+        throw AuthException(t("Email or password is incorrect"))
     } catch (e: FirebaseAuthInvalidCredentialsException) {
-        throw AuthException("Email or password is incorrect")
+        throw AuthException(t("Email or password is incorrect"))
     } catch (e: FirebaseNetworkException) {
-        throw AuthException("No internet connection")
+        throw AuthException(t("No internet connection"))
     } catch (e: FirebaseFirestoreException) {
         throw AuthException(
-            if (e.code == FirebaseFirestoreException.Code.UNAVAILABLE) "No internet connection"
-            else "Couldn't reach the server (${e.code.name.lowercase()}). Try again."
+            if (e.code == FirebaseFirestoreException.Code.UNAVAILABLE) t("No internet connection")
+            else t("Couldn't reach the server ({0}). Try again.", e.code.name.lowercase())
         )
     }
 

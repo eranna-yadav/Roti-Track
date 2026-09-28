@@ -1,5 +1,6 @@
 package com.rotitrack.app.cloud
 
+import com.rotitrack.app.i18n.t
 import android.app.Activity
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -41,13 +42,13 @@ class FirebaseRazorpay(private val activity: () -> Activity?) : RazorpayGateway 
             mapOf("plan" to plan.productId, "externalTransactionToken" to externalTransactionToken),
         )
         val subscriptionId = created["subscriptionId"] as String
-        val act = activity() ?: throw AuthException("Open Roti Track and try again.")
+        val act = activity() ?: throw AuthException(t("Open Roti Track and try again."))
 
         // 2. Razorpay Checkout collects the payment (UPI, cards, netbanking, wallets).
         val result = CompletableDeferred<Result<PaymentData>>().also { pending = it }
         val options = JSONObject()
             .put("name", "Roti Track")
-            .put("description", "Pro · ${plan.label} (${plan.fallbackPrice}/${plan.period})")
+            .put("description", t("Pro · {0} ({1}/{2})", plan.label, plan.fallbackPrice, plan.period))
             .put("subscription_id", subscriptionId)
             .put("theme", JSONObject().put("color", "#1B4FF0"))
             .put("prefill", JSONObject().put("email", account.email).put("name", account.name))
@@ -64,21 +65,21 @@ class FirebaseRazorpay(private val activity: () -> Activity?) : RazorpayGateway 
                 "signature" to data.signature,
             ),
         )
-        message = "Payment successful. Welcome to Roti Track Pro!"
+        message = t("Payment successful. Welcome to Roti Track Pro!")
     }
 
     override suspend fun cancel() = guarded {
         call("cancelRazorpaySubscription", emptyMap())
-        message = "Auto-renew is off. You keep Pro until the end of this period."
+        message = t("Auto-renew is off. You keep Pro until the end of this period.")
     }
 
     fun onPaymentSuccess(paymentId: String?, data: PaymentData?) {
-        pending?.complete(if (data != null && paymentId != null) Result.success(data) else Result.failure(AuthException("Payment incomplete")))
+        pending?.complete(if (data != null && paymentId != null) Result.success(data) else Result.failure(AuthException(t("Payment incomplete"))))
         pending = null
     }
 
     fun onPaymentError(code: Int, response: String?) {
-        val reason = if (code == Checkout.PAYMENT_CANCELED) "Payment cancelled." else "Payment failed. No money was taken; please try again."
+        val reason = if (code == Checkout.PAYMENT_CANCELED) t("Payment cancelled.") else t("Payment failed. No money was taken; please try again.")
         pending?.complete(Result.failure(AuthException(reason)))
         pending = null
     }
@@ -91,10 +92,10 @@ class FirebaseRazorpay(private val activity: () -> Activity?) : RazorpayGateway 
             block()
             version++
         } catch (e: FirebaseFunctionsException) {
-            message = e.message ?: "Couldn't reach the payment server."
+            message = e.message ?: t("Couldn't reach the payment server.")
             throw AuthException(message!!)
         } catch (e: Exception) {
-            message = e.message ?: "Something went wrong."
+            message = e.message ?: t("Something went wrong.")
             throw e
         } finally {
             busy = false
