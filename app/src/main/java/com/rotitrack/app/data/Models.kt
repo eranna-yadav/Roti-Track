@@ -148,7 +148,7 @@ val DEFAULT_CUSTOM_TIMES = (0 until 12).map { i ->
     DROP_2("Water drop 2", 3),
     FLOWING_1("Water flowing 1", 5),
     FLOWING_2("Water flowing 2", 7),
-    FLOWING_3("Water flowing 3", 9),
+    FLOWING_3("Water flowing 3", 8),
 }
 
 @Serializable
