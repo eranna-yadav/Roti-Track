@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rotitrack.app.domain.Nutrition
@@ -42,12 +43,17 @@ fun OnboardingScreen(store: AppStore, platform: Platform) {
         ) {
             Spacer(Modifier.weight(1f))
             Row(verticalAlignment = Alignment.CenterVertically) {
-            Image(RotiLogo, contentDescription = "Roti Track logo", modifier = Modifier.size(72.dp))
-            Spacer(Modifier.width(10.dp))
-            Image(WaterDropLogo, contentDescription = null, modifier = Modifier.size(width = 54.dp, height = 72.dp))
-        }
+                Image(RotiLogo, contentDescription = "Roti Track logo", modifier = Modifier.size(72.dp))
+                Spacer(Modifier.width(10.dp))
+                Image(WaterDropLogo, contentDescription = null, modifier = Modifier.size(width = 54.dp, height = 72.dp))
+            }
             Text("ROTI TRACK", fontSize = 40.sp, fontWeight = FontWeight.Black, color = Color.White, modifier = Modifier.padding(top = 12.dp))
-            Text("Indian diet planner, calorie & water tracker", style = Type.body.copy(color = Color.White.copy(alpha = 0.8f)))
+            Text(
+                "Indian diet planner, calorie & water tracker",
+                style = Type.body.copy(color = Color.White.copy(alpha = 0.8f)),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+            )
             Spacer(Modifier.weight(1f))
             PillButton("Get started", { started = true }, Modifier.fillMaxWidth(), color = Color.White, textColor = Palette.brand, height = 60.dp)
         }
