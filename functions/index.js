@@ -95,12 +95,14 @@ exports.verifyRazorpayPayment = onCall(
     if (!sub.notes || sub.notes.uid !== uid) throw new HttpsError("permission-denied", "This payment belongs to another account.");
 
     const fields = lib.userFieldsFromSubscription(sub, sub.notes.planId);
+    // The payment was just verified, so at least one has been made even if Razorpay hasn't counted it yet.
+    fields.razorpayPaidCount = Math.max(fields.razorpayPaidCount, 1);
     // A just-authenticated subscription may not have current_end yet; cover the first cycle.
     if (!fields.razorpayUntil) {
       const days = sub.notes.planId === "rotitrack_pro_yearly" ? 366 : 31;
       fields.razorpayUntil = Date.now() + days * 86_400_000;
     }
-    await db.doc(`users/${uid}`).set(fields, { merge: true });
+    await setSubscriptionFields(uid, fields);
     await db.doc(`payments/${subscriptionId}`).set({ status: sub.status, lastPaymentId: paymentId, verifiedAt: Date.now() }, { merge: true });
     await reportToPlay(sub, paymentId, true).catch((e) => logger.error("Play report failed", e));
     return { ok: true, until: fields.razorpayUntil };
@@ -120,6 +122,15 @@ exports.cancelRazorpaySubscription = onCall(
   }
 );
 
+/** Saves a user's subscription state without ever lowering the count of payments made. */
+async function setSubscriptionFields(uid, fields) {
+  const ref = db.doc(`users/${uid}`);
+  await db.runTransaction(async (tx) => {
+    const existing = (await tx.get(ref)).data();
+    tx.set(ref, lib.keepHighestPaidCount(existing, fields), { merge: true });
+  });
+}
+
 /** Razorpay → us: renewals, failed charges, cancellations. Point the dashboard webhook here. */
 exports.razorpayWebhook = onRequest(
   { region: REGION, secrets: [KEY_ID, KEY_SECRET, WEBHOOK_SECRET] },
@@ -135,7 +146,7 @@ exports.razorpayWebhook = onRequest(
       res.status(200).send("ignored");
       return;
     }
-    await db.doc(`users/${sub.notes.uid}`).set(lib.userFieldsFromSubscription(sub, sub.notes.planId), { merge: true });
+    await setSubscriptionFields(sub.notes.uid, lib.userFieldsFromSubscription(sub, sub.notes.planId));
     await db.doc(`payments/${sub.id}`).set({ status: sub.status, lastEvent: event, updatedAt: Date.now() }, { merge: true });
 
     if (event === "subscription.charged") {
@@ -178,32 +189,38 @@ async function reportToPlay(sub, paymentId, initial) {
 }
 
 /**
- * Referral reward: the first time a user who signed up with a friend's code
- * has a server-verified paid plan (Razorpay), the friend earns ₹500.
- * Runs in a transaction so a user can only ever pay out once.
+ * Referral rewards, paid as a friend's payments are confirmed (see lib.js for the rules):
+ * ₹500 for a yearly plan; ₹250 + ₹250 over the first two monthly payments.
+ * Runs in a transaction and keeps a running total per friend, so nothing is paid twice.
  */
 exports.creditReferral = onDocumentWritten({ document: "users/{uid}", region: REGION }, async (event) => {
   const after = event.data && event.data.after && event.data.after.data();
   if (!after) return;
   const uid = event.params.uid;
-  if (!lib.shouldCreditReferral(after, Date.now())) return;
+  if (lib.referralToCredit(after, Date.now()) <= 0) return;
 
   const codeDoc = await db.doc(`referralCodes/${after.referredByCode}`).get();
   const referrerUid = codeDoc.exists && codeDoc.data().uid;
   if (!referrerUid || referrerUid === uid) return;
 
-  await db.runTransaction(async (tx) => {
+  const credited = await db.runTransaction(async (tx) => {
     const userRef = db.doc(`users/${uid}`);
     const fresh = (await tx.get(userRef)).data() || {};
-    if (fresh.referralCredited) return;
-    tx.set(userRef, { referralCredited: true, referralCreditedTo: referrerUid }, { merge: true });
+    const amount = lib.referralToCredit(fresh, Date.now());
+    if (amount <= 0) return 0;
+    const before = lib.referralCreditedSoFar(fresh);
+    const total = before + amount;
+    tx.set(userRef, { referralCredited: true, referralCreditedAmount: total, referralCreditedTo: referrerUid }, { merge: true });
     tx.set(db.doc(`users/${referrerUid}`), {
-      referralEarnings: admin.firestore.FieldValue.increment(lib.REFERRAL_REWARD),
-      referralCount: admin.firestore.FieldValue.increment(1),
+      referralEarnings: admin.firestore.FieldValue.increment(amount),
+      // A friend counts once, on their first reward.
+      referralCount: admin.firestore.FieldValue.increment(before === 0 ? 1 : 0),
     }, { merge: true });
-    tx.set(db.doc(`referrals/${uid}`), {
-      referrerUid, referredUid: uid, amount: lib.REFERRAL_REWARD, createdAt: Date.now(),
+    tx.set(db.doc(`referrals/${uid}_${total}`), {
+      referrerUid, referredUid: uid, amount, totalForFriend: total,
+      planId: fresh.razorpayPlanId || null, payments: fresh.razorpayPaidCount || 0, createdAt: Date.now(),
     });
+    return amount;
   });
-  logger.info("Referral credited", { uid, referrerUid });
+  if (credited) logger.info("Referral credited", { uid, referrerUid, amount: credited });
 });

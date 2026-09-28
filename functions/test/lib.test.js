@@ -40,9 +40,24 @@ test("plan prices match the app", () => {
 
 test("referral pays once, only for a verified paid plan", () => {
   const now = 1_000;
-  assert.ok(lib.shouldCreditReferral({ referredByCode: "RTABC234", razorpayUntil: 5_000 }, now));
-  assert.ok(!lib.shouldCreditReferral({ referredByCode: "RTABC234", razorpayUntil: 5_000, referralCredited: true }, now));
-  assert.ok(!lib.shouldCreditReferral({ referredByCode: "RTABC234", razorpayUntil: 500 }, now));
-  assert.ok(!lib.shouldCreditReferral({ razorpayUntil: 5_000 }, now));
-  assert.strictEqual(lib.REFERRAL_REWARD, 500);
+  const monthly = { referredByCode: "RTABC234", razorpayPlanId: "rotitrack_pro_monthly", razorpayUntil: 5_000 };
+  // Monthly: ₹250 after the 1st payment, ₹250 more after the 2nd, then nothing.
+  assert.strictEqual(lib.referralToCredit({ ...monthly, razorpayPaidCount: 1 }, now), 250);
+  assert.strictEqual(lib.referralToCredit({ ...monthly, razorpayPaidCount: 1, referralCreditedAmount: 250 }, now), 0);
+  assert.strictEqual(lib.referralToCredit({ ...monthly, razorpayPaidCount: 2, referralCreditedAmount: 250 }, now), 250);
+  assert.strictEqual(lib.referralToCredit({ ...monthly, razorpayPaidCount: 5, referralCreditedAmount: 500 }, now), 0);
+  // Yearly: ₹500 at once; switching from monthly pays the rest.
+  const yearly = { ...monthly, razorpayPlanId: "rotitrack_pro_yearly", razorpayPaidCount: 1 };
+  assert.strictEqual(lib.referralToCredit(yearly, now), 500);
+  assert.strictEqual(lib.referralToCredit({ ...yearly, referralCreditedAmount: 250 }, now), 250);
+  // Nothing without a code, without a current paid plan, or for accounts credited before instalments.
+  assert.strictEqual(lib.referralToCredit({ ...monthly, referredByCode: undefined, razorpayPaidCount: 1 }, now), 0);
+  assert.strictEqual(lib.referralToCredit({ ...monthly, razorpayUntil: 500, razorpayPaidCount: 1 }, now), 0);
+  assert.strictEqual(lib.referralToCredit({ ...yearly, referralCredited: true }, now), 0);
+});
+
+test("a late Razorpay event never lowers the payment count", () => {
+  const existing = { razorpaySubscriptionId: "sub_1", razorpayPaidCount: 2 };
+  assert.strictEqual(lib.keepHighestPaidCount(existing, { razorpaySubscriptionId: "sub_1", razorpayPaidCount: 1 }).razorpayPaidCount, 2);
+  assert.strictEqual(lib.keepHighestPaidCount(existing, { razorpaySubscriptionId: "sub_2", razorpayPaidCount: 1 }).razorpayPaidCount, 1);
 });

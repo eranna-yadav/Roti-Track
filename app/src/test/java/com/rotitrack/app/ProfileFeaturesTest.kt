@@ -5,7 +5,9 @@ import com.rotitrack.app.account.DemoBilling
 import com.rotitrack.app.account.LocalAuth
 import com.rotitrack.app.account.LocalDirectory
 import com.rotitrack.app.account.Plan
+import com.rotitrack.app.account.REFERRAL_MONTHLY_INSTALMENT
 import com.rotitrack.app.account.REFERRAL_REWARD_RUPEES
+import com.rotitrack.app.account.referralEarnedFor
 import com.rotitrack.app.account.UserSummary
 import com.rotitrack.app.account.referralCodeFor
 import com.rotitrack.app.data.MealSlot
@@ -114,6 +116,11 @@ class ProfileFeaturesTest {
         // …going Pro pays out once.
         dir.publish(UserSummary(ravi, "Ravi", "ravi@example.com", planId = Plan.MONTHLY.productId))
         dir.publish(UserSummary(ravi, "Ravi", "ravi@example.com", planId = Plan.MONTHLY.productId))
+        // Monthly pays ₹250 for the first payment (the server adds ₹250 more on the second).
+        assertEquals(REFERRAL_MONTHLY_INSTALMENT, dir.get(asha)!!.referralEarnings)
+        // Switching to yearly pays the rest, and the friend still counts once.
+        dir.publish(UserSummary(ravi, "Ravi", "ravi@example.com", planId = Plan.YEARLY.productId))
+        dir.publish(UserSummary(ravi, "Ravi", "ravi@example.com", planId = Plan.YEARLY.productId))
         assertEquals(REFERRAL_REWARD_RUPEES, dir.get(asha)!!.referralEarnings)
         assertEquals(1, dir.get(asha)!!.referralCount)
         assertEquals(REFERRAL_REWARD_RUPEES, dir.get(asha)!!.referralDue)
@@ -169,5 +176,14 @@ class ReferralCodeTest {
         org.junit.Assert.assertEquals(com.rotitrack.app.account.referralCodeFor(uid, 1), code)
         // A code the user already holds is theirs.
         org.junit.Assert.assertEquals(first, com.rotitrack.app.account.firstFreeReferralCode(uid) { if (it == first) uid else null })
+    }
+}
+
+class ReferralRewardTest {
+    @Test fun monthlyPaysInTwoParts() {
+        org.junit.Assert.assertEquals(250, referralEarnedFor(Plan.MONTHLY, 1))
+        org.junit.Assert.assertEquals(500, referralEarnedFor(Plan.MONTHLY, 2))
+        org.junit.Assert.assertEquals(500, referralEarnedFor(Plan.MONTHLY, 12))
+        org.junit.Assert.assertEquals(500, referralEarnedFor(Plan.YEARLY, 1))
     }
 }

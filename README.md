@@ -62,7 +62,9 @@ from the Pro screen.
 
 **Profile**:
 - **Invite friends**: each user gets a promo code. When a friend signs up with
-  it and then buys Pro, the referrer earns ₹500 (once per friend). Users add a
+  it and then buys Pro, the referrer earns up to ₹500: all at once for a yearly
+  plan, or ₹250 after the friend's 1st monthly payment and ₹250 after the 2nd.
+  The full rules are under Profile → Referral rules. Users add a
   UPI ID for payouts.
 - **Personal details**: name, age, gender, height, a weight log with history,
   activity level, diet preference and cuisine.

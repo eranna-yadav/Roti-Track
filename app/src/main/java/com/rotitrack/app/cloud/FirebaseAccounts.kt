@@ -261,6 +261,7 @@ class FirestoreDirectory : UserDirectory {
         referralEarnings = getLong("referralEarnings")?.toInt() ?: 0,
         referralCount = getLong("referralCount")?.toInt() ?: 0,
         referralCredited = getBoolean("referralCredited") ?: false,
+        referralCreditedAmount = getLong("referralCreditedAmount")?.toInt() ?: 0,
         referralPaid = getLong("referralPaid")?.toInt() ?: 0,
         payoutUpi = getString("payoutUpi").orEmpty(),
     )

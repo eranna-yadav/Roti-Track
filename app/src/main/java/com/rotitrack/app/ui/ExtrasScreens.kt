@@ -33,6 +33,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rotitrack.app.account.Account
+import com.rotitrack.app.account.REFERRAL_MONTHLY_INSTALMENT
 import com.rotitrack.app.account.REFERRAL_REWARD_RUPEES
 import com.rotitrack.app.account.UserSummary
 import com.rotitrack.app.domain.Reports
@@ -46,7 +47,7 @@ import java.util.Locale
 // ------------------------------------------------------------------- referral
 
 @Composable
-fun ReferralScreen(store: AppStore, account: Account, summary: UserSummary?, platform: Platform, onBack: () -> Unit) {
+fun ReferralScreen(store: AppStore, account: Account, summary: UserSummary?, platform: Platform, onRules: () -> Unit, onBack: () -> Unit) {
     // The code is assigned by the server at sign-up; show it once the account details have loaded.
     val code = summary?.referralCode?.takeIf { it.isNotBlank() }
     var upi by remember { mutableStateOf(store.prefs.payoutUpi) }
@@ -56,9 +57,10 @@ fun ReferralScreen(store: AppStore, account: Account, summary: UserSummary?, pla
     SubScreen("Refer & earn", onBack) {
         AppCard(color = Palette.saffronSoft) {
             Text("🎁", fontSize = 40.sp)
-            Text("Earn ₹$REFERRAL_REWARD_RUPEES per friend", style = Type.h2)
+            Text("Earn up to ₹$REFERRAL_REWARD_RUPEES per friend", style = Type.h2)
             Text(
-                "Share your code. When a friend signs up with it and becomes a Pro member, you earn ₹$REFERRAL_REWARD_RUPEES.",
+                "Share your code. When a friend signs up with it and buys Pro, you earn ₹$REFERRAL_REWARD_RUPEES: " +
+                    "all at once for a yearly plan, or ₹$REFERRAL_MONTHLY_INSTALMENT + ₹$REFERRAL_MONTHLY_INSTALMENT over their first two monthly payments.",
                 style = Type.body.copy(color = Palette.inkSoft), modifier = Modifier.padding(top = 4.dp),
             )
         }
@@ -84,13 +86,48 @@ fun ReferralScreen(store: AppStore, account: Account, summary: UserSummary?, pla
             Spacer(Modifier.height(8.dp))
             PillButton("Save UPI ID", { store.updatePrefs { it.copy(payoutUpi = upi) } }, Modifier.fillMaxWidth(), height = 46.dp,
                 enabled = upi != store.prefs.payoutUpi && (upi.isEmpty() || upi.contains('@')))
-            Text("Earnings are sent to this UPI ID after your friend's first payment clears.", style = Type.small, modifier = Modifier.padding(top = 8.dp))
+            Text("We send your earnings to this UPI ID after checking your friend's payment.", style = Type.small, modifier = Modifier.padding(top = 8.dp))
         }
         SectionLabel("How it works")
         SettingsGroup {
             SettingsRow("1️⃣", "Share your code", subtitle = "Send it on WhatsApp or anywhere you like")
-            SettingsRow("2️⃣", "Your friend signs up", subtitle = "They enter $code when creating an account")
-            SettingsRow("3️⃣", "They go Pro, you earn ₹$REFERRAL_REWARD_RUPEES", subtitle = "Paid once per friend", last = true)
+            SettingsRow("2️⃣", "Your friend signs up", subtitle = "They enter ${code ?: "your code"} when creating an account")
+            SettingsRow(
+                "3️⃣", "They buy Pro, you earn up to ₹$REFERRAL_REWARD_RUPEES",
+                subtitle = "Yearly: ₹$REFERRAL_REWARD_RUPEES at once. Monthly: ₹$REFERRAL_MONTHLY_INSTALMENT after the 1st payment, ₹$REFERRAL_MONTHLY_INSTALMENT after the 2nd",
+            )
+            SettingsRow("📜", "Referral rules", last = true, onClick = onRules)
+        }
+    }
+}
+
+/** The referral programme's rules, shown from Profile and from Refer & earn. */
+val REFERRAL_RULES = listOf(
+    "Share your promo code" to "Find it under Profile → Refer a friend. Your friend must enter it while creating their Roti Track account; it can't be added later.",
+    "Yearly plan: ₹$REFERRAL_REWARD_RUPEES" to "When your friend buys the yearly plan (₹990), you earn ₹$REFERRAL_REWARD_RUPEES once their payment is confirmed.",
+    "Monthly plan: ₹$REFERRAL_MONTHLY_INSTALMENT + ₹$REFERRAL_MONTHLY_INSTALMENT" to "When your friend buys the monthly plan (₹359), you earn ₹$REFERRAL_MONTHLY_INSTALMENT after their 1st month's payment and another ₹$REFERRAL_MONTHLY_INSTALMENT after their 2nd month's payment: ₹$REFERRAL_REWARD_RUPEES in total.",
+    "If they stop after one month" to "If your friend cancels or their 2nd monthly payment doesn't go through, you keep the first ₹$REFERRAL_MONTHLY_INSTALMENT but don't earn the second.",
+    "Switching to yearly" to "If your friend moves from monthly to yearly, you earn the rest of the ₹$REFERRAL_REWARD_RUPEES when the yearly payment is confirmed.",
+    "Most ₹$REFERRAL_REWARD_RUPEES per friend" to "Each friend earns you at most ₹$REFERRAL_REWARD_RUPEES in total, however long they stay Pro. There's no limit on how many friends you invite.",
+    "Which payments count" to "Only Pro plans your friend pays for in the Roti Track app with Razorpay (UPI, cards, netbanking or wallets). Free Pro given by Roti Track and refunded payments don't count.",
+    "Getting paid" to "Add your UPI ID on the Refer & earn screen. The Roti Track team checks each payment and sends your earnings to that UPI ID.",
+    "Fair use" to "Referring yourself, fake or duplicate accounts, and spam are not allowed. Rewards earned this way are cancelled and the account may be blocked.",
+    "Changes" to "We may change or end the programme with notice in the app. Rewards you have already earned will still be paid.",
+)
+
+@Composable
+fun ReferralRulesScreen(onBack: () -> Unit) {
+    SubScreen("Referral rules", onBack) {
+        AppCard(color = Palette.saffronSoft) {
+            Text("Earn up to ₹$REFERRAL_REWARD_RUPEES per friend", style = Type.h2)
+            Text(
+                "Yearly plan: ₹$REFERRAL_REWARD_RUPEES at once.\nMonthly plan: ₹$REFERRAL_MONTHLY_INSTALMENT after the 1st payment + ₹$REFERRAL_MONTHLY_INSTALMENT after the 2nd.",
+                style = Type.body.copy(color = Palette.inkSoft, lineHeight = 22.sp), modifier = Modifier.padding(top = 4.dp),
+            )
+        }
+        REFERRAL_RULES.forEachIndexed { i, (h, body) ->
+            Text("${i + 1}. $h", style = Type.title, modifier = Modifier.padding(top = 14.dp, bottom = 4.dp))
+            Text(body, style = Type.body.copy(color = Palette.inkSoft, lineHeight = 22.sp))
         }
     }
 }
@@ -213,7 +250,7 @@ private val TERMS = listOf(
     "About Roti Track" to "Roti Track helps you plan Indian meals and track calories, macros, water, exercise, weight and fasting. It is a wellness tool, not a medical service, and does not replace advice from a doctor or dietitian.",
     "Your account" to "Keep your password safe. You are responsible for activity on your account. We may suspend accounts that misuse the app or the referral programme.",
     "Pro subscription" to "Pro costs ₹359 per month or ₹990 per year, including GST, and renews automatically until you cancel. Cancel Google Play subscriptions in the Play Store and Razorpay subscriptions from the Pro screen; you keep Pro until the end of the paid period. Payments are non-refundable except where the law or the store's policy requires.",
-    "Referral programme" to "You earn ₹500 when a friend signs up with your code and pays for Pro. Each friend counts once. Self-referrals, fake accounts and spam are not allowed and forfeit rewards. We may change or end the programme with notice; earned rewards will still be paid.",
+    "Referral programme" to "You earn up to ₹500 when a friend signs up with your code and pays for Pro: ₹500 once their yearly plan is paid, or ₹250 after their first monthly payment and ₹250 after their second. The full Referral rules in the app apply. Each friend counts once. Self-referrals, fake accounts and spam are not allowed and forfeit rewards. We may change or end the programme with notice; earned rewards will still be paid.",
     "Food and health information" to "Nutrition values are typical home-style estimates and vary with recipes and portions. Calorie, macro, water and fasting targets are general guidance. If you are pregnant, diabetic, have a medical condition or an eating disorder, consult a professional before changing your diet.",
     "Changes" to "We may update these terms. Continuing to use the app after an update means you accept the new terms.",
 )

@@ -34,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rotitrack.app.account.Account
+import com.rotitrack.app.account.REFERRAL_MONTHLY_INSTALMENT
 import com.rotitrack.app.account.REFERRAL_REWARD_RUPEES
 import com.rotitrack.app.store.AppStore
 
@@ -41,7 +42,7 @@ const val APP_VERSION = "1.4.0"
 /** Where "Support Email" and "Request a Feature" send mail. Change to your own address. */
 const val SUPPORT_EMAIL = "support@rotitrack.app"
 
-enum class ProfilePage { PERSONAL, PREFERENCES, LANGUAGE, GOALS, FASTING, REMINDERS, WATER_REMINDERS, REFERRAL, BADGES, REPORT, TERMS, PRIVACY, ARTICLES, ADMIN, PRO }
+enum class ProfilePage { PERSONAL, PREFERENCES, LANGUAGE, GOALS, FASTING, REMINDERS, WATER_REMINDERS, REFERRAL, REFERRAL_RULES, BADGES, REPORT, TERMS, PRIVACY, ARTICLES, ADMIN, PRO }
 
 @Composable
 fun ProfileScreen(
@@ -79,9 +80,14 @@ fun ProfileScreen(
         SectionLabel("Invite friends")
         SettingsGroup {
             SettingsRow(
-                "🎁", "Refer a friend and earn ₹$REFERRAL_REWARD_RUPEES",
-                subtitle = "Earn ₹$REFERRAL_REWARD_RUPEES for every friend who joins Pro with your promo code.",
-                last = true, onClick = { onOpen(ProfilePage.REFERRAL) },
+                "🎁", "Refer a friend and earn up to ₹$REFERRAL_REWARD_RUPEES",
+                subtitle = "For every friend who buys Pro with your promo code.",
+                onClick = { onOpen(ProfilePage.REFERRAL) },
+            )
+            SettingsRow(
+                "📜", "Referral rules",
+                subtitle = "Yearly: ₹$REFERRAL_REWARD_RUPEES · Monthly: ₹$REFERRAL_MONTHLY_INSTALMENT + ₹$REFERRAL_MONTHLY_INSTALMENT",
+                last = true, onClick = { onOpen(ProfilePage.REFERRAL_RULES) },
             )
         }
 

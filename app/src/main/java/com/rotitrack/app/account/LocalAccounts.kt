@@ -127,18 +127,24 @@ class LocalDirectory(private val storage: Storage) : UserDirectory {
             razorpayPlanId = old.razorpayPlanId, razorpayStatus = old.razorpayStatus, razorpayUntil = old.razorpayUntil,
             referredByCode = old.referredByCode, referralEarnings = old.referralEarnings,
             referralCount = old.referralCount, referralCredited = old.referralCredited, referralPaid = old.referralPaid,
+            referralCreditedAmount = old.referralCreditedAmount,
             createdAt = if (old.createdAt > 0) old.createdAt else s.createdAt,
             // The code is chosen once, at sign-up.
             referralCode = old.referralCode,
         )
-        // Stand-in for the server: the first time a referred user is on a paid plan, pay their referrer.
+        // Stand-in for the server, which pays as each payment is confirmed. On this device there are
+        // no renewals, so a paid plan counts as one payment: ₹500 for yearly, ₹250 for monthly.
         val referrer = merged.referredByCode?.let { code -> users.values.firstOrNull { it.referralCode == code } }
-        if (merged.plan != null && !merged.referralCredited && referrer != null && referrer.uid != merged.uid) {
-            users = users + (referrer.uid to referrer.copy(
-                referralEarnings = referrer.referralEarnings + REFERRAL_REWARD_RUPEES,
-                referralCount = referrer.referralCount + 1,
-            ))
-            merged = merged.copy(referralCredited = true)
+        val plan = merged.plan
+        if (plan != null && referrer != null && referrer.uid != merged.uid) {
+            val owed = referralEarnedFor(plan, payments = 1) - merged.referralCreditedAmount
+            if (owed > 0) {
+                users = users + (referrer.uid to referrer.copy(
+                    referralEarnings = referrer.referralEarnings + owed,
+                    referralCount = referrer.referralCount + if (merged.referralCreditedAmount == 0) 1 else 0,
+                ))
+                merged = merged.copy(referralCredited = true, referralCreditedAmount = merged.referralCreditedAmount + owed)
+            }
         }
         users = users + (s.uid to merged)
         save()

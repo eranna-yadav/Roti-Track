@@ -18,8 +18,9 @@ service cloud.firestore {
     // Razorpay status, which only the payments server (Admin SDK) writes.
     function adminOnly() {
       return ['role', 'compPro', 'blocked',
-              'razorpaySubscriptionId', 'razorpayPlanId', 'razorpayStatus', 'razorpayUntil',
-              'referralEarnings', 'referralCount', 'referralCredited', 'referralCreditedTo', 'referralPaid'];
+              'razorpaySubscriptionId', 'razorpayPlanId', 'razorpayStatus', 'razorpayUntil', 'razorpayPaidCount',
+              'referralEarnings', 'referralCount', 'referralCredited', 'referralCreditedAmount',
+              'referralCreditedTo', 'referralPaid'];
     }
 
     match /users/{uid} {

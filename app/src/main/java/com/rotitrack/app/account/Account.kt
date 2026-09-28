@@ -49,6 +49,8 @@ data class UserSummary(
     val referralCount: Int = 0,
     /** Server-maintained: this user's own Pro purchase has already paid out their referrer. */
     val referralCredited: Boolean = false,
+    /** ₹ this user's payments have earned their referrer so far (0, 250 or 500). */
+    val referralCreditedAmount: Int = 0,
     /** Where referral earnings should be paid. */
     val payoutUpi: String = "",
     /** Admin-maintained: ₹ of [referralEarnings] already paid out. */
@@ -94,8 +96,17 @@ interface UserDirectory {
     suspend fun markReferralPaid(uid: String)
 }
 
-/** ₹ paid to a user when a friend who signed up with their code buys Pro. */
+/** Most a user earns per friend who buys Pro with their code. Must match functions/lib.js. */
 const val REFERRAL_REWARD_RUPEES = 500
+
+/** On a monthly plan the reward comes in two parts: after the 1st and after the 2nd payment. */
+const val REFERRAL_MONTHLY_INSTALMENT = 250
+
+/** Total a friend's payments have earned so far: yearly ₹500; monthly ₹250 per payment, up to ₹500. */
+fun referralEarnedFor(plan: Plan, payments: Int): Int = when (plan) {
+    Plan.YEARLY -> REFERRAL_REWARD_RUPEES
+    Plan.MONTHLY -> minOf(REFERRAL_REWARD_RUPEES, REFERRAL_MONTHLY_INSTALMENT * maxOf(payments, 1))
+}
 
 /**
  * A stable, shareable code for a user, e.g. "RTK7P2QX". No 0/O/1/I to avoid mix-ups.
