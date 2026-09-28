@@ -14,6 +14,8 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreException
+import com.google.firebase.firestore.Source
 import com.google.firebase.firestore.SetOptions
 import com.rotitrack.app.account.Account
 import com.rotitrack.app.account.AuthException
@@ -25,6 +27,9 @@ import com.rotitrack.app.account.referralCodeFor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.async
+import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -41,10 +46,13 @@ class FirebaseAuthService(private val directory: FirestoreDirectory) : AuthServi
 
     override val backendLabel = "Firebase"
 
+    /** While true, sign-up finishes its own setup before the app moves past the login screen. */
+    private var signingUp = false
+
     init {
         auth.addAuthStateListener { a ->
             val user = a.currentUser
-            if (user == null) account = null else scope.launch { refresh(user) }
+            if (user == null) account = null else if (!signingUp) scope.launch { refresh(user) }
         }
     }
 
@@ -72,10 +80,19 @@ class FirebaseAuthService(private val directory: FirestoreDirectory) : AuthServi
         if (code != null && !directory.referralCodeExists(code)) {
             throw AuthException("That referral code doesn't exist. Check it or leave it empty.")
         }
-        val user = auth.createUserWithEmailAndPassword(email, password).await().user ?: throw AuthException("Sign-up failed")
-        user.updateProfile(UserProfileChangeRequest.Builder().setDisplayName(name).build()).await()
-        directory.create(user.uid, name, email, code)
-        refresh(user, name)
+        // Run in the service's scope so leaving the login screen can't cut the setup short.
+        scope.async {
+            signingUp = true
+            try {
+                val user = auth.createUserWithEmailAndPassword(email, password).await().user ?: throw AuthException("Sign-up failed")
+                runCatching { user.updateProfile(UserProfileChangeRequest.Builder().setDisplayName(name).build()).await() }
+                // The account exists now; a failed profile write is retried by the app's next publish.
+                runCatching { withTimeout(NETWORK_TIMEOUT_MS) { directory.create(user.uid, name, email, code) } }
+                refresh(user, name)
+            } finally {
+                signingUp = false
+            }
+        }.await()
     }
 
     override suspend fun deleteAccount() = friendly {
@@ -95,9 +112,11 @@ class FirebaseAuthService(private val directory: FirestoreDirectory) : AuthServi
 
     override fun signOut() = auth.signOut()
 
-    /** Turns Firebase's exceptions into messages a user can act on. */
+    /** Turns Firebase's exceptions into messages a user can act on, and gives up on a stalled network. */
     private suspend fun <T> friendly(block: suspend () -> T): T = try {
-        block()
+        withTimeout(2 * NETWORK_TIMEOUT_MS) { block() }
+    } catch (e: TimeoutCancellationException) {
+        throw AuthException("The server is taking too long. Check your internet connection and try again.")
     } catch (e: AuthException) {
         throw e
     } catch (e: FirebaseAuthWeakPasswordException) {
@@ -110,6 +129,15 @@ class FirebaseAuthService(private val directory: FirestoreDirectory) : AuthServi
         throw AuthException("Email or password is incorrect")
     } catch (e: FirebaseNetworkException) {
         throw AuthException("No internet connection")
+    } catch (e: FirebaseFirestoreException) {
+        throw AuthException(
+            if (e.code == FirebaseFirestoreException.Code.UNAVAILABLE) "No internet connection"
+            else "Couldn't reach the server (${e.code.name.lowercase()}). Try again."
+        )
+    }
+
+    private companion object {
+        const val NETWORK_TIMEOUT_MS = 15_000L
     }
 }
 
@@ -132,7 +160,8 @@ class FirestoreDirectory : UserDirectory {
         registerCode(uid)
     }
 
-    suspend fun referralCodeExists(code: String): Boolean = codes.document(code).get().await().exists()
+    suspend fun referralCodeExists(code: String): Boolean =
+        withTimeout(15_000) { codes.document(code).get(Source.SERVER).await().exists() }
 
     /** referralCodes/{code} → {uid}: lets sign-up check a code and the server find the referrer. */
     private suspend fun registerCode(uid: String) {
