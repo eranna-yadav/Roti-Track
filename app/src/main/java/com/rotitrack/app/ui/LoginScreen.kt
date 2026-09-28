@@ -172,10 +172,6 @@ fun LoginScreen(auth: AuthService) {
                 },
             )
         }
-        Text(
-            "Accounts: ${auth.backendLabel}",
-            style = Type.tiny.copy(color = Color.White.copy(alpha = 0.6f)), modifier = Modifier.padding(top = 24.dp),
-        )
     }
 }
 
