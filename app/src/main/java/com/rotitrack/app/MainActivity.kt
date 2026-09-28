@@ -143,8 +143,9 @@ class MainActivity : ComponentActivity(), Platform, PaymentResultWithDataListene
     override fun vibrate() = WaterSounds.vibrate(this)
 
     override fun previewMealVoice() {
-        val (title, text) = mealReminderText("lunch", I18n.lang)
-        val (enTitle, enText) = mealReminderText("lunch", "en")
+        val name = rotiTrack.activeStore?.profile?.name.orEmpty()
+        val (title, text) = mealReminderText("lunch", I18n.lang, name)
+        val (enTitle, enText) = mealReminderText("lunch", "en", name)
         MealVoice.speak(this, MealVoice.sentence(title, text), MealVoice.sentence(enTitle, enText))
     }
 

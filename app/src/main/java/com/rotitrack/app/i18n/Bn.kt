@@ -799,4 +799,6 @@ internal val BN: Map<String, String> = mapOf(
     "🔊 Voice reminders" to "🔊 ভয়েস রিমাইন্ডার",
     "Food reminders are read out loud in the app's language. Quiet when the phone is on silent or Do Not Disturb." to "খাবারের রিমাইন্ডার অ্যাপের ভাষায় জোরে পড়ে শোনানো হয়। ফোন সাইলেন্ট বা Do Not Disturb-এ থাকলে শোনা যাবে না।",
     "▶ Try it" to "▶ শুনে দেখুন",
+    "Hey {0}! It's time to log your {1} {2}" to "হেই {0}! আপনার {1} লগ করার সময় হয়েছে {2}",
+    "Hey {0}! Wrap up your day 🌙" to "হেই {0}! আপনার দিন শেষ করুন 🌙",
 )

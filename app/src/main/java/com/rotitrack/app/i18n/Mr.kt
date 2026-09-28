@@ -799,4 +799,6 @@ internal val MR: Map<String, String> = mapOf(
     "🔊 Voice reminders" to "🔊 आवाज स्मरणपत्रे",
     "Food reminders are read out loud in the app's language. Quiet when the phone is on silent or Do Not Disturb." to "जेवणाची स्मरणपत्रे ॲपच्या भाषेत मोठ्याने वाचली जातात. फोन सायलेंट किंवा Do Not Disturb वर असल्यास आवाज येत नाही.",
     "▶ Try it" to "▶ ऐकून पहा",
+    "Hey {0}! It's time to log your {1} {2}" to "हे {0}! तुमचा {1} नोंदवण्याची वेळ झाली {2}",
+    "Hey {0}! Wrap up your day 🌙" to "हे {0}! तुमचा दिवस पूर्ण करा 🌙",
 )

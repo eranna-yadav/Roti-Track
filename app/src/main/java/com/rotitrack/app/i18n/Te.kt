@@ -799,4 +799,6 @@ internal val TE: Map<String, String> = mapOf(
     "🔊 Voice reminders" to "🔊 వాయిస్ రిమైండర్‌లు",
     "Food reminders are read out loud in the app's language. Quiet when the phone is on silent or Do Not Disturb." to "ఆహార రిమైండర్‌లు యాప్ భాషలో బిగ్గరగా చదవబడతాయి. ఫోన్ సైలెంట్ లేదా Do Not Disturbలో ఉంటే వినిపించవు.",
     "▶ Try it" to "▶ విని చూడండి",
+    "Hey {0}! It's time to log your {1} {2}" to "హే {0}! మీ {1} నమోదు చేసే సమయం {2}",
+    "Hey {0}! Wrap up your day 🌙" to "హే {0}! మీ రోజును ముగించండి 🌙",
 )

@@ -89,15 +89,18 @@ object MealReminders {
     }
 }
 
-/** Title and text of a meal reminder in the language [code]. */
-fun mealReminderText(key: String, code: String): Pair<String, String> {
+/** Title and text of a meal reminder in the language [code], greeting [fullName] by first name when known. */
+fun mealReminderText(key: String, code: String, fullName: String = ""): Pair<String, String> {
+    val name = fullName.trim().substringBefore(' ')
     val slot = MealSlot.entries.firstOrNull { it.name.equals(key, ignoreCase = true) }
-    return if (slot == null) {
-        tIn(code, "Wrap up your day 🌙") to tIn(code, "Log everything you ate today in one go.")
-    } else {
-        tIn(code, "Time to log your {0} {1}", tIn(code, slot.shortEn).lowercase(), slot.emoji) to
-            tIn(code, "Tap to add what you ate. It takes a few seconds.")
+    val title = when {
+        slot == null && name.isEmpty() -> tIn(code, "Wrap up your day 🌙")
+        slot == null -> tIn(code, "Hey {0}! Wrap up your day 🌙", name)
+        name.isEmpty() -> tIn(code, "Time to log your {0} {1}", tIn(code, slot.shortEn).lowercase(), slot.emoji)
+        else -> tIn(code, "Hey {0}! It's time to log your {1} {2}", name, tIn(code, slot.shortEn).lowercase(), slot.emoji)
     }
+    val text = if (slot == null) tIn(code, "Log everything you ate today in one go.") else tIn(code, "Tap to add what you ate. It takes a few seconds.")
+    return title to text
 }
 
 /** Skips the nudge when that meal (or, for End of Day, every meal) is already logged. */
@@ -112,10 +115,10 @@ class MealReminderWorker(context: Context, params: WorkerParameters) : Worker(co
             val slot = MealSlot.entries.firstOrNull { it.name.equals(key, ignoreCase = true) } ?: return Result.success()
             if (meals.any { it.slot == slot }) return Result.success()
         }
-        val (title, text) = mealReminderText(key, I18n.lang)
+        val (title, text) = mealReminderText(key, I18n.lang, store.profile.name)
         val shown = MealReminders.notify(applicationContext, 100 + Math.floorMod(key.hashCode(), 100), title, text)
         if (shown && store.prefs.mealVoice && MealVoice.allowed(applicationContext)) {
-            val (enTitle, enText) = mealReminderText(key, "en")
+            val (enTitle, enText) = mealReminderText(key, "en", store.profile.name)
             MealVoice.speakAndWait(applicationContext, MealVoice.sentence(title, text), MealVoice.sentence(enTitle, enText))
         }
         return Result.success()

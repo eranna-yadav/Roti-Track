@@ -799,4 +799,6 @@ internal val KN: Map<String, String> = mapOf(
     "🔊 Voice reminders" to "🔊 ಧ್ವನಿ ಜ್ಞಾಪನೆಗಳು",
     "Food reminders are read out loud in the app's language. Quiet when the phone is on silent or Do Not Disturb." to "ಊಟದ ಜ್ಞಾಪನೆಗಳನ್ನು ಆ್ಯಪ್‌ನ ಭಾಷೆಯಲ್ಲಿ ಗಟ್ಟಿಯಾಗಿ ಓದಲಾಗುತ್ತದೆ. ಫೋನ್ ಸೈಲೆಂಟ್ ಅಥವಾ Do Not Disturb ನಲ್ಲಿದ್ದರೆ ಧ್ವನಿ ಇರುವುದಿಲ್ಲ.",
     "▶ Try it" to "▶ ಕೇಳಿ ನೋಡಿ",
+    "Hey {0}! It's time to log your {1} {2}" to "ಹೇ {0}! ನಿಮ್ಮ {1} ದಾಖಲಿಸುವ ಸಮಯ {2}",
+    "Hey {0}! Wrap up your day 🌙" to "ಹೇ {0}! ನಿಮ್ಮ ದಿನವನ್ನು ಮುಗಿಸಿ 🌙",
 )
