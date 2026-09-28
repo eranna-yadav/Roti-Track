@@ -59,8 +59,7 @@ fun ReferralScreen(store: AppStore, account: Account, summary: UserSummary?, pla
             Text("🎁", fontSize = 40.sp)
             Text("Earn up to ₹$REFERRAL_REWARD_RUPEES per friend", style = Type.h2)
             Text(
-                "Share your code. When a friend signs up with it and buys Pro, you earn ₹$REFERRAL_REWARD_RUPEES: " +
-                    "all at once for a yearly plan, or ₹$REFERRAL_MONTHLY_INSTALMENT + ₹$REFERRAL_MONTHLY_INSTALMENT over their first two monthly payments.",
+                "Share your code. When a friend signs up with it and buys Pro, you earn a reward.",
                 style = Type.body.copy(color = Palette.inkSoft), modifier = Modifier.padding(top = 4.dp),
             )
         }
@@ -92,10 +91,7 @@ fun ReferralScreen(store: AppStore, account: Account, summary: UserSummary?, pla
         SettingsGroup {
             SettingsRow("1️⃣", "Share your code", subtitle = "Send it on WhatsApp or anywhere you like")
             SettingsRow("2️⃣", "Your friend signs up", subtitle = "They enter ${code ?: "your code"} when creating an account")
-            SettingsRow(
-                "3️⃣", "They buy Pro, you earn up to ₹$REFERRAL_REWARD_RUPEES",
-                subtitle = "Yearly: ₹$REFERRAL_REWARD_RUPEES at once. Monthly: ₹$REFERRAL_MONTHLY_INSTALMENT after the 1st payment, ₹$REFERRAL_MONTHLY_INSTALMENT after the 2nd",
-            )
+            SettingsRow("3️⃣", "They buy Pro, you earn up to ₹$REFERRAL_REWARD_RUPEES", subtitle = "See the referral rules for details")
             SettingsRow("📜", "Referral rules", last = true, onClick = onRules)
         }
     }

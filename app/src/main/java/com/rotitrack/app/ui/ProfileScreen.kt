@@ -34,7 +34,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rotitrack.app.account.Account
-import com.rotitrack.app.account.REFERRAL_MONTHLY_INSTALMENT
 import com.rotitrack.app.account.REFERRAL_REWARD_RUPEES
 import com.rotitrack.app.store.AppStore
 
@@ -86,7 +85,7 @@ fun ProfileScreen(
             )
             SettingsRow(
                 "📜", "Referral rules",
-                subtitle = "Yearly: ₹$REFERRAL_REWARD_RUPEES · Monthly: ₹$REFERRAL_MONTHLY_INSTALMENT + ₹$REFERRAL_MONTHLY_INSTALMENT",
+                subtitle = "How and when rewards are paid",
                 last = true, onClick = { onOpen(ProfilePage.REFERRAL_RULES) },
             )
         }
