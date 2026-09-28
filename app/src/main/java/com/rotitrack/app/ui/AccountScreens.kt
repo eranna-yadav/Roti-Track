@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.DropdownMenu
@@ -29,6 +30,18 @@ import com.rotitrack.app.data.WeightGoal
 import com.rotitrack.app.domain.Days
 import com.rotitrack.app.domain.Nutrition
 import com.rotitrack.app.store.AppStore
+import androidx.compose.foundation.Canvas
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.sp
+import com.rotitrack.app.data.WeightEntry
 import kotlin.math.roundToInt
 
 @Composable
@@ -58,24 +71,21 @@ fun PersonalDetailsScreen(store: AppStore, platform: Platform, onBack: () -> Uni
                     label = { Text("kg") }, singleLine = true, modifier = Modifier.weight(1f),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 )
-                Spacer(Modifier.padding(6.dp))
+                Spacer(Modifier.width(12.dp))
                 PillButton("Log weight", {
                     weightText.toDoubleOrNull()?.takeIf { it in 25.0..250.0 }?.let { store.logWeight((it * 10).roundToInt() / 10.0) }
-                }, height = 48.dp)
+                }, Modifier.width(132.dp), height = 52.dp)
             }
             if (weights.isNotEmpty()) {
-                Spacer(Modifier.height(12.dp))
-                val recent = weights.takeLast(10)
-                val first = weights.first().kg
+                Spacer(Modifier.height(14.dp))
+                val first = weights.first()
                 Text(
-                    "Since ${Days.label(weights.first().day)}: ${signed(p.weightKg - first)} kg",
+                    if (weights.size == 1) "Logged ${fmt(first.kg)} kg on ${Days.short(first.day)}. Log again on another day to see your progress."
+                    else "Change since ${Days.short(first.day)}: ${signed(p.weightKg - first.kg)} kg",
                     style = Type.small.copy(color = Palette.inkSoft),
                 )
-                Spacer(Modifier.height(8.dp))
-                BarChart(
-                    recent.map { Bar(Days.parse(it.day).let { d -> "${d.dayOfMonth}/${d.monthValue}" }, it.kg.toFloat(), it.day == Days.today()) },
-                    goal = 0f, color = Palette.brand, height = 100.dp,
-                )
+                Spacer(Modifier.height(10.dp))
+                WeightChart(weights.takeLast(7))
             } else {
                 Text("Log your weight regularly to see your progress here and in your PDF report.", style = Type.small, modifier = Modifier.padding(top = 8.dp))
             }
@@ -205,6 +215,53 @@ fun LanguageScreen(store: AppStore, onBack: () -> Unit) {
                     last = i == LANGUAGES.lastIndex,
                     onClick = { store.updatePrefs { it.copy(language = code) } },
                     trailing = { Radio(store.prefs.language == code) },
+                )
+            }
+        }
+    }
+}
+
+/** Weight over the last few logged days: a line with each value above its point and the date below. */
+@Composable
+fun WeightChart(entries: List<WeightEntry>, height: Dp = 130.dp) {
+    val measurer = rememberTextMeasurer()
+    val line = Palette.brand
+    val dot = Palette.card
+    val base = Palette.divider
+    val valueStyle = Type.tiny.copy(color = Palette.ink, letterSpacing = 0.sp)
+    val lo = entries.minOf { it.kg }
+    val hi = entries.maxOf { it.kg }
+    val mid = (lo + hi) / 2
+    val span = maxOf(hi - lo, 2.0) * 0.75
+    Column {
+        Canvas(Modifier.fillMaxWidth().height(height)) {
+            val slot = size.width / entries.size
+            val top = 26.dp.toPx()
+            val bottom = size.height - 10.dp.toPx()
+            fun point(i: Int) = Offset(
+                slot * (i + 0.5f),
+                bottom - ((entries[i].kg - (mid - span)) / (2 * span)).toFloat() * (bottom - top),
+            )
+            drawLine(base, Offset(0f, size.height - 1.dp.toPx()), Offset(size.width, size.height - 1.dp.toPx()), 1.dp.toPx())
+            if (entries.size > 1) {
+                val path = Path()
+                entries.indices.forEach { i -> point(i).let { if (i == 0) path.moveTo(it.x, it.y) else path.lineTo(it.x, it.y) } }
+                drawPath(path, line, style = Stroke(3.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round))
+            }
+            entries.indices.forEach { i ->
+                val c = point(i)
+                drawCircle(line, 6.dp.toPx(), c)
+                drawCircle(dot, 3.dp.toPx(), c)
+                val label = measurer.measure(fmt(entries[i].kg) + if (entries.size <= 4) " kg" else "", valueStyle)
+                drawText(label, topLeft = Offset(c.x - label.size.width / 2f, c.y - 10.dp.toPx() - label.size.height))
+            }
+        }
+        Row(Modifier.fillMaxWidth().padding(top = 6.dp)) {
+            entries.forEach { e ->
+                Text(
+                    Days.short(e.day),
+                    style = Type.tiny.copy(color = if (e.day == Days.today()) Palette.ink else Palette.muted, letterSpacing = 0.sp),
+                    textAlign = TextAlign.Center, maxLines = 1, modifier = Modifier.weight(1f),
                 )
             }
         }

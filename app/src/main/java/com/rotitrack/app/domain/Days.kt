@@ -13,6 +13,10 @@ object Days {
     fun weekdayShort(key: String): String =
         parse(key).dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())
 
+    /** "28 Sep". */
+    fun short(key: String): String =
+        parse(key).let { "${it.dayOfMonth} ${it.month.getDisplayName(TextStyle.SHORT, Locale.getDefault())}" }
+
     fun label(key: String, today: String = today()): String = when (key) {
         today -> "Today"
         shift(today, -1) -> "Yesterday"
