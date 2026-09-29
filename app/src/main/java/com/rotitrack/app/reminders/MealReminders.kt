@@ -90,6 +90,9 @@ object MealReminders {
     }
 }
 
+/** Gap between the notification sound and the voice reminder. */
+private const val VOICE_DELAY_MS = 2_000L
+
 /** Warm, varied messages for each reminder: title ({0} is the first name) and text. */
 val MEAL_MESSAGES: Map<String, List<Pair<String, String>>> = mapOf(
     "breakfast" to listOf(
@@ -151,6 +154,8 @@ class MealReminderWorker(context: Context, params: WorkerParameters) : Worker(co
         val shown = MealReminders.notify(applicationContext, 100 + Math.floorMod(key.hashCode(), 100), title, text)
         if (shown && store.prefs.mealVoice && MealVoice.allowed(applicationContext)) {
             val (enTitle, enText) = mealReminderText(key, "en", store.profile.name)
+            // Let the notification sound finish first so the voice is heard clearly.
+            Thread.sleep(VOICE_DELAY_MS)
             MealVoice.speakAndWait(applicationContext, MealVoice.sentence(title, text), MealVoice.sentence(enTitle, enText))
         }
         return Result.success()
