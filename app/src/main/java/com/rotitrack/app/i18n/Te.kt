@@ -858,4 +858,10 @@ internal val TE: Map<String, String> = mapOf(
     "Couldn't scan the photo. Check your internet and try again." to "ఫోటో స్కాన్ కాలేదు. ఇంటర్నెట్ సరిచూసి మళ్లీ ప్రయత్నించండి.",
     "Couldn't read this photo. Try another one." to "ఈ ఫోటోను చదవలేకపోయాం. వేరే ఫోటో ప్రయత్నించండి.",
     "Food scanning isn't set up yet. Please try again later." to "ఫుడ్ స్కాన్ ఇంకా సిద్ధం కాలేదు. దయచేసి తర్వాత ప్రయత్నించండి.",
+    "User guide" to "యూజర్ గైడ్",
+    "Every feature explained, page by page" to "ప్రతి ఫీచర్ వివరణ, పేజీ వారీగా",
+    "Every feature of Roti Track, page by page: what it does, how to use it, and how it helps you." to "Roti Track లోని ప్రతి ఫీచర్, పేజీ వారీగా: అది ఏమి చేస్తుంది, ఎలా ఉపయోగించాలి, మీకు ఎలా సహాయపడుతుంది.",
+    "{0} features" to "{0} ఫీచర్‌లు",
+    "How to use it" to "ఎలా ఉపయోగించాలి",
+    "Why it helps" to "ఇది ఎలా సహాయపడుతుంది",
 )

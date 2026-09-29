@@ -858,4 +858,10 @@ internal val TA: Map<String, String> = mapOf(
     "Couldn't scan the photo. Check your internet and try again." to "புகைப்படத்தை ஸ்கேன் செய்ய முடியவில்லை. இணையத்தைச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்.",
     "Couldn't read this photo. Try another one." to "இந்தப் புகைப்படத்தைப் படிக்க முடியவில்லை. வேறு படத்தை முயற்சிக்கவும்.",
     "Food scanning isn't set up yet. Please try again later." to "உணவு ஸ்கேன் இன்னும் தயாராகவில்லை. பின்னர் முயற்சிக்கவும்.",
+    "User guide" to "பயனர் வழிகாட்டி",
+    "Every feature explained, page by page" to "ஒவ்வொரு அம்சமும் விளக்கம், பக்கம் பக்கமாக",
+    "Every feature of Roti Track, page by page: what it does, how to use it, and how it helps you." to "Roti Track-இன் ஒவ்வொரு அம்சமும், பக்கம் பக்கமாக: அது என்ன செய்கிறது, எப்படிப் பயன்படுத்துவது, உங்களுக்கு எப்படி உதவுகிறது.",
+    "{0} features" to "{0} அம்சங்கள்",
+    "How to use it" to "எப்படிப் பயன்படுத்துவது",
+    "Why it helps" to "இது எப்படி உதவுகிறது",
 )

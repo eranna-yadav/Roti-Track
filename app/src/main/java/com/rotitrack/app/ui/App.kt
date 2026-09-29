@@ -89,6 +89,8 @@ sealed interface Route {
     data class Scan(val slot: MealSlot, val day: String) : Route
     data object Articles : Route
     data class Article(val id: String) : Route
+    data object Guide : Route
+    data class GuidePage(val id: String) : Route
     data object Pro : Route
     data object Admin : Route
     data class AdminUser(val uid: String) : Route
@@ -168,6 +170,7 @@ private fun SignedIn(services: Services, platform: Platform, nav: Navigator, acc
             ProfilePage.ADMIN -> nav.push(Route.Admin)
             ProfilePage.PRO -> nav.push(Route.Pro)
             ProfilePage.ARTICLES -> nav.push(Route.Articles)
+            ProfilePage.GUIDE -> nav.push(Route.Guide)
             else -> nav.push(Route.Page(page))
         }
     }
@@ -231,6 +234,8 @@ private fun SignedIn(services: Services, platform: Platform, nav: Navigator, acc
                 is Route.Scan -> ScanScreen(store, services.scanner, platform, route.slot, route.day, onBack = nav::pop)
                 Route.Articles -> ArticlesScreen(onOpen = { nav.push(Route.Article(it)) }, onBack = nav::pop)
                 is Route.Article -> ArticleScreen(route.id, onBack = nav::pop)
+                Route.Guide -> GuideScreen(onOpen = { nav.push(Route.GuidePage(it)) }, onBack = nav::pop)
+                is Route.GuidePage -> GuidePageScreen(route.id, onBack = nav::pop)
                 Route.Pro -> ProScreen(services.billing, services.razorpay, account, summary, platform, onBack = nav::pop)
                 Route.Admin -> if (isAdmin) AdminScreen(services.directory, onOpen = { nav.push(Route.AdminUser(it)) }, onBack = nav::pop) else LaunchedEffect(Unit) { nav.pop() }
                 is Route.AdminUser -> if (isAdmin) AdminUserScreen(services.directory, route.uid, onBack = nav::pop) else LaunchedEffect(Unit) { nav.pop() }
@@ -248,7 +253,7 @@ private fun SignedIn(services: Services, platform: Platform, nav: Navigator, acc
                     ProfilePage.REPORT -> ReportScreen(store, account, isPro, platform, onUpgrade = upgrade, onBack = nav::pop)
                     ProfilePage.TERMS -> LegalScreen(terms = true, onBack = nav::pop)
                     ProfilePage.PRIVACY -> LegalScreen(terms = false, onBack = nav::pop)
-                    ProfilePage.ADMIN, ProfilePage.PRO, ProfilePage.ARTICLES -> LaunchedEffect(Unit) { nav.pop() }
+                    ProfilePage.ADMIN, ProfilePage.PRO, ProfilePage.ARTICLES, ProfilePage.GUIDE -> LaunchedEffect(Unit) { nav.pop() }
                 }
             }
         }

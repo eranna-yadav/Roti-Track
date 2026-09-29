@@ -858,4 +858,10 @@ internal val KN: Map<String, String> = mapOf(
     "Couldn't scan the photo. Check your internet and try again." to "ಫೋಟೋ ಸ್ಕ್ಯಾನ್ ಆಗಲಿಲ್ಲ. ಇಂಟರ್ನೆಟ್ ಪರಿಶೀಲಿಸಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
     "Couldn't read this photo. Try another one." to "ಈ ಫೋಟೋ ಓದಲಾಗಲಿಲ್ಲ. ಬೇರೆ ಫೋಟೋ ಪ್ರಯತ್ನಿಸಿ.",
     "Food scanning isn't set up yet. Please try again later." to "ಆಹಾರ ಸ್ಕ್ಯಾನ್ ಇನ್ನೂ ಸಿದ್ಧವಾಗಿಲ್ಲ. ದಯವಿಟ್ಟು ನಂತರ ಪ್ರಯತ್ನಿಸಿ.",
+    "User guide" to "ಬಳಕೆದಾರ ಮಾರ್ಗದರ್ಶಿ",
+    "Every feature explained, page by page" to "ಪ್ರತಿ ವೈಶಿಷ್ಟ್ಯದ ವಿವರಣೆ, ಪುಟದಿಂದ ಪುಟಕ್ಕೆ",
+    "Every feature of Roti Track, page by page: what it does, how to use it, and how it helps you." to "Roti Track ನ ಪ್ರತಿ ವೈಶಿಷ್ಟ್ಯ, ಪುಟದಿಂದ ಪುಟಕ್ಕೆ: ಅದು ಏನು ಮಾಡುತ್ತದೆ, ಹೇಗೆ ಬಳಸುವುದು ಮತ್ತು ಅದು ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡುತ್ತದೆ.",
+    "{0} features" to "{0} ವೈಶಿಷ್ಟ್ಯಗಳು",
+    "How to use it" to "ಹೇಗೆ ಬಳಸುವುದು",
+    "Why it helps" to "ಇದು ಹೇಗೆ ಸಹಾಯ ಮಾಡುತ್ತದೆ",
 )

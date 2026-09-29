@@ -42,7 +42,7 @@ const val APP_VERSION = "1.4.0"
 /** Where "Support Email" and "Request a Feature" send mail. Change to your own address. */
 const val SUPPORT_EMAIL = "support@rotitrack.app"
 
-enum class ProfilePage { PERSONAL, PREFERENCES, LANGUAGE, GOALS, FASTING, REMINDERS, WATER_REMINDERS, REFERRAL, REFERRAL_RULES, BADGES, REPORT, TERMS, PRIVACY, ARTICLES, ADMIN, PRO }
+enum class ProfilePage { PERSONAL, PREFERENCES, LANGUAGE, GOALS, FASTING, REMINDERS, WATER_REMINDERS, REFERRAL, REFERRAL_RULES, BADGES, REPORT, TERMS, PRIVACY, ARTICLES, ADMIN, PRO, GUIDE }
 
 @Composable
 fun ProfileScreen(
@@ -97,6 +97,14 @@ fun ProfileScreen(
             { onOpen(ProfilePage.PRO) }, Modifier.fillMaxWidth(),
             color = if (isPro) Palette.chip else Palette.saffron, textColor = if (isPro) Palette.brand else Color.White, height = 50.dp,
         )
+
+        Spacer(Modifier.height(12.dp))
+        SettingsGroup {
+            SettingsRow(
+                "📘", t("User guide"), subtitle = t("Every feature explained, page by page"),
+                last = true, onClick = { onOpen(ProfilePage.GUIDE) },
+            )
+        }
 
         SectionLabel(t("Account"))
         SettingsGroup {

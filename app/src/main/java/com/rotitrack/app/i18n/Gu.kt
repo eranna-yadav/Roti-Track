@@ -858,4 +858,10 @@ internal val GU: Map<String, String> = mapOf(
     "Couldn't scan the photo. Check your internet and try again." to "ફોટો સ્કૅન થઈ શક્યો નહીં. ઇન્ટરનેટ તપાસી ફરી પ્રયાસ કરો.",
     "Couldn't read this photo. Try another one." to "આ ફોટો વાંચી શકાયો નહીં. બીજો ફોટો અજમાવો.",
     "Food scanning isn't set up yet. Please try again later." to "ફૂડ સ્કૅન હજી ચાલુ નથી. કૃપા કરીને પછી પ્રયાસ કરો.",
+    "User guide" to "યુઝર ગાઇડ",
+    "Every feature explained, page by page" to "દરેક સુવિધાની સમજ, પાને પાને",
+    "Every feature of Roti Track, page by page: what it does, how to use it, and how it helps you." to "Roti Track ની દરેક સુવિધા, પાને પાને: તે શું કરે છે, કેવી રીતે વાપરવી અને તે તમને કેવી રીતે મદદ કરે છે.",
+    "{0} features" to "{0} સુવિધાઓ",
+    "How to use it" to "કેવી રીતે વાપરવું",
+    "Why it helps" to "તે કેવી રીતે મદદ કરે છે",
 )

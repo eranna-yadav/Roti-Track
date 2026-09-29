@@ -858,4 +858,10 @@ internal val HI: Map<String, String> = mapOf(
     "Couldn't scan the photo. Check your internet and try again." to "फ़ोटो स्कैन नहीं हो सकी। इंटरनेट जाँचकर फिर कोशिश करें।",
     "Couldn't read this photo. Try another one." to "यह फ़ोटो पढ़ी नहीं जा सकी। दूसरी फ़ोटो आज़माएँ।",
     "Food scanning isn't set up yet. Please try again later." to "फ़ूड स्कैन अभी सेट नहीं है। कृपया बाद में कोशिश करें।",
+    "User guide" to "यूज़र गाइड",
+    "Every feature explained, page by page" to "हर फ़ीचर की जानकारी, पेज दर पेज",
+    "Every feature of Roti Track, page by page: what it does, how to use it, and how it helps you." to "Roti Track का हर फ़ीचर, पेज दर पेज: यह क्या करता है, कैसे इस्तेमाल करें, और यह आपकी कैसे मदद करता है।",
+    "{0} features" to "{0} फ़ीचर",
+    "How to use it" to "कैसे इस्तेमाल करें",
+    "Why it helps" to "यह कैसे मदद करता है",
 )

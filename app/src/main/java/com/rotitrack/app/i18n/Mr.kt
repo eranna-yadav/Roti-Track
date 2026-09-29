@@ -858,4 +858,10 @@ internal val MR: Map<String, String> = mapOf(
     "Couldn't scan the photo. Check your internet and try again." to "फोटो स्कॅन झाला नाही. इंटरनेट तपासून पुन्हा प्रयत्न करा.",
     "Couldn't read this photo. Try another one." to "हा फोटो वाचता आला नाही. दुसरा फोटो वापरून पहा.",
     "Food scanning isn't set up yet. Please try again later." to "फूड स्कॅन अजून सेट नाही. कृपया नंतर प्रयत्न करा.",
+    "User guide" to "वापरकर्ता मार्गदर्शक",
+    "Every feature explained, page by page" to "प्रत्येक वैशिष्ट्याची माहिती, पानानुसार",
+    "Every feature of Roti Track, page by page: what it does, how to use it, and how it helps you." to "Roti Track चे प्रत्येक वैशिष्ट्य, पानानुसार: ते काय करते, कसे वापरायचे आणि ते तुम्हाला कशी मदत करते.",
+    "{0} features" to "{0} वैशिष्ट्ये",
+    "How to use it" to "कसे वापरायचे",
+    "Why it helps" to "याचा फायदा",
 )

@@ -858,4 +858,10 @@ internal val BN: Map<String, String> = mapOf(
     "Couldn't scan the photo. Check your internet and try again." to "ছবিটি স্ক্যান করা যায়নি। ইন্টারনেট যাচাই করে আবার চেষ্টা করুন।",
     "Couldn't read this photo. Try another one." to "এই ছবিটি পড়া যায়নি। অন্য ছবি চেষ্টা করুন।",
     "Food scanning isn't set up yet. Please try again later." to "ফুড স্ক্যান এখনও চালু হয়নি। পরে আবার চেষ্টা করুন।",
+    "User guide" to "ব্যবহারকারী নির্দেশিকা",
+    "Every feature explained, page by page" to "প্রতিটি ফিচারের ব্যাখ্যা, পাতা ধরে ধরে",
+    "Every feature of Roti Track, page by page: what it does, how to use it, and how it helps you." to "Roti Track-এর প্রতিটি ফিচার, পাতা ধরে ধরে: এটি কী করে, কীভাবে ব্যবহার করবেন এবং এটি আপনাকে কীভাবে সাহায্য করে।",
+    "{0} features" to "{0}টি ফিচার",
+    "How to use it" to "কীভাবে ব্যবহার করবেন",
+    "Why it helps" to "এটি কীভাবে সাহায্য করে",
 )
