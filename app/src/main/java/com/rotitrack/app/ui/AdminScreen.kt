@@ -193,7 +193,7 @@ private fun ReferralsPanel(report: ReferralReport, onOpen: (String) -> Unit, onP
             }
             Spacer(Modifier.height(10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Kpi("Referred sign-ups", "${report.links.size}", Modifier.weight(1f))
+                Kpi("Referred", "${report.links.size}", Modifier.weight(1f))
                 Kpi("Went Pro", "${report.wentPro}", Modifier.weight(1f), Palette.saffron)
                 Kpi("Promoters", "${report.promoters.size}", Modifier.weight(1f))
             }
