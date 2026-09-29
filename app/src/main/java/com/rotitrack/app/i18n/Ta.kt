@@ -830,4 +830,8 @@ internal val TA: Map<String, String> = mapOf(
     "Take a minute to complete today's log. You're doing better than you think." to "இன்றைய பதிவை முடிக்க ஒரு நிமிடம் ஒதுக்குங்கள். நீங்கள் நினைப்பதை விட சிறப்பாகச் செய்கிறீர்கள்.",
     "Proud of you, {0}! 🌟" to "உங்களைப் பற்றிப் பெருமை, {0}! 🌟",
     "Wrap up your day by logging all your meals. Sweet dreams!" to "எல்லா உணவுகளையும் பதிவு செய்து உங்கள் நாளை முடியுங்கள். இனிய கனவுகள்!",
+    "Allow \"Alarms & reminders\" so reminders arrive on time, even when your phone is locked." to "ஃபோன் பூட்டப்பட்டிருந்தாலும் நினைவூட்டல்கள் நேரத்திற்கு வர \"Alarms & reminders\"-ஐ அனுமதிக்கவும்.",
+    "Allow" to "அனுமதி",
+    "5. Allow \"Alarms & reminders\" for Roti Track, so reminders come on time when the phone is locked." to "5. ஃபோன் பூட்டப்பட்டிருக்கும்போதும் நினைவூட்டல்கள் நேரத்திற்கு வர, Roti Track-க்கு \"Alarms & reminders\"-ஐ அனுமதிக்கவும்.",
+    "Open alarm settings ›" to "அலாரம் அமைப்புகளைத் திற ›",
 )

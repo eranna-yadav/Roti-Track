@@ -830,4 +830,8 @@ internal val KN: Map<String, String> = mapOf(
     "Take a minute to complete today's log. You're doing better than you think." to "ಇಂದಿನ ದಾಖಲೆ ಪೂರ್ಣಗೊಳಿಸಲು ಒಂದು ನಿಮಿಷ ಕೊಡಿ. ನೀವು ಅಂದುಕೊಂಡಿದ್ದಕ್ಕಿಂತ ಚೆನ್ನಾಗಿ ಮಾಡುತ್ತಿದ್ದೀರಿ.",
     "Proud of you, {0}! 🌟" to "ನಿಮ್ಮ ಬಗ್ಗೆ ಹೆಮ್ಮೆ, {0}! 🌟",
     "Wrap up your day by logging all your meals. Sweet dreams!" to "ಎಲ್ಲಾ ಊಟಗಳನ್ನು ದಾಖಲಿಸಿ ನಿಮ್ಮ ದಿನ ಮುಗಿಸಿ. ಸಿಹಿ ಕನಸುಗಳು!",
+    "Allow \"Alarms & reminders\" so reminders arrive on time, even when your phone is locked." to "ಫೋನ್ ಲಾಕ್ ಆಗಿದ್ದರೂ ಜ್ಞಾಪನೆಗಳು ಸಮಯಕ್ಕೆ ಬರಲು \"Alarms & reminders\" ಅನುಮತಿಸಿ.",
+    "Allow" to "ಅನುಮತಿಸಿ",
+    "5. Allow \"Alarms & reminders\" for Roti Track, so reminders come on time when the phone is locked." to "5. ಫೋನ್ ಲಾಕ್ ಆಗಿದ್ದಾಗಲೂ ಜ್ಞಾಪನೆಗಳು ಸಮಯಕ್ಕೆ ಬರಲು Roti Track ಗೆ \"Alarms & reminders\" ಅನುಮತಿಸಿ.",
+    "Open alarm settings ›" to "ಅಲಾರ್ಮ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ ›",
 )

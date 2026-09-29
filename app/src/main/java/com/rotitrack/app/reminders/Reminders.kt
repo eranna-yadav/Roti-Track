@@ -12,12 +12,9 @@ import android.content.pm.PackageManager
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
-import androidx.work.workDataOf
 import com.rotitrack.app.MainActivity
 import com.rotitrack.app.R
 import com.rotitrack.app.data.Prefs
@@ -31,8 +28,8 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 /**
- * Water reminders. Only the next reminder is ever queued: when it fires it notifies,
- * then queues the one after it, so a changed schedule takes effect at once.
+ * Water reminders. Only the next reminder is ever queued, as an alarm: when it fires it
+ * notifies, then queues the one after it, so a changed schedule takes effect at once.
  */
 object Reminders {
     // The channel is silent: the app plays the user's chosen water sound itself, at their volume.
@@ -41,6 +38,7 @@ object Reminders {
     private const val WORK = "water-reminder-next"
     private const val OLD_WORK = "water-reminder"
     const val NOTIFICATION_ID = 1
+    private const val ALARM_ID = 1
 
     fun createChannel(context: Context) {
         val nm = context.getSystemService(NotificationManager::class.java)
@@ -55,26 +53,25 @@ object Reminders {
 
     /** Queues the next reminder, or cancels reminders when they're off. */
     fun schedule(context: Context, p: Profile, prefs: Prefs) {
+        // Reminders used to be WorkManager jobs, which a dozing phone holds back.
         val wm = WorkManager.getInstance(context)
         wm.cancelUniqueWork(OLD_WORK)
+        wm.cancelUniqueWork(WORK)
         val now = LocalDateTime.now()
         val next = if (p.remindersOn && p.onboarded) WaterSchedule.next(now, p, prefs) else null
         if (next == null) {
-            wm.cancelUniqueWork(WORK)
+            cancel(context)
             return
         }
         val at = next.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
-        val request = OneTimeWorkRequestBuilder<ReminderWorker>()
-            .setInitialDelay((at - System.currentTimeMillis()).coerceAtLeast(0), TimeUnit.MILLISECONDS)
-            .setInputData(workDataOf("at" to at))
-            .build()
-        wm.enqueueUniqueWork(WORK, ExistingWorkPolicy.REPLACE, request)
+        Alarms.set(context, ALARM_ID, at, Intent(Alarms.ACTION_WATER).putExtra(Alarms.EXTRA_AT, at))
     }
 
     fun cancel(context: Context) {
         val wm = WorkManager.getInstance(context)
         wm.cancelUniqueWork(WORK)
         wm.cancelUniqueWork(OLD_WORK)
+        Alarms.cancel(context, ALARM_ID, Intent(Alarms.ACTION_WATER))
     }
 
     @SuppressLint("MissingPermission") // checked on the first line
@@ -104,29 +101,36 @@ object Reminders {
     }
 }
 
-/** Nudges while the day's goal is unmet, with the chosen sound and buzz, then queues the next reminder. */
-class ReminderWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
-    override fun doWork(): Result {
-        val store = applicationContext.rotiTrack.activeStore ?: return Result.success()
-        val p = store.profile
-        val prefs = store.prefs
-        val at = inputData.getLong("at", 0L)
-        // Android may hold background work back while the phone dozes; skip a nudge that's long overdue.
-        val onTime = System.currentTimeMillis() - at < 45 * 60_000L
-        val total = store.waterTotal(Days.today())
-        if (p.remindersOn && onTime && total < p.waterGoalMl) {
-            Reminders.notify(applicationContext, total, p.waterGoalMl, p.cupMl)
-            if (NotificationManagerCompat.from(applicationContext).areNotificationsEnabled()) {
-                if (prefs.vibration) WaterSounds.vibrate(applicationContext)
-                if (prefs.soundOn) {
-                    // Stay alive until the sound finishes, or the process may be stopped mid-sound.
-                    val done = CountDownLatch(1)
-                    WaterSounds.play(applicationContext, prefs.sound, prefs.soundVolume) { done.countDown() }
-                    done.await(prefs.sound.seconds + 3L, TimeUnit.SECONDS)
-                }
+/**
+ * Nudges while the day's goal is unmet, with the chosen sound and buzz, then queues the next
+ * reminder. Blocks until the sound ends, so call it off the main thread.
+ */
+fun runWaterReminder(context: Context, at: Long) {
+    val store = context.rotiTrack.activeStore ?: return
+    val p = store.profile
+    val prefs = store.prefs
+    // Skip a nudge that's long overdue, e.g. one held back while the phone was off.
+    val onTime = System.currentTimeMillis() - at < 45 * 60_000L
+    val total = store.waterTotal(Days.today())
+    if (p.remindersOn && onTime && total < p.waterGoalMl) {
+        Reminders.notify(context, total, p.waterGoalMl, p.cupMl)
+        if (NotificationManagerCompat.from(context).areNotificationsEnabled()) {
+            if (prefs.vibration) WaterSounds.vibrate(context)
+            if (prefs.soundOn) {
+                // Stay alive until the sound finishes, or the process may be stopped mid-sound.
+                val done = CountDownLatch(1)
+                WaterSounds.play(context, prefs.sound, prefs.soundVolume) { done.countDown() }
+                done.await(prefs.sound.seconds + 3L, TimeUnit.SECONDS)
             }
         }
-        Reminders.schedule(applicationContext, store.profile, store.prefs)
+    }
+    Reminders.schedule(context, store.profile, store.prefs)
+}
+
+/** Kept so a reminder queued by an older version still runs once after updating. */
+class ReminderWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
+    override fun doWork(): Result {
+        runWaterReminder(applicationContext, inputData.getLong("at", 0L))
         return Result.success()
     }
 }

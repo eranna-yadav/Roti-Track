@@ -830,4 +830,8 @@ internal val HI: Map<String, String> = mapOf(
     "Take a minute to complete today's log. You're doing better than you think." to "एक मिनट निकालकर आज का लॉग पूरा करें। आप जितना सोचते हैं, उससे बेहतर कर रहे हैं।",
     "Proud of you, {0}! 🌟" to "हमें आप पर गर्व है, {0}! 🌟",
     "Wrap up your day by logging all your meals. Sweet dreams!" to "सारे भोजन लॉग करके अपना दिन पूरा करें। मीठे सपने!",
+    "Allow \"Alarms & reminders\" so reminders arrive on time, even when your phone is locked." to "\"Alarms & reminders\" की अनुमति दें, ताकि फ़ोन लॉक होने पर भी रिमाइंडर समय पर आएँ।",
+    "Allow" to "अनुमति दें",
+    "5. Allow \"Alarms & reminders\" for Roti Track, so reminders come on time when the phone is locked." to "5. Roti Track के लिए \"Alarms & reminders\" की अनुमति दें, ताकि फ़ोन लॉक होने पर भी रिमाइंडर समय पर आएँ।",
+    "Open alarm settings ›" to "अलार्म सेटिंग्स खोलें ›",
 )

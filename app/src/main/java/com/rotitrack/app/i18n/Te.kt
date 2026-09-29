@@ -830,4 +830,8 @@ internal val TE: Map<String, String> = mapOf(
     "Take a minute to complete today's log. You're doing better than you think." to "ఈ రోజు లాగ్ పూర్తి చేయడానికి ఒక నిమిషం ఇవ్వండి. మీరు అనుకున్నదానికంటే బాగా చేస్తున్నారు.",
     "Proud of you, {0}! 🌟" to "మీ గురించి గర్వంగా ఉంది, {0}! 🌟",
     "Wrap up your day by logging all your meals. Sweet dreams!" to "అన్ని భోజనాలు నమోదు చేసి మీ రోజును ముగించండి. తియ్యని కలలు!",
+    "Allow \"Alarms & reminders\" so reminders arrive on time, even when your phone is locked." to "ఫోన్ లాక్ అయి ఉన్నా రిమైండర్‌లు సమయానికి రావడానికి \"Alarms & reminders\" అనుమతించండి.",
+    "Allow" to "అనుమతించు",
+    "5. Allow \"Alarms & reminders\" for Roti Track, so reminders come on time when the phone is locked." to "5. ఫోన్ లాక్ అయి ఉన్నప్పుడూ రిమైండర్‌లు సమయానికి రావడానికి Roti Track కి \"Alarms & reminders\" అనుమతించండి.",
+    "Open alarm settings ›" to "అలారం సెట్టింగ్‌లు తెరవండి ›",
 )

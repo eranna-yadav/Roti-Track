@@ -128,6 +128,10 @@ fun WaterRemindersScreen(store: AppStore, platform: Platform, onBack: () -> Unit
                 Banner(t("Notifications are turned off for Roti Track, so reminders can't appear."), t("Open Settings"), Palette.chip) {
                     platform.openNotificationSettings()
                 }
+            } else if (!platform.exactAlarmsAllowed) {
+                Banner(t("Allow \"Alarms & reminders\" so reminders arrive on time, even when your phone is locked."), t("Allow"), Palette.chip) {
+                    platform.openExactAlarmSettings()
+                }
             }
             val mode = prefs.waterReminderMode
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -358,6 +362,13 @@ private fun CantReceiveDialog(platform: Platform, onDismiss: () -> Unit) {
                 )
                 Text(t("3. On Xiaomi, Vivo, Oppo, Realme and OnePlus phones, also turn on Autostart for Roti Track, and lock it in Recent apps."), style = Type.body)
                 Text(t("4. Check that Do Not Disturb is off and the phone isn't on silent."), style = Type.body)
+                if (!platform.exactAlarmsAllowed) {
+                    Text(t("5. Allow \"Alarms & reminders\" for Roti Track, so reminders come on time when the phone is locked."), style = Type.body)
+                    Text(
+                        t("Open alarm settings ›"), style = Type.title.copy(color = Palette.brand, fontSize = 15.sp),
+                        modifier = Modifier.clickable { platform.openExactAlarmSettings() },
+                    )
+                }
             }
         },
         confirmButton = { TextButton(onClick = onDismiss) { Text(t("Got it")) } },

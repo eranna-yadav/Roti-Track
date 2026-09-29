@@ -18,7 +18,10 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -30,6 +33,7 @@ import com.rotitrack.app.data.Profile
 import com.rotitrack.app.data.WaterSound
 import com.rotitrack.app.domain.Report
 import com.rotitrack.app.i18n.I18n
+import com.rotitrack.app.reminders.Alarms
 import com.rotitrack.app.reminders.MealReminders
 import com.rotitrack.app.reminders.MealVoice
 import com.rotitrack.app.reminders.mealReminderText
@@ -43,6 +47,7 @@ import com.rotitrack.app.ui.Platform
 class MainActivity : ComponentActivity(), Platform, PaymentResultWithDataListener {
 
     private var pendingResult: ((Boolean) -> Unit)? = null
+    private var exactOk by mutableStateOf(true)
 
     private val permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         pendingResult?.invoke(granted)
@@ -64,6 +69,22 @@ class MainActivity : ComponentActivity(), Platform, PaymentResultWithDataListene
         super.onResume()
         rotiTrack.currentActivity = this
         rotiTrack.services.billing.restore()
+        // Picks up a change made in system settings, and makes pending reminders exact once allowed.
+        val allowed = Alarms.exactAllowed(this)
+        if (allowed != exactOk) {
+            exactOk = allowed
+            Alarms.rescheduleAll(this)
+        }
+    }
+
+    override val exactAlarmsAllowed: Boolean get() = exactOk
+
+    override fun openExactAlarmSettings() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            runCatching {
+                startActivity(Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM, Uri.parse("package:$packageName")))
+            }
+        }
     }
 
     override fun onPause() {

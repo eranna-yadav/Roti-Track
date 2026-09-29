@@ -72,6 +72,10 @@ fun TrackingRemindersScreen(store: AppStore, platform: Platform, onWaterReminder
                 t("Notifications are currently turned off for Roti Track.\nTo get reminders, allow notifications in system settings."),
                 t("Open Settings"),
             ) { platform.openNotificationSettings() }
+        } else if (!platform.exactAlarmsAllowed) {
+            Banner(t("Allow \"Alarms & reminders\" so reminders arrive on time, even when your phone is locked."), t("Allow")) {
+                platform.openExactAlarmSettings()
+            }
         }
 
         SettingsGroup {

@@ -830,4 +830,8 @@ internal val GU: Map<String, String> = mapOf(
     "Take a minute to complete today's log. You're doing better than you think." to "આજની નોંધ પૂરી કરવા એક મિનિટ આપો. તમે ધારો છો તેના કરતાં સારું કરી રહ્યા છો.",
     "Proud of you, {0}! 🌟" to "અમને તમારા પર ગર્વ છે, {0}! 🌟",
     "Wrap up your day by logging all your meals. Sweet dreams!" to "બધાં ભોજન નોંધીને તમારો દિવસ પૂરો કરો. મીઠાં સપનાં!",
+    "Allow \"Alarms & reminders\" so reminders arrive on time, even when your phone is locked." to "ફોન લૉક હોય ત્યારે પણ રિમાઇન્ડર સમયસર આવે તે માટે \"Alarms & reminders\" ની મંજૂરી આપો.",
+    "Allow" to "મંજૂરી આપો",
+    "5. Allow \"Alarms & reminders\" for Roti Track, so reminders come on time when the phone is locked." to "5. ફોન લૉક હોય ત્યારે પણ રિમાઇન્ડર સમયસર આવે તે માટે Roti Track માટે \"Alarms & reminders\" ની મંજૂરી આપો.",
+    "Open alarm settings ›" to "એલાર્મ સેટિંગ્સ ખોલો ›",
 )

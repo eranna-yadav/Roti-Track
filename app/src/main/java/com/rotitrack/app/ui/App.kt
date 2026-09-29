@@ -55,6 +55,10 @@ interface Platform {
     fun openNotificationSettings()
     /** Where the user can stop Android from holding back background reminders. */
     fun openBatterySettings()
+    /** Whether reminders can go off at the exact minute while the phone is locked. Compose state. */
+    val exactAlarmsAllowed: Boolean get() = true
+    /** Where the user allows "Alarms & reminders" for the app. */
+    fun openExactAlarmSettings() {}
     /** Plays a water sound once (a preview, or when water is logged). */
     fun playSound(sound: WaterSound, volume: Float)
     fun stopSound()

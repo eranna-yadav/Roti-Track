@@ -830,4 +830,8 @@ internal val BN: Map<String, String> = mapOf(
     "Take a minute to complete today's log. You're doing better than you think." to "আজকের লগ শেষ করতে এক মিনিট দিন। আপনি যা ভাবছেন তার চেয়েও ভালো করছেন।",
     "Proud of you, {0}! 🌟" to "আপনাকে নিয়ে গর্বিত, {0}! 🌟",
     "Wrap up your day by logging all your meals. Sweet dreams!" to "সব খাবার লগ করে দিনটা শেষ করুন। মিষ্টি স্বপ্ন দেখুন!",
+    "Allow \"Alarms & reminders\" so reminders arrive on time, even when your phone is locked." to "ফোন লক থাকলেও রিমাইন্ডার যেন সময়মতো আসে, সেজন্য \"Alarms & reminders\" চালু করুন।",
+    "Allow" to "অনুমতি দিন",
+    "5. Allow \"Alarms & reminders\" for Roti Track, so reminders come on time when the phone is locked." to "5. ফোন লক থাকলেও রিমাইন্ডার যেন সময়মতো আসে, সেজন্য Roti Track-এর জন্য \"Alarms & reminders\" চালু করুন।",
+    "Open alarm settings ›" to "অ্যালার্ম সেটিংস খুলুন ›",
 )
