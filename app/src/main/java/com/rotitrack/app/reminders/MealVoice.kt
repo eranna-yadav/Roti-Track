@@ -6,6 +6,7 @@ import android.media.AudioAttributes
 import android.media.AudioManager
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
+import android.speech.tts.Voice
 import com.rotitrack.app.i18n.I18n
 import java.util.Locale
 import java.util.concurrent.CountDownLatch
@@ -15,9 +16,33 @@ import java.util.concurrent.TimeUnit
 object MealVoice {
     private val EMOJI = Regex("[\\p{So}\\p{Cs}\\p{Sk}\\u200D\\uFE0F]")
 
-    /** "Time to log your lunch 🍛" + "Tap to add…" → one sentence to speak, without emoji. */
-    fun sentence(title: String, text: String): String =
-        "${title.replace(EMOJI, "").trim()}. ${text.replace(EMOJI, "").trim()}".replace(Regex("\\s+"), " ")
+    /** A friendly, unhurried pace and a slightly brighter pitch sound warmer than the defaults. */
+    private const val RATE = 0.9f
+    private const val PITCH = 1.08f
+    /** A short breath between sentences, as a person would pause. */
+    private const val PAUSE_MS = 350L
+    private const val LAST = "meal-reminder-end"
+
+    /** "Hey Krish! Lunch time 🍛" + "Tap to add…" → one passage to speak, without emoji. */
+    fun sentence(title: String, text: String): String {
+        val head = title.replace(EMOJI, "").trim()
+        val end = if (head.isNotEmpty() && head.last() in ".!?।") "" else "."
+        return "$head$end ${text.replace(EMOJI, "").trim()}".replace(Regex("\\s+"), " ").trim()
+    }
+
+    /** Sentences to speak one by one, so there's a natural pause between them. */
+    private fun phrases(text: String): List<String> =
+        text.split(Regex("(?<=[.!?।])\\s+|\\s+—\\s+")).map { it.trim() }.filter { it.isNotEmpty() }
+
+    /** The most natural installed voice for [locale], if the engine lists any. */
+    private fun bestVoice(engine: TextToSpeech, locale: Locale): Voice? =
+        runCatching { engine.voices }.getOrNull().orEmpty()
+            .filter { v ->
+                v.locale.language == locale.language &&
+                    !v.isNetworkConnectionRequired &&
+                    TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED !in v.features
+            }
+            .maxWithOrNull(compareBy<Voice>({ it.locale.country == locale.country }, { it.quality }, { -it.latency }))
 
     /** Stays quiet when the phone is on silent or vibrate, or Do Not Disturb is on. */
     fun allowed(context: Context): Boolean {
@@ -47,12 +72,17 @@ object MealVoice {
             val wanted = Locale(lang, "IN")
             val say = if (engine.isLanguageAvailable(wanted) >= TextToSpeech.LANG_AVAILABLE) {
                 engine.setLanguage(wanted)
+                bestVoice(engine, wanted)?.let { engine.setVoice(it) }
                 text
             } else {
                 val en = Locale("en", "IN")
-                engine.setLanguage(if (engine.isLanguageAvailable(en) >= TextToSpeech.LANG_AVAILABLE) en else Locale.ENGLISH)
+                val locale = if (engine.isLanguageAvailable(en) >= TextToSpeech.LANG_AVAILABLE) en else Locale.ENGLISH
+                engine.setLanguage(locale)
+                bestVoice(engine, locale)?.let { engine.setVoice(it) }
                 english
             }
+            engine.setSpeechRate(RATE)
+            engine.setPitch(PITCH)
             engine.setAudioAttributes(
                 AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_NOTIFICATION)
@@ -61,12 +91,22 @@ object MealVoice {
             )
             engine.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
                 override fun onStart(utteranceId: String?) {}
-                override fun onDone(utteranceId: String?) = finish()
+                override fun onDone(utteranceId: String?) {
+                    if (utteranceId == LAST) finish()
+                }
                 @Deprecated("Deprecated in Java")
                 override fun onError(utteranceId: String?) = finish()
                 override fun onError(utteranceId: String?, errorCode: Int) = finish()
             })
-            if (engine.speak(say, TextToSpeech.QUEUE_FLUSH, null, "meal-reminder") != TextToSpeech.SUCCESS) finish()
+            val parts = phrases(say).ifEmpty { listOf(say) }
+            var ok = true
+            parts.forEachIndexed { i, part ->
+                if (i > 0) engine.playSilentUtterance(PAUSE_MS, TextToSpeech.QUEUE_ADD, "meal-reminder-pause-$i")
+                val id = if (i == parts.lastIndex) LAST else "meal-reminder-$i"
+                val mode = if (i == 0) TextToSpeech.QUEUE_FLUSH else TextToSpeech.QUEUE_ADD
+                if (engine.speak(part, mode, null, id) != TextToSpeech.SUCCESS) ok = false
+            }
+            if (!ok) finish()
         }
     }
 

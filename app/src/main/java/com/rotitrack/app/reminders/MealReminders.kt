@@ -24,7 +24,6 @@ import com.rotitrack.app.data.MealReminder
 import com.rotitrack.app.data.MealSlot
 import com.rotitrack.app.domain.Days
 import com.rotitrack.app.rotiTrack
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 
@@ -92,51 +91,6 @@ object MealReminders {
 
 /** Gap between the notification sound and the voice reminder. */
 private const val VOICE_DELAY_MS = 2_000L
-
-/** Warm, varied messages for each reminder: title ({0} is the first name) and text. */
-val MEAL_MESSAGES: Map<String, List<Pair<String, String>>> = mapOf(
-    "breakfast" to listOf(
-        "Good morning, {0}! ☀️" to "A warm breakfast is the best hug for your body. Tell us what you're having today 💛",
-        "Rise and shine, {0}! 🌅" to "You deserve a lovely start. Log your breakfast and let's make today amazing together.",
-        "Morning, dear {0}! 🍵" to "Don't skip breakfast — you matter too much. Tap to add what you ate.",
-    ),
-    "lunch" to listOf(
-        "Hey {0}! Lunch time 🍛" to "You've been working so hard. Take a break, enjoy your food and log your lunch 💛",
-        "{0}, your thali is waiting! 🍛" to "Eat slowly and enjoy every bite. We're proud of you for taking care of yourself.",
-        "Hi {0}! Hungry? 😊" to "A good lunch keeps you strong for the rest of the day. Tap to log what you ate.",
-    ),
-    "snack" to listOf(
-        "Chai time, {0}! ☕" to "A little break makes everything better. Log your evening snack when you're ready.",
-        "Hey {0}, feeling peckish? 🥜" to "Pick something light and tasty — you're doing great. Tap to add your snack.",
-        "Time for a small treat, {0}! 🍎" to "You've come so far today. Log your snack and keep smiling 😊",
-    ),
-    "dinner" to listOf(
-        "Dinner time, {0}! 🌙" to "You made it through the day — well done! Enjoy a light, warm dinner and log it here 💛",
-        "Hey {0}, how was your day? 🍲" to "Relax, eat well and let us keep track for you. Tap to log your dinner.",
-        "Good evening, {0}! ✨" to "A happy tummy means a happy sleep. Log your dinner and rest easy.",
-    ),
-    "end_of_day" to listOf(
-        "Well done today, {0}! 🌙" to "Before you sleep, log anything you missed. Every small step counts — we believe in you 💛",
-        "Almost bedtime, {0}! 😴" to "Take a minute to complete today's log. You're doing better than you think.",
-        "Proud of you, {0}! 🌟" to "Wrap up your day by logging all your meals. Sweet dreams!",
-    ),
-)
-
-/**
- * Title and text of a meal reminder in the language [code], greeting [fullName] by first name
- * ("friend" when unknown). [variant] picks one of the messages; by default it changes every day.
- */
-fun mealReminderText(
-    key: String,
-    code: String,
-    fullName: String = "",
-    variant: Int = LocalDate.now().dayOfYear,
-): Pair<String, String> {
-    val messages = MEAL_MESSAGES[key] ?: MEAL_MESSAGES.getValue("end_of_day")
-    val (title, text) = messages[Math.floorMod(variant, messages.size)]
-    val name = fullName.trim().substringBefore(' ').ifEmpty { tIn(code, "friend") }
-    return tIn(code, title, name) to tIn(code, text)
-}
 
 /**
  * Nudges to log a meal, skipped when that meal (or, for End of Day, every meal) is already
