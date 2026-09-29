@@ -135,4 +135,27 @@ class AccountsTest {
         assertEquals(42, dir.get("u")!!.razorpayUntil)
         assertEquals(Plan.MONTHLY.productId, dir.get("u")!!.razorpayPlanId)
     }
+
+    @Test fun referralReportShowsWhoReferredWhomAndWhatIsDue() {
+        val users = listOf(
+            UserSummary("p1", name = "Asha", referralCode = "RTAAAAAA", referralEarnings = 750, referralPaid = 250, payoutUpi = "asha@upi"),
+            UserSummary("p2", name = "Ravi", referralCode = "RTBBBBBB", referralEarnings = 500, referralPaid = 500),
+            UserSummary("f1", name = "Krish", referralCode = "RTCCCCCC", referredByCode = "RTAAAAAA", referralCreditedAmount = 500, createdAt = 2),
+            UserSummary("f2", name = "Meera", referralCode = "RTDDDDDD", referredByCode = "RTAAAAAA", referralCreditedAmount = 250, createdAt = 3),
+            UserSummary("f3", name = "Sam", referralCode = "RTEEEEEE", referredByCode = "RTBBBBBB", referralCreditedAmount = 500, createdAt = 1),
+            UserSummary("f4", name = "Lost", referralCode = "RTFFFFFF", referredByCode = "RTZZZZZZ", createdAt = 4),
+            UserSummary("n", name = "Nobody", referralCode = "RTGGGGGG"),
+        )
+        val r = com.rotitrack.app.account.ReferralReport.of(users)
+        assertEquals(listOf("f4", "f2", "f1", "f3"), r.links.map { it.friend.uid })
+        assertEquals("Asha", r.promoterOf(users[2])?.name)
+        assertNull(r.promoterOf(users[5]))
+        assertEquals(listOf("p1", "p2"), r.promoters.map { it.user.uid })
+        assertEquals(listOf("f2", "f1"), r.promoters[0].friends.map { it.uid })
+        assertEquals(listOf("p1"), r.payoutsDue.map { it.user.uid })
+        assertEquals(1250, r.earned)
+        assertEquals(750, r.paid)
+        assertEquals(500, r.due)
+        assertEquals(3, r.wentPro)
+    }
 }
