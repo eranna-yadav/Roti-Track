@@ -198,7 +198,11 @@ private fun SignedIn(services: Services, platform: Platform, nav: Navigator, acc
                 is Route.Tabs -> when (route.tab) {
                     Tab.HOME -> DashboardScreen(store, account, isPro, plan, onUpgrade = upgrade, onOpen = nav::tab)
                     Tab.WATER -> WaterScreen(store, platform, onReminders = { nav.push(Route.Page(ProfilePage.WATER_REMINDERS)) })
-                    Tab.FOOD -> FoodScreen(store, onAdd = { slot, day -> nav.push(Route.AddFood(slot, day)) })
+                    Tab.FOOD -> FoodScreen(
+                        store, platform,
+                        onAdd = { slot, day -> nav.push(Route.AddFood(slot, day)) },
+                        onReminders = { nav.push(Route.Page(ProfilePage.REMINDERS)) },
+                    )
                     Tab.PLAN -> PlanScreen(store, isPro, onUpgrade = upgrade, onOpenArticles = { nav.push(Route.Articles) }, onEditProfile = { nav.push(Route.Page(ProfilePage.PERSONAL)) })
                     Tab.PROFILE -> ProfileScreen(
                         store, account, isPro, isAdmin, platform,

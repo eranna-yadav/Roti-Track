@@ -47,7 +47,7 @@ import com.rotitrack.app.store.AppStore
 import kotlin.math.roundToInt
 
 @Composable
-fun FoodScreen(store: AppStore, onAdd: (MealSlot, String) -> Unit) {
+fun FoodScreen(store: AppStore, platform: Platform, onAdd: (MealSlot, String) -> Unit, onReminders: () -> Unit) {
     val p = store.profile
     val todayKey = today
     var day by remember { mutableStateOf(todayKey) }
@@ -62,7 +62,18 @@ fun FoodScreen(store: AppStore, onAdd: (MealSlot, String) -> Unit) {
 
     LazyColumn(Modifier.fillMaxSize(), contentPadding = ScreenPadding) {
         item {
-            ScreenHeader(t("CALORIES"))
+            val prefs = store.prefs
+            ScreenHeader(t("CALORIES")) {
+                val anyOn = prefs.mealReminders.any { it.enabled }
+                HeaderIcon(TabIcons.Bell, t("Meal logging reminders"), if (anyOn) Palette.brand else Palette.ink, onReminders)
+                Spacer(Modifier.width(10.dp))
+                // Switches spoken meal reminders on or off; turning it on plays a sample.
+                HeaderIcon(TabIcons.Speaker, t("🔊 Voice reminders"), if (prefs.mealVoice) Palette.brand else Palette.muted) {
+                    val on = !prefs.mealVoice
+                    store.updatePrefs { it.copy(mealVoice = on) }
+                    if (on) platform.previewMealVoice()
+                }
+            }
             Row(Modifier.fillMaxWidth().padding(bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     "‹", fontSize = 32.sp, color = Palette.brand,
