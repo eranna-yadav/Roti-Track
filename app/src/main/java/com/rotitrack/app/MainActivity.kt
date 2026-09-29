@@ -144,8 +144,11 @@ class MainActivity : ComponentActivity(), Platform, PaymentResultWithDataListene
 
     override fun previewMealVoice() {
         val name = rotiTrack.activeStore?.profile?.name.orEmpty()
-        val (title, text) = mealReminderText("lunch", I18n.lang, name)
-        val (enTitle, enText) = mealReminderText("lunch", "en", name)
+        // A different meal and message on each tap, so all of them can be heard.
+        val key = listOf("breakfast", "lunch", "snack", "dinner", "end_of_day").random()
+        val variant = (0..2).random()
+        val (title, text) = mealReminderText(key, I18n.lang, name, variant)
+        val (enTitle, enText) = mealReminderText(key, "en", name, variant)
         MealVoice.speak(this, MealVoice.sentence(title, text), MealVoice.sentence(enTitle, enText))
     }
 
