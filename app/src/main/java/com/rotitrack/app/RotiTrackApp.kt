@@ -5,6 +5,8 @@ import android.app.Application
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import com.google.firebase.FirebaseApp
+import com.rotitrack.app.account.NoFoodScanner
+import com.rotitrack.app.cloud.FirebaseFoodScanner
 import com.rotitrack.app.account.DemoBilling
 import com.rotitrack.app.account.LocalAuth
 import com.rotitrack.app.account.LocalDirectory
@@ -79,7 +81,10 @@ class RotiTrackApp : Application() {
                 },
             ).also { it.connect() }
         }
-        services = Services(auth, directory, billing, razorpay, ::storeFor)
+        services = Services(
+            auth, directory, billing, razorpay, ::storeFor,
+            scanner = if (usesFirebase) FirebaseFoodScanner() else NoFoodScanner,
+        )
     }
 
     fun storeFor(uid: String): AppStore = stores.getOrPut(uid) { AppStore(AndroidStorage(this, "state-$uid.json")) }

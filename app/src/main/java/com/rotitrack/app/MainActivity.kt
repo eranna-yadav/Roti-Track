@@ -17,6 +17,7 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,6 +34,7 @@ import com.rotitrack.app.data.Profile
 import com.rotitrack.app.data.WaterSound
 import com.rotitrack.app.domain.Report
 import com.rotitrack.app.i18n.I18n
+import com.rotitrack.app.cloud.FoodPhoto
 import com.rotitrack.app.reminders.Alarms
 import com.rotitrack.app.reminders.MealReminders
 import com.rotitrack.app.reminders.MealVoice
@@ -43,11 +45,36 @@ import com.rotitrack.app.reminders.WaterSounds
 import com.rotitrack.app.ui.App
 import com.rotitrack.app.ui.Navigator
 import com.rotitrack.app.ui.Platform
+import java.io.File
+import kotlin.concurrent.thread
 
 class MainActivity : ComponentActivity(), Platform, PaymentResultWithDataListener {
 
     private var pendingResult: ((Boolean) -> Unit)? = null
     private var exactOk by mutableStateOf(true)
+
+    // Food scanner photos. Only one request at a time, so one callback is enough.
+    private var photoCallback: ((ByteArray?) -> Unit)? = null
+    private val photoFile by lazy { File(File(cacheDir, "scans").apply { mkdirs() }, "plate.jpg") }
+
+    private val takePicture = registerForActivityResult(ActivityResultContracts.TakePicture()) { saved ->
+        deliverPhoto(if (saved) FileProvider.getUriForFile(this, "$packageName.files", photoFile) else null)
+    }
+
+    private val pickPicture = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        deliverPhoto(uri)
+    }
+
+    /** Shrinks the photo off the main thread, then hands it to the waiting screen. */
+    private fun deliverPhoto(uri: Uri?) {
+        val callback = photoCallback ?: return
+        photoCallback = null
+        if (uri == null) return callback(null)
+        thread(name = "food-photo") {
+            val jpeg = FoodPhoto.prepare(this, uri)
+            runOnUiThread { callback(jpeg) }
+        }
+    }
 
     private val permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         pendingResult?.invoke(granted)
@@ -78,6 +105,22 @@ class MainActivity : ComponentActivity(), Platform, PaymentResultWithDataListene
     }
 
     override val exactAlarmsAllowed: Boolean get() = exactOk
+
+    override fun pickFoodPhoto(camera: Boolean, onPhoto: (ByteArray?) -> Unit) {
+        photoCallback = onPhoto
+        val launched = runCatching {
+            if (camera) {
+                takePicture.launch(FileProvider.getUriForFile(this, "$packageName.files", photoFile))
+            } else {
+                pickPicture.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            }
+        }
+        if (launched.isFailure) {
+            photoCallback = null
+            Toast.makeText(this, t("Couldn't open the camera."), Toast.LENGTH_SHORT).show()
+            onPhoto(null)
+        }
+    }
 
     override fun openExactAlarmSettings() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

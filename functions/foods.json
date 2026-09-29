@@ -1,0 +1,854 @@
+[
+{
+"id": "poha",
+"name": "Poha",
+"serving": "1 plate (150 g)",
+"kcal": 250
+},
+{
+"id": "upma",
+"name": "Upma",
+"serving": "1 bowl (200 g)",
+"kcal": 290
+},
+{
+"id": "idli",
+"name": "Idli",
+"serving": "1 piece",
+"kcal": 58
+},
+{
+"id": "dosa",
+"name": "Plain Dosa",
+"serving": "1 dosa",
+"kcal": 170
+},
+{
+"id": "masala-dosa",
+"name": "Masala Dosa",
+"serving": "1 dosa",
+"kcal": 390
+},
+{
+"id": "rava-dosa",
+"name": "Rava Dosa",
+"serving": "1 dosa",
+"kcal": 220
+},
+{
+"id": "medu-vada",
+"name": "Medu Vada",
+"serving": "1 piece",
+"kcal": 140
+},
+{
+"id": "uttapam",
+"name": "Uttapam",
+"serving": "1 uttapam",
+"kcal": 210
+},
+{
+"id": "pesarattu",
+"name": "Pesarattu",
+"serving": "1 piece",
+"kcal": 180
+},
+{
+"id": "ragi-dosa",
+"name": "Ragi Dosa",
+"serving": "1 dosa",
+"kcal": 140
+},
+{
+"id": "appam",
+"name": "Appam",
+"serving": "1 appam",
+"kcal": 120
+},
+{
+"id": "pongal",
+"name": "Ven Pongal",
+"serving": "1 bowl (200 g)",
+"kcal": 300
+},
+{
+"id": "aloo-paratha",
+"name": "Aloo Paratha",
+"serving": "1 paratha",
+"kcal": 290
+},
+{
+"id": "paneer-paratha",
+"name": "Paneer Paratha",
+"serving": "1 paratha",
+"kcal": 320
+},
+{
+"id": "thepla",
+"name": "Methi Thepla",
+"serving": "1 thepla",
+"kcal": 120
+},
+{
+"id": "besan-chilla",
+"name": "Besan Chilla",
+"serving": "1 chilla",
+"kcal": 150
+},
+{
+"id": "moong-chilla",
+"name": "Moong Dal Chilla",
+"serving": "1 chilla",
+"kcal": 130
+},
+{
+"id": "dhokla",
+"name": "Khaman Dhokla",
+"serving": "4 pieces (100 g)",
+"kcal": 160
+},
+{
+"id": "oats",
+"name": "Masala Oats",
+"serving": "1 bowl",
+"kcal": 220
+},
+{
+"id": "oats-milk",
+"name": "Oats Porridge with Milk",
+"serving": "1 bowl",
+"kcal": 230
+},
+{
+"id": "semiya-upma",
+"name": "Semiya Upma",
+"serving": "1 bowl",
+"kcal": 250
+},
+{
+"id": "sabudana-khichdi",
+"name": "Sabudana Khichdi",
+"serving": "1 bowl (150 g)",
+"kcal": 330
+},
+{
+"id": "puri",
+"name": "Puri",
+"serving": "1 puri",
+"kcal": 100
+},
+{
+"id": "bhatura",
+"name": "Bhatura",
+"serving": "1 bhatura",
+"kcal": 250
+},
+{
+"id": "bread",
+"name": "Brown Bread",
+"serving": "1 slice",
+"kcal": 75
+},
+{
+"id": "boiled-egg",
+"name": "Boiled Egg",
+"serving": "1 egg",
+"kcal": 78
+},
+{
+"id": "omelette",
+"name": "Masala Omelette",
+"serving": "2 eggs",
+"kcal": 190
+},
+{
+"id": "egg-bhurji",
+"name": "Egg Bhurji",
+"serving": "1 bowl (2 eggs)",
+"kcal": 220
+},
+{
+"id": "coconut-chutney",
+"name": "Coconut Chutney",
+"serving": "2 tbsp (30 g)",
+"kcal": 70
+},
+{
+"id": "sprouts",
+"name": "Moong Sprouts Salad",
+"serving": "1 bowl",
+"kcal": 110
+},
+{
+"id": "roti",
+"name": "Roti / Chapati",
+"serving": "1 roti (40 g)",
+"kcal": 110
+},
+{
+"id": "phulka",
+"name": "Phulka (no oil)",
+"serving": "1 phulka",
+"kcal": 70
+},
+{
+"id": "bajra-roti",
+"name": "Bajra Roti",
+"serving": "1 roti",
+"kcal": 120
+},
+{
+"id": "jowar-roti",
+"name": "Jowar Bhakri",
+"serving": "1 roti",
+"kcal": 110
+},
+{
+"id": "makki-roti",
+"name": "Makki di Roti",
+"serving": "1 roti",
+"kcal": 150
+},
+{
+"id": "missi-roti",
+"name": "Missi Roti",
+"serving": "1 roti",
+"kcal": 140
+},
+{
+"id": "paratha",
+"name": "Plain Paratha",
+"serving": "1 paratha",
+"kcal": 200
+},
+{
+"id": "naan",
+"name": "Naan",
+"serving": "1 naan",
+"kcal": 260
+},
+{
+"id": "butter-naan",
+"name": "Butter Naan",
+"serving": "1 naan",
+"kcal": 320
+},
+{
+"id": "pav",
+"name": "Pav",
+"serving": "1 pav",
+"kcal": 110
+},
+{
+"id": "rice",
+"name": "Steamed Rice",
+"serving": "1 bowl (150 g cooked)",
+"kcal": 195
+},
+{
+"id": "brown-rice",
+"name": "Brown Rice",
+"serving": "1 bowl (150 g cooked)",
+"kcal": 170
+},
+{
+"id": "jeera-rice",
+"name": "Jeera Rice",
+"serving": "1 bowl",
+"kcal": 240
+},
+{
+"id": "veg-pulao",
+"name": "Veg Pulao",
+"serving": "1 bowl",
+"kcal": 270
+},
+{
+"id": "veg-biryani",
+"name": "Veg Biryani",
+"serving": "1 plate (250 g)",
+"kcal": 400
+},
+{
+"id": "curd-rice",
+"name": "Curd Rice",
+"serving": "1 bowl",
+"kcal": 230
+},
+{
+"id": "lemon-rice",
+"name": "Lemon Rice",
+"serving": "1 bowl",
+"kcal": 260
+},
+{
+"id": "khichdi",
+"name": "Moong Dal Khichdi",
+"serving": "1 bowl",
+"kcal": 220
+},
+{
+"id": "bisi-bele-bath",
+"name": "Bisi Bele Bath",
+"serving": "1 bowl",
+"kcal": 300
+},
+{
+"id": "chicken-biryani",
+"name": "Chicken Biryani",
+"serving": "1 plate (250 g)",
+"kcal": 500
+},
+{
+"id": "egg-biryani",
+"name": "Egg Biryani",
+"serving": "1 plate (250 g)",
+"kcal": 440
+},
+{
+"id": "dal-tadka",
+"name": "Dal Tadka",
+"serving": "1 bowl (150 g)",
+"kcal": 180
+},
+{
+"id": "moong-dal",
+"name": "Yellow Moong Dal",
+"serving": "1 bowl (150 g)",
+"kcal": 150
+},
+{
+"id": "chana-dal",
+"name": "Chana Dal",
+"serving": "1 bowl (150 g)",
+"kcal": 190
+},
+{
+"id": "dal-makhani",
+"name": "Dal Makhani",
+"serving": "1 bowl (150 g)",
+"kcal": 280
+},
+{
+"id": "sambar",
+"name": "Sambar",
+"serving": "1 bowl (150 ml)",
+"kcal": 130
+},
+{
+"id": "rasam",
+"name": "Rasam",
+"serving": "1 bowl (150 ml)",
+"kcal": 60
+},
+{
+"id": "rajma",
+"name": "Rajma Masala",
+"serving": "1 bowl (150 g)",
+"kcal": 210
+},
+{
+"id": "chole",
+"name": "Chole / Chana Masala",
+"serving": "1 bowl (150 g)",
+"kcal": 240
+},
+{
+"id": "kadhi",
+"name": "Kadhi",
+"serving": "1 bowl (150 g)",
+"kcal": 160
+},
+{
+"id": "usal",
+"name": "Matki Usal",
+"serving": "1 bowl (150 g)",
+"kcal": 200
+},
+{
+"id": "aloo-gobi",
+"name": "Aloo Gobi",
+"serving": "1 bowl (150 g)",
+"kcal": 170
+},
+{
+"id": "bhindi",
+"name": "Bhindi Masala",
+"serving": "1 bowl (150 g)",
+"kcal": 150
+},
+{
+"id": "palak-paneer",
+"name": "Palak Paneer",
+"serving": "1 bowl (150 g)",
+"kcal": 270
+},
+{
+"id": "paneer-butter",
+"name": "Paneer Butter Masala",
+"serving": "1 bowl (150 g)",
+"kcal": 350
+},
+{
+"id": "matar-paneer",
+"name": "Matar Paneer",
+"serving": "1 bowl (150 g)",
+"kcal": 260
+},
+{
+"id": "paneer-bhurji",
+"name": "Paneer Bhurji",
+"serving": "1 bowl (100 g)",
+"kcal": 250
+},
+{
+"id": "mixed-veg",
+"name": "Mixed Veg Curry",
+"serving": "1 bowl (150 g)",
+"kcal": 150
+},
+{
+"id": "baingan-bharta",
+"name": "Baingan Bharta",
+"serving": "1 bowl (150 g)",
+"kcal": 140
+},
+{
+"id": "aloo-matar",
+"name": "Aloo Matar",
+"serving": "1 bowl (150 g)",
+"kcal": 180
+},
+{
+"id": "lauki",
+"name": "Lauki Sabzi",
+"serving": "1 bowl (150 g)",
+"kcal": 90
+},
+{
+"id": "poriyal",
+"name": "Cabbage Poriyal",
+"serving": "1 bowl (150 g)",
+"kcal": 110
+},
+{
+"id": "beans-poriyal",
+"name": "Beans Poriyal",
+"serving": "1 bowl (150 g)",
+"kcal": 120
+},
+{
+"id": "avial",
+"name": "Avial",
+"serving": "1 bowl (150 g)",
+"kcal": 180
+},
+{
+"id": "soya-curry",
+"name": "Soya Chunks Curry",
+"serving": "1 bowl (150 g)",
+"kcal": 200
+},
+{
+"id": "mushroom-masala",
+"name": "Mushroom Masala",
+"serving": "1 bowl (150 g)",
+"kcal": 150
+},
+{
+"id": "methi-aloo",
+"name": "Aloo Methi",
+"serving": "1 bowl (150 g)",
+"kcal": 160
+},
+{
+"id": "pav-bhaji-bhaji",
+"name": "Pav Bhaji (bhaji only)",
+"serving": "1 bowl (150 g)",
+"kcal": 230
+},
+{
+"id": "salad",
+"name": "Kachumber Salad",
+"serving": "1 bowl",
+"kcal": 40
+},
+{
+"id": "chicken-curry",
+"name": "Chicken Curry",
+"serving": "1 bowl (150 g)",
+"kcal": 260
+},
+{
+"id": "butter-chicken",
+"name": "Butter Chicken",
+"serving": "1 bowl (150 g)",
+"kcal": 380
+},
+{
+"id": "tandoori-chicken",
+"name": "Tandoori Chicken",
+"serving": "2 pieces (200 g)",
+"kcal": 260
+},
+{
+"id": "chicken-tikka",
+"name": "Chicken Tikka",
+"serving": "6 pieces (150 g)",
+"kcal": 220
+},
+{
+"id": "grilled-chicken",
+"name": "Grilled Chicken Breast",
+"serving": "100 g",
+"kcal": 165
+},
+{
+"id": "keema",
+"name": "Chicken Keema",
+"serving": "1 bowl (150 g)",
+"kcal": 300
+},
+{
+"id": "mutton-curry",
+"name": "Mutton Curry",
+"serving": "1 bowl (150 g)",
+"kcal": 340
+},
+{
+"id": "fish-curry",
+"name": "Fish Curry",
+"serving": "1 bowl (150 g)",
+"kcal": 220
+},
+{
+"id": "fish-fry",
+"name": "Fish Fry",
+"serving": "1 piece (100 g)",
+"kcal": 200
+},
+{
+"id": "prawn-masala",
+"name": "Prawn Masala",
+"serving": "1 bowl (150 g)",
+"kcal": 200
+},
+{
+"id": "egg-curry",
+"name": "Egg Curry",
+"serving": "1 bowl (2 eggs)",
+"kcal": 240
+},
+{
+"id": "curd",
+"name": "Curd / Dahi",
+"serving": "1 bowl (150 g)",
+"kcal": 90
+},
+{
+"id": "raita",
+"name": "Boondi / Veg Raita",
+"serving": "1 bowl (150 g)",
+"kcal": 100
+},
+{
+"id": "paneer",
+"name": "Paneer (raw)",
+"serving": "100 g",
+"kcal": 265
+},
+{
+"id": "milk",
+"name": "Toned Milk",
+"serving": "1 glass (250 ml)",
+"kcal": 145
+},
+{
+"id": "haldi-doodh",
+"name": "Haldi Doodh",
+"serving": "1 glass (250 ml)",
+"kcal": 160
+},
+{
+"id": "chaas",
+"name": "Chaas / Buttermilk",
+"serving": "1 glass (250 ml)",
+"kcal": 40
+},
+{
+"id": "lassi",
+"name": "Sweet Lassi",
+"serving": "1 glass (250 ml)",
+"kcal": 220
+},
+{
+"id": "ghee",
+"name": "Ghee",
+"serving": "1 tsp (5 g)",
+"kcal": 45
+},
+{
+"id": "samosa",
+"name": "Samosa",
+"serving": "1 samosa",
+"kcal": 260
+},
+{
+"id": "pakora",
+"name": "Onion Pakora",
+"serving": "5 pieces",
+"kcal": 200
+},
+{
+"id": "kachori",
+"name": "Kachori",
+"serving": "1 kachori",
+"kcal": 190
+},
+{
+"id": "pani-puri",
+"name": "Pani Puri",
+"serving": "6 puris",
+"kcal": 180
+},
+{
+"id": "bhel",
+"name": "Bhel Puri",
+"serving": "1 plate",
+"kcal": 200
+},
+{
+"id": "pav-bhaji",
+"name": "Pav Bhaji",
+"serving": "1 plate (2 pav)",
+"kcal": 450
+},
+{
+"id": "vada-pav",
+"name": "Vada Pav",
+"serving": "1 vada pav",
+"kcal": 290
+},
+{
+"id": "roasted-chana",
+"name": "Roasted Chana",
+"serving": "1 handful (30 g)",
+"kcal": 110
+},
+{
+"id": "makhana",
+"name": "Roasted Makhana",
+"serving": "1 cup (30 g)",
+"kcal": 120
+},
+{
+"id": "nuts",
+"name": "Mixed Nuts",
+"serving": "1 handful (30 g)",
+"kcal": 180
+},
+{
+"id": "peanuts",
+"name": "Roasted Peanuts",
+"serving": "1 handful (30 g)",
+"kcal": 170
+},
+{
+"id": "murmura",
+"name": "Masala Murmura",
+"serving": "1 bowl",
+"kcal": 130
+},
+{
+"id": "khakhra",
+"name": "Khakhra",
+"serving": "2 khakhras",
+"kcal": 120
+},
+{
+"id": "sprouts-chaat",
+"name": "Sprouts Chaat",
+"serving": "1 bowl",
+"kcal": 140
+},
+{
+"id": "marie",
+"name": "Marie Biscuits",
+"serving": "4 biscuits",
+"kcal": 120
+},
+{
+"id": "sundal",
+"name": "Chana Sundal",
+"serving": "1 bowl (100 g)",
+"kcal": 150
+},
+{
+"id": "gulab-jamun",
+"name": "Gulab Jamun",
+"serving": "1 piece",
+"kcal": 150
+},
+{
+"id": "rasgulla",
+"name": "Rasgulla",
+"serving": "1 piece",
+"kcal": 110
+},
+{
+"id": "jalebi",
+"name": "Jalebi",
+"serving": "2 pieces",
+"kcal": 200
+},
+{
+"id": "kheer",
+"name": "Rice Kheer",
+"serving": "1 bowl",
+"kcal": 250
+},
+{
+"id": "besan-ladoo",
+"name": "Besan Ladoo",
+"serving": "1 ladoo",
+"kcal": 180
+},
+{
+"id": "sooji-halwa",
+"name": "Sooji Halwa",
+"serving": "1 bowl",
+"kcal": 330
+},
+{
+"id": "gajar-halwa",
+"name": "Gajar Halwa",
+"serving": "1 bowl",
+"kcal": 300
+},
+{
+"id": "barfi",
+"name": "Kaju Barfi",
+"serving": "1 piece",
+"kcal": 140
+},
+{
+"id": "chai",
+"name": "Masala Chai",
+"serving": "1 cup",
+"kcal": 90
+},
+{
+"id": "chai-nosugar",
+"name": "Chai (no sugar)",
+"serving": "1 cup",
+"kcal": 50
+},
+{
+"id": "filter-coffee",
+"name": "Filter Coffee",
+"serving": "1 cup",
+"kcal": 110
+},
+{
+"id": "black-coffee",
+"name": "Black Coffee",
+"serving": "1 cup",
+"kcal": 5
+},
+{
+"id": "green-tea",
+"name": "Green Tea",
+"serving": "1 cup",
+"kcal": 2
+},
+{
+"id": "nimbu-pani",
+"name": "Nimbu Pani",
+"serving": "1 glass",
+"kcal": 60
+},
+{
+"id": "coconut-water",
+"name": "Coconut Water",
+"serving": "1 glass (240 ml)",
+"kcal": 45
+},
+{
+"id": "sugarcane",
+"name": "Sugarcane Juice",
+"serving": "1 glass",
+"kcal": 180
+},
+{
+"id": "mango-shake",
+"name": "Mango Shake",
+"serving": "1 glass",
+"kcal": 250
+},
+{
+"id": "banana",
+"name": "Banana",
+"serving": "1 medium",
+"kcal": 105
+},
+{
+"id": "apple",
+"name": "Apple",
+"serving": "1 medium",
+"kcal": 95
+},
+{
+"id": "mango",
+"name": "Mango",
+"serving": "1 cup sliced",
+"kcal": 100
+},
+{
+"id": "papaya",
+"name": "Papaya",
+"serving": "1 cup",
+"kcal": 60
+},
+{
+"id": "guava",
+"name": "Guava",
+"serving": "1 medium",
+"kcal": 70
+},
+{
+"id": "orange",
+"name": "Orange",
+"serving": "1 medium",
+"kcal": 62
+},
+{
+"id": "watermelon",
+"name": "Watermelon",
+"serving": "1 cup",
+"kcal": 46
+},
+{
+"id": "pomegranate",
+"name": "Pomegranate",
+"serving": "½ cup arils",
+"kcal": 72
+},
+{
+"id": "grapes",
+"name": "Grapes",
+"serving": "1 cup",
+"kcal": 104
+},
+{
+"id": "chikoo",
+"name": "Chikoo",
+"serving": "1 medium",
+"kcal": 80
+},
+{
+"id": "dates",
+"name": "Dates",
+"serving": "3 dates",
+"kcal": 67
+}
+]

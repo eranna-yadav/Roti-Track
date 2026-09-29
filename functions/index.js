@@ -17,7 +17,9 @@ const { defineSecret, defineString } = require("firebase-functions/params");
 const logger = require("firebase-functions/logger");
 const admin = require("firebase-admin");
 const Razorpay = require("razorpay");
+const Anthropic = require("@anthropic-ai/sdk");
 const lib = require("./lib");
+const scan = require("./scan");
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -29,6 +31,11 @@ const WEBHOOK_SECRET = defineSecret("RAZORPAY_WEBHOOK_SECRET");
 const PLAN_MONTHLY = defineString("RAZORPAY_PLAN_MONTHLY", { description: "Razorpay plan_id for ₹359/month" });
 const PLAN_YEARLY = defineString("RAZORPAY_PLAN_YEARLY", { description: "Razorpay plan_id for ₹990/year" });
 const ANDROID_PACKAGE = "com.rotitrack.app";
+const ANTHROPIC_API_KEY = defineSecret("ANTHROPIC_API_KEY");
+const SCAN_MODEL = defineString("CLAUDE_SCAN_MODEL", {
+  default: "claude-opus-5-5",
+  description: "Claude model that reads food photos",
+});
 
 function razorpay() {
   return new Razorpay({ key_id: KEY_ID.value(), key_secret: KEY_SECRET.value() });
@@ -224,3 +231,65 @@ exports.creditReferral = onDocumentWritten({ document: "users/{uid}", region: RE
   });
   if (credited) logger.info("Referral credited", { uid, referrerUid, amount: credited });
 });
+
+/**
+ * Pro: reads a food photo with Claude and returns the dishes it sees, matched to the app's
+ * food catalog where possible. The app shows them for the user to check before logging.
+ */
+exports.scanFood = onCall(
+  { region: REGION, secrets: [ANTHROPIC_API_KEY], timeoutSeconds: 120, memory: "512MiB" },
+  async (req) => {
+    const uid = req.auth && req.auth.uid;
+    if (!uid) throw new HttpsError("unauthenticated", "Sign in to scan food.");
+    const apiKey = ANTHROPIC_API_KEY.value();
+    if (!apiKey || apiKey === "not-set") {
+      throw new HttpsError("failed-precondition", "Food scanning isn't set up yet. Please try again later.");
+    }
+    const image = req.data && req.data.image;
+    const bad = scan.checkImage(image);
+    if (bad) throw new HttpsError("invalid-argument", bad);
+
+    const user = (await db.doc(`users/${uid}`).get()).data();
+    if (!scan.isPro(user)) throw new HttpsError("permission-denied", "Food scanning is part of Roti Track Pro.");
+
+    // A daily cap per account keeps the AI bill predictable.
+    const usage = db.doc(`scanUsage/${uid}`);
+    const day = scan.scanDay();
+    await db.runTransaction(async (tx) => {
+      const u = (await tx.get(usage)).data() || {};
+      const count = u.day === day ? u.count || 0 : 0;
+      if (count >= scan.DAILY_SCAN_LIMIT) {
+        throw new HttpsError("resource-exhausted", "You've used today's food scans. Try again tomorrow.");
+      }
+      tx.set(usage, { day, count: count + 1 });
+    });
+
+    const client = new Anthropic({ apiKey });
+    let response;
+    try {
+      response = await client.beta.messages.create(scan.buildRequest(SCAN_MODEL.value(), image, req.data.meal));
+    } catch (e) {
+      if (e instanceof Anthropic.RateLimitError) {
+        throw new HttpsError("resource-exhausted", "The scanner is busy. Try again in a minute.");
+      } else if (e instanceof Anthropic.APIError) {
+        logger.error("scanFood: Claude API error", { status: e.status, message: e.message });
+      } else {
+        logger.error("scanFood: request failed", { message: e.message });
+      }
+      throw new HttpsError("unavailable", "Couldn't scan the photo. Check your internet and try again.");
+    }
+    if (response.stop_reason === "refusal") {
+      throw new HttpsError("failed-precondition", "Couldn't read this photo. Try another one.");
+    }
+    const text = response.content.filter((b) => b.type === "text").map((b) => b.text).join("");
+    let parsed;
+    try {
+      parsed = JSON.parse(text);
+    } catch (e) {
+      logger.error("scanFood: unreadable answer", { stop: response.stop_reason, length: text.length });
+      throw new HttpsError("internal", "Couldn't read this photo. Try again.");
+    }
+    logger.info("scanFood", { uid, items: (parsed.items || []).length, usage: response.usage });
+    return scan.sanitize(parsed);
+  },
+);

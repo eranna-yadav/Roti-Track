@@ -10,6 +10,8 @@ name: Deploy Firebase
 #   RAZORPAY_WEBHOOK_SECRET    any long random string; the same one goes in Razorpay → Webhooks
 #   RAZORPAY_PLAN_MONTHLY      plan_… for ₹359/month
 #   RAZORPAY_PLAN_YEARLY       plan_… for ₹990/year
+#   ANTHROPIC_API_KEY          (optional) Claude API key from console.anthropic.com, for the Pro food scanner
+# Optional repository variable CLAUDE_SCAN_MODEL picks the Claude model for food scans (default claude-opus-5-5).
 # The Key ID and plan IDs aren't secret, so they may be repository variables instead.
 on:
   push:
@@ -32,6 +34,8 @@ jobs:
       RAZORPAY_WEBHOOK_SECRET: ${{ secrets.RAZORPAY_WEBHOOK_SECRET }}
       RAZORPAY_PLAN_MONTHLY: ${{ secrets.RAZORPAY_PLAN_MONTHLY || vars.RAZORPAY_PLAN_MONTHLY }}
       RAZORPAY_PLAN_YEARLY: ${{ secrets.RAZORPAY_PLAN_YEARLY || vars.RAZORPAY_PLAN_YEARLY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      CLAUDE_SCAN_MODEL: ${{ vars.CLAUDE_SCAN_MODEL || 'claude-opus-5-5' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -68,7 +72,8 @@ jobs:
 
       - name: Write plan IDs
         run: |
-          printf 'RAZORPAY_PLAN_MONTHLY=%s\nRAZORPAY_PLAN_YEARLY=%s\n' "$RAZORPAY_PLAN_MONTHLY" "$RAZORPAY_PLAN_YEARLY" > functions/.env
+          printf 'RAZORPAY_PLAN_MONTHLY=%s\nRAZORPAY_PLAN_YEARLY=%s\nCLAUDE_SCAN_MODEL=%s\n' \
+            "$RAZORPAY_PLAN_MONTHLY" "$RAZORPAY_PLAN_YEARLY" "$CLAUDE_SCAN_MODEL" > functions/.env
 
       - name: Store Razorpay keys in Secret Manager
         run: |
@@ -76,6 +81,16 @@ jobs:
             printf '%s' "${!name}" | npx -y firebase-tools@13 functions:secrets:set "$name" \
               --data-file=- --project "$PROJECT" --force --non-interactive
           done
+
+      - name: Store the Claude API key in Secret Manager
+        run: |
+          # Without a key the food scanner answers "not set up yet" and everything else still deploys.
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::warning::ANTHROPIC_API_KEY isn't set, so the food scanner stays off."
+            ANTHROPIC_API_KEY=not-set
+          fi
+          printf '%s' "$ANTHROPIC_API_KEY" | npx -y firebase-tools@13 functions:secrets:set ANTHROPIC_API_KEY \
+            --data-file=- --project "$PROJECT" --force --non-interactive
 
       - name: Deploy functions and Firestore rules
         run: npx -y firebase-tools@13 deploy --only functions,firestore:rules --project "$PROJECT" --force --non-interactive
