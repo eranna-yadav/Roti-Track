@@ -40,7 +40,7 @@ import com.rotitrack.app.store.AppStore
 
 const val APP_VERSION = "1.4.0"
 /** Where "Support Email" and "Request a Feature" send mail. Change to your own address. */
-const val SUPPORT_EMAIL = "support@rotitrack.app"
+const val SUPPORT_EMAIL = "rotitrack.app@gmail.com"
 
 enum class ProfilePage { PERSONAL, PREFERENCES, LANGUAGE, GOALS, FASTING, REMINDERS, WATER_REMINDERS, REFERRAL, REFERRAL_RULES, BADGES, REPORT, TERMS, PRIVACY, ARTICLES, ADMIN, PRO, GUIDE }
 
