@@ -11,8 +11,6 @@ class Services(
     val razorpay: RazorpayGateway,
     /** Each account keeps its own log on the phone. */
     val storeFor: (uid: String) -> AppStore,
-    /** Pro food photo scanning. */
-    val scanner: FoodScanner = NoFoodScanner,
 )
 
 /** The activity fields the admin dashboard shows, built from the user's local data. */

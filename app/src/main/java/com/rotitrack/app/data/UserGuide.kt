@@ -120,17 +120,6 @@ val USER_GUIDE: List<GuidePage> = listOf(
                 "Logging a meal takes seconds, with values made for Indian home cooking.",
             ),
             GuideFeature(
-                "📷", "AI food scanner",
-                "Take a photo of your plate and the app recognises the dishes and portions for you.",
-                listOf(
-                    "Tap the scan button next to + on a meal.",
-                    "Take a photo from above in good light, or choose one from your gallery.",
-                    "Check the items, change servings, untick anything wrong, then tap Add.",
-                ),
-                "The fastest way to log a full thali. Portions are estimates, so always check before adding.",
-                pro = true,
-            ),
-            GuideFeature(
                 "🏃", "Exercise",
                 "Log walks, yoga, gym, sports, dancing, housework and more, with the calories burned.",
                 listOf(
@@ -275,7 +264,7 @@ val USER_GUIDE: List<GuidePage> = listOf(
             ),
             GuideFeature(
                 "👑", "Roti Track Pro",
-                "Unlocks the AI food scanner, the full 7-day meal plan, meal swaps, 30-day trends, custom foods and longer reports.",
+                "Unlocks the full 7-day meal plan, meal swaps, 30-day trends, custom foods and longer reports.",
                 listOf(
                     "Tap Upgrade to Pro.",
                     "Choose Monthly or Yearly, then pay with Google Play or Razorpay (UPI, cards, netbanking, wallets).",

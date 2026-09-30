@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -48,14 +47,7 @@ import com.rotitrack.app.store.AppStore
 import kotlin.math.roundToInt
 
 @Composable
-fun FoodScreen(
-    store: AppStore,
-    platform: Platform,
-    onAdd: (MealSlot, String) -> Unit,
-    onReminders: () -> Unit,
-    isPro: Boolean = false,
-    onScan: (MealSlot, String) -> Unit = { _, _ -> },
-) {
+fun FoodScreen(store: AppStore, platform: Platform, onAdd: (MealSlot, String) -> Unit, onReminders: () -> Unit) {
     val p = store.profile
     val todayKey = today
     var day by remember { mutableStateOf(todayKey) }
@@ -166,14 +158,6 @@ fun FoodScreen(
                                 style = Type.small,
                             )
                         }
-                        // Pro: photograph the plate; free users see a lock and go to the upgrade screen.
-                        Box {
-                            RoundButton({ onScan(slot, day) }, size = 40.dp, color = Palette.chip) {
-                                Icon(TabIcons.Scan, t("Scan your {0}", slot.label.lowercase()), tint = Palette.brand, modifier = Modifier.size(22.dp))
-                            }
-                            if (!isPro) Text("🔒", fontSize = 11.sp, modifier = Modifier.align(Alignment.TopEnd))
-                        }
-                        Spacer(Modifier.width(10.dp))
                         RoundButton({ onAdd(slot, day) }, size = 40.dp, color = Palette.brand) {
                             Icon(Icons.Filled.Add, contentDescription = t("Add to {0}", slot.label), tint = Color.White)
                         }

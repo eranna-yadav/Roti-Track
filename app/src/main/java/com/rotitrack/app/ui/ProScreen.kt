@@ -45,7 +45,6 @@ private val FEATURES get() = listOf(
     Triple(t("Calorie & macro tracking"), true, true),
     Triple(t("142 Indian foods"), true, true),
     Triple(t("Today's meal plan"), true, true),
-    Triple(t("📷 AI food photo scanner"), false, true),
     Triple(t("Full 7-day meal plan"), false, true),
     Triple(t("Swap any meal"), false, true),
     Triple(t("30-day trends"), false, true),

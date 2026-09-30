@@ -52,12 +52,6 @@ object TabIcons {
         "M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" to true,
     )
     val Vibrate = icon("vibrate", "M8.5 4.5h7v15h-7Z" to true, "M5 9v6M2.5 10.5v3M19 9v6M21.5 10.5v3" to true)
-    /** A camera viewfinder with a scan line, for the food scanner. */
-    val Scan = icon(
-        "scan",
-        "M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2" to true,
-        "M7.5 12h9" to true,
-    )
     val Pencil = icon("pencil", "M5 19l1-4L15.5 5.5l3 3L9 18Z" to true)
     val Info = icon("info", "M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17Z" to true, "M12 11v5M12 7.8v.4" to true)
 }

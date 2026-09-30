@@ -59,8 +59,6 @@ interface Platform {
     val exactAlarmsAllowed: Boolean get() = true
     /** Where the user allows "Alarms & reminders" for the app. */
     fun openExactAlarmSettings() {}
-    /** Takes a photo ([camera]) or picks one from the gallery, and returns it as a small JPEG, or null if cancelled. */
-    fun pickFoodPhoto(camera: Boolean, onPhoto: (ByteArray?) -> Unit) = onPhoto(null)
     /** Plays a water sound once (a preview, or when water is logged). */
     fun playSound(sound: WaterSound, volume: Float)
     fun stopSound()
@@ -86,7 +84,6 @@ enum class Tab(private val labelEn: String, val icon: ImageVector) {
 sealed interface Route {
     data class Tabs(val tab: Tab) : Route
     data class AddFood(val slot: MealSlot, val day: String) : Route
-    data class Scan(val slot: MealSlot, val day: String) : Route
     data object Articles : Route
     data class Article(val id: String) : Route
     data object Guide : Route
@@ -207,8 +204,6 @@ private fun SignedIn(services: Services, platform: Platform, nav: Navigator, acc
                     Tab.FOOD -> FoodScreen(
                         store, platform,
                         onAdd = { slot, day -> nav.push(Route.AddFood(slot, day)) },
-                        isPro = isPro,
-                        onScan = { slot, day -> if (isPro) nav.push(Route.Scan(slot, day)) else upgrade() },
                         onReminders = { nav.push(Route.Page(ProfilePage.REMINDERS)) },
                     )
                     Tab.PLAN -> PlanScreen(store, isPro, onUpgrade = upgrade, onOpenArticles = { nav.push(Route.Articles) }, onEditProfile = { nav.push(Route.Page(ProfilePage.PERSONAL)) })
@@ -231,7 +226,6 @@ private fun SignedIn(services: Services, platform: Platform, nav: Navigator, acc
                     )
                 }
                 is Route.AddFood -> AddFoodScreen(store, route.slot, route.day, isPro, onUpgrade = upgrade, onBack = nav::pop)
-                is Route.Scan -> ScanScreen(store, services.scanner, platform, route.slot, route.day, onBack = nav::pop)
                 Route.Articles -> ArticlesScreen(onOpen = { nav.push(Route.Article(it)) }, onBack = nav::pop)
                 is Route.Article -> ArticleScreen(route.id, onBack = nav::pop)
                 Route.Guide -> GuideScreen(onOpen = { nav.push(Route.GuidePage(it)) }, onBack = nav::pop)
