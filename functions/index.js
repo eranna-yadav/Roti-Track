@@ -36,6 +36,11 @@ const SCAN_MODEL = defineString("CLAUDE_SCAN_MODEL", {
   default: "claude-opus-5-5",
   description: "Claude model that reads food photos",
 });
+const GEMINI_API_KEY = defineSecret("GEMINI_API_KEY");
+const GEMINI_SCAN_MODEL = defineString("GEMINI_SCAN_MODEL", {
+  default: "gemini-flash-latest",
+  description: "Gemini model that reads food photos",
+});
 
 function razorpay() {
   return new Razorpay({ key_id: KEY_ID.value(), key_secret: KEY_SECRET.value() });
@@ -237,12 +242,12 @@ exports.creditReferral = onDocumentWritten({ document: "users/{uid}", region: RE
  * food catalog where possible. The app shows them for the user to check before logging.
  */
 exports.scanFood = onCall(
-  { region: REGION, secrets: [ANTHROPIC_API_KEY], timeoutSeconds: 120, memory: "512MiB" },
+  { region: REGION, secrets: [ANTHROPIC_API_KEY, GEMINI_API_KEY], timeoutSeconds: 120, memory: "512MiB" },
   async (req) => {
     const uid = req.auth && req.auth.uid;
     if (!uid) throw new HttpsError("unauthenticated", "Sign in to scan food.");
-    const apiKey = ANTHROPIC_API_KEY.value();
-    if (!apiKey || apiKey === "not-set") {
+    const provider = scan.pickProvider(GEMINI_API_KEY.value(), ANTHROPIC_API_KEY.value());
+    if (!provider) {
       throw new HttpsError("failed-precondition", "Food scanning isn't set up yet. Please try again later.");
     }
     const image = req.data && req.data.image;
@@ -252,7 +257,7 @@ exports.scanFood = onCall(
     const user = (await db.doc(`users/${uid}`).get()).data();
     if (!scan.isPro(user)) throw new HttpsError("permission-denied", "Food scanning is part of Roti Track Pro.");
 
-    // A daily cap per account keeps the AI bill predictable.
+    // A daily cap per account keeps the AI bill (or the free quota) predictable.
     const usage = db.doc(`scanUsage/${uid}`);
     const day = scan.scanDay();
     await db.runTransaction(async (tx) => {
@@ -264,32 +269,71 @@ exports.scanFood = onCall(
       tx.set(usage, { day, count: count + 1 });
     });
 
-    const client = new Anthropic({ apiKey });
-    let response;
-    try {
-      response = await client.beta.messages.create(scan.buildRequest(SCAN_MODEL.value(), image, req.data.meal));
-    } catch (e) {
-      if (e instanceof Anthropic.RateLimitError) {
-        throw new HttpsError("resource-exhausted", "The scanner is busy. Try again in a minute.");
-      } else if (e instanceof Anthropic.APIError) {
-        logger.error("scanFood: Claude API error", { status: e.status, message: e.message });
-      } else {
-        logger.error("scanFood: request failed", { message: e.message });
-      }
-      throw new HttpsError("unavailable", "Couldn't scan the photo. Check your internet and try again.");
-    }
-    if (response.stop_reason === "refusal") {
-      throw new HttpsError("failed-precondition", "Couldn't read this photo. Try another one.");
-    }
-    const text = response.content.filter((b) => b.type === "text").map((b) => b.text).join("");
-    let parsed;
-    try {
-      parsed = JSON.parse(text);
-    } catch (e) {
-      logger.error("scanFood: unreadable answer", { stop: response.stop_reason, length: text.length });
-      throw new HttpsError("internal", "Couldn't read this photo. Try again.");
-    }
-    logger.info("scanFood", { uid, items: (parsed.items || []).length, usage: response.usage });
+    const meal = req.data.meal;
+    const parsed = provider === "gemini" ? await askGemini(image, meal) : await askClaude(image, meal);
+    logger.info("scanFood", { uid, provider, items: (parsed.items || []).length });
     return scan.sanitize(parsed);
   },
 );
+
+/** Reads the photo with Claude; returns the parsed answer or throws an HttpsError for the app. */
+async function askClaude(image, meal) {
+  const client = new Anthropic({ apiKey: ANTHROPIC_API_KEY.value() });
+  let response;
+  try {
+    response = await client.beta.messages.create(scan.buildRequest(SCAN_MODEL.value(), image, meal));
+  } catch (e) {
+    if (e instanceof Anthropic.RateLimitError) {
+      throw new HttpsError("resource-exhausted", "The scanner is busy. Try again in a minute.");
+    } else if (e instanceof Anthropic.APIError) {
+      logger.error("scanFood: Claude API error", { status: e.status, message: e.message });
+    } else {
+      logger.error("scanFood: request failed", { message: e.message });
+    }
+    throw new HttpsError("unavailable", "Couldn't scan the photo. Check your internet and try again.");
+  }
+  if (response.stop_reason === "refusal") {
+    throw new HttpsError("failed-precondition", "Couldn't read this photo. Try another one.");
+  }
+  const text = response.content.filter((b) => b.type === "text").map((b) => b.text).join("");
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    logger.error("scanFood: unreadable Claude answer", { stop: response.stop_reason, length: text.length });
+    throw new HttpsError("internal", "Couldn't read this photo. Try again.");
+  }
+}
+
+/** Reads the photo with Gemini; returns the parsed answer or throws an HttpsError for the app. */
+async function askGemini(image, meal) {
+  const { url, body } = scan.buildGeminiRequest(GEMINI_SCAN_MODEL.value(), image, meal);
+  let res;
+  try {
+    res = await fetch(url, {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-goog-api-key": GEMINI_API_KEY.value() },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(100_000),
+    });
+  } catch (e) {
+    logger.error("scanFood: Gemini request failed", { message: e.message });
+    throw new HttpsError("unavailable", "Couldn't scan the photo. Check your internet and try again.");
+  }
+  const json = await res.json().catch(() => null);
+  if (res.status === 429) {
+    throw new HttpsError("resource-exhausted", "The scanner is busy. Try again in a minute.");
+  }
+  if (!res.ok) {
+    logger.error("scanFood: Gemini API error", { status: res.status, error: json && json.error });
+    throw new HttpsError("unavailable", "Couldn't scan the photo. Check your internet and try again.");
+  }
+  const parsed = scan.geminiAnswer(json);
+  if (!parsed) {
+    const c = json && json.candidates && json.candidates[0];
+    logger.error("scanFood: unreadable Gemini answer", {
+      finish: c && c.finishReason, block: json && json.promptFeedback && json.promptFeedback.blockReason,
+    });
+    throw new HttpsError("failed-precondition", "Couldn't read this photo. Try another one.");
+  }
+  return parsed;
+}

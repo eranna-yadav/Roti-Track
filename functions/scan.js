@@ -141,4 +141,72 @@ function buildRequest(model, image, meal) {
   return request;
 }
 
-module.exports = { SYSTEM_PROMPT, RESULT_SCHEMA, buildRequest, RESULT_SCHEMA, DAILY_SCAN_LIMIT, userPrompt, checkImage, sanitize, isPro, scanDay };
+/** Gemini's response schema: the same shape as RESULT_SCHEMA, in Gemini's OpenAPI-style format. */
+const GEMINI_SCHEMA = {
+  type: "OBJECT",
+  properties: {
+    items: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: {
+          food_id: { type: "STRING" },
+          name: { type: "STRING" },
+          serving: { type: "STRING" },
+          servings: { type: "NUMBER" },
+          kcal: { type: "NUMBER" },
+          protein: { type: "NUMBER" },
+          carbs: { type: "NUMBER" },
+          fat: { type: "NUMBER" },
+          confidence: { type: "STRING", enum: ["high", "medium", "low"] },
+        },
+        required: ["food_id", "name", "serving", "servings", "kcal", "protein", "carbs", "fat", "confidence"],
+      },
+    },
+    note: { type: "STRING" },
+  },
+  required: ["items", "note"],
+};
+
+/** URL and body of a Gemini generateContent request for one photo. */
+function buildGeminiRequest(model, image, meal) {
+  return {
+    url: `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
+    body: {
+      systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+      contents: [
+        {
+          role: "user",
+          parts: [
+            { inlineData: { mimeType: "image/jpeg", data: image } },
+            { text: userPrompt(meal) },
+          ],
+        },
+      ],
+      generationConfig: { responseMimeType: "application/json", responseSchema: GEMINI_SCHEMA, temperature: 0.2 },
+    },
+  };
+}
+
+/** The JSON answer inside a Gemini response, or null if there's none (blocked, empty or cut off). */
+function geminiAnswer(response) {
+  const candidate = response && Array.isArray(response.candidates) ? response.candidates[0] : null;
+  const parts = candidate && candidate.content && Array.isArray(candidate.content.parts) ? candidate.content.parts : [];
+  const text = parts.map((p) => p.text || "").join("");
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    return null;
+  }
+}
+
+/** Which AI reads the photos: Gemini when its key is set, else Claude, else none. */
+function pickProvider(geminiKey, claudeKey) {
+  const set = (k) => !!k && k !== "not-set";
+  if (set(geminiKey)) return "gemini";
+  if (set(claudeKey)) return "claude";
+  return null;
+}
+
+module.exports = { SYSTEM_PROMPT, RESULT_SCHEMA, buildRequest, buildGeminiRequest, geminiAnswer, pickProvider, RESULT_SCHEMA, DAILY_SCAN_LIMIT, userPrompt, checkImage, sanitize, isPro, scanDay };

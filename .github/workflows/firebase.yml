@@ -10,8 +10,10 @@ name: Deploy Firebase
 #   RAZORPAY_WEBHOOK_SECRET    any long random string; the same one goes in Razorpay → Webhooks
 #   RAZORPAY_PLAN_MONTHLY      plan_… for ₹359/month
 #   RAZORPAY_PLAN_YEARLY       plan_… for ₹990/year
-#   ANTHROPIC_API_KEY          (optional) Claude API key from console.anthropic.com, for the Pro food scanner
-# Optional repository variable CLAUDE_SCAN_MODEL picks the Claude model for food scans (default claude-opus-5-5).
+#   GEMINI_API_KEY             (optional) Gemini API key from aistudio.google.com, for the Pro food scanner
+#   ANTHROPIC_API_KEY          (optional) Claude API key from console.anthropic.com, used when there's no Gemini key
+# Optional repository variables GEMINI_SCAN_MODEL (default gemini-flash-latest) and
+# CLAUDE_SCAN_MODEL (default claude-opus-5-5) pick the models for food scans.
 # The Key ID and plan IDs aren't secret, so they may be repository variables instead.
 on:
   push:
@@ -36,6 +38,8 @@ jobs:
       RAZORPAY_PLAN_YEARLY: ${{ secrets.RAZORPAY_PLAN_YEARLY || vars.RAZORPAY_PLAN_YEARLY }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       CLAUDE_SCAN_MODEL: ${{ vars.CLAUDE_SCAN_MODEL || 'claude-opus-5-5' }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GEMINI_SCAN_MODEL: ${{ vars.GEMINI_SCAN_MODEL || 'gemini-flash-latest' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -72,8 +76,8 @@ jobs:
 
       - name: Write plan IDs
         run: |
-          printf 'RAZORPAY_PLAN_MONTHLY=%s\nRAZORPAY_PLAN_YEARLY=%s\nCLAUDE_SCAN_MODEL=%s\n' \
-            "$RAZORPAY_PLAN_MONTHLY" "$RAZORPAY_PLAN_YEARLY" "$CLAUDE_SCAN_MODEL" > functions/.env
+          printf 'RAZORPAY_PLAN_MONTHLY=%s\nRAZORPAY_PLAN_YEARLY=%s\nCLAUDE_SCAN_MODEL=%s\nGEMINI_SCAN_MODEL=%s\n' \
+            "$RAZORPAY_PLAN_MONTHLY" "$RAZORPAY_PLAN_YEARLY" "$CLAUDE_SCAN_MODEL" "$GEMINI_SCAN_MODEL" > functions/.env
 
       - name: Store Razorpay keys in Secret Manager
         run: |
@@ -82,18 +86,35 @@ jobs:
               --data-file=- --project "$PROJECT" --force --non-interactive
           done
 
-      - name: Store the Claude API key in Secret Manager
+      - name: Store the food scanner keys in Secret Manager
         run: |
-          # Without a key the food scanner answers "not set up yet" and everything else still deploys.
-          if [ -z "$ANTHROPIC_API_KEY" ]; then
-            echo "::warning::ANTHROPIC_API_KEY isn't set, so the food scanner stays off."
-            ANTHROPIC_API_KEY=not-set
+          # The scanner uses Gemini when its key is set, else Claude. With neither it answers
+          # "not set up yet" and everything else still deploys.
+          if [ -z "$GEMINI_API_KEY" ] && [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::warning::Neither GEMINI_API_KEY nor ANTHROPIC_API_KEY is set, so the food scanner stays off."
           fi
-          printf '%s' "$ANTHROPIC_API_KEY" | npx -y firebase-tools@13 functions:secrets:set ANTHROPIC_API_KEY \
-            --data-file=- --project "$PROJECT" --force --non-interactive
+          for name in GEMINI_API_KEY ANTHROPIC_API_KEY; do
+            value="${!name}"
+            [ -z "$value" ] && value=not-set
+            printf '%s' "$value" | npx -y firebase-tools@13 functions:secrets:set "$name" \
+              --data-file=- --project "$PROJECT" --force --non-interactive
+          done
 
       - name: Deploy functions and Firestore rules
         run: npx -y firebase-tools@13 deploy --only functions,firestore:rules --project "$PROJECT" --force --non-interactive
+
+      - name: Check the food scanner with a real photo
+        if: env.GEMINI_API_KEY != ''
+        working-directory: functions
+        run: |
+          # Any one of these Wikimedia food photos will do; a plain image still proves the key works.
+          for f in "Masala_dosa.JPG" "Idli_Sambar.JPG" "Dosa_and_chutney.jpg" "Indian_thali.jpg"; do
+            curl -sfL -A "RotiTrackCI/1.0" -o plate.jpg "https://commons.wikimedia.org/wiki/Special:FilePath/$f?width=640" \
+              && file plate.jpg | grep -q JPEG && echo "Photo: $f" && break
+            rm -f plate.jpg
+          done
+          [ -f plate.jpg ] || { echo "No photo downloaded; using a plain image."; convert -size 320x320 xc:orange plate.jpg; }
+          node scripts/scan-smoke.js plate.jpg "$GEMINI_SCAN_MODEL"
 
       - name: Webhook URL
         run: |

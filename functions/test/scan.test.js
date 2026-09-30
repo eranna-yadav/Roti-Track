@@ -62,3 +62,35 @@ test("the daily limit resets at midnight India time", () => {
   assert.strictEqual(scan.scanDay(Date.UTC(2026, 8, 29, 18, 29)), "2026-09-29");
   assert.strictEqual(scan.scanDay(Date.UTC(2026, 8, 29, 18, 31)), "2026-09-30");
 });
+
+test("Gemini is used when its key is set, else Claude, else nothing", () => {
+  assert.strictEqual(scan.pickProvider("g-key", "c-key"), "gemini");
+  assert.strictEqual(scan.pickProvider("not-set", "c-key"), "claude");
+  assert.strictEqual(scan.pickProvider("", "c-key"), "claude");
+  assert.strictEqual(scan.pickProvider("not-set", "not-set"), null);
+  assert.strictEqual(scan.pickProvider(undefined, undefined), null);
+});
+
+test("the Gemini request carries the photo, the meal and the JSON schema", () => {
+  const { url, body } = scan.buildGeminiRequest("gemini-flash-latest", "AAAA", "dinner");
+  assert.strictEqual(url, "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent");
+  assert.strictEqual(body.contents[0].parts[0].inlineData.data, "AAAA");
+  assert.strictEqual(body.contents[0].parts[0].inlineData.mimeType, "image/jpeg");
+  assert.match(body.contents[0].parts[1].text, /dinner/);
+  assert.strictEqual(body.systemInstruction.parts[0].text, scan.SYSTEM_PROMPT);
+  assert.strictEqual(body.generationConfig.responseMimeType, "application/json");
+  assert.deepStrictEqual(
+    body.generationConfig.responseSchema.properties.items.items.required,
+    scan.RESULT_SCHEMA.properties.items.items.required,
+  );
+});
+
+test("Gemini answers are read from the first candidate", () => {
+  const answer = { items: [{ food_id: "idli", name: "Idli", serving: "1 piece", servings: 3, kcal: 58, protein: 2, carbs: 12, fat: 0.2, confidence: "high" }], note: "" };
+  const text = JSON.stringify(answer);
+  const response = { candidates: [{ content: { parts: [{ text: text.slice(0, 20) }, { text: text.slice(20) }] }, finishReason: "STOP" }] };
+  assert.deepStrictEqual(scan.geminiAnswer(response), answer);
+  assert.strictEqual(scan.geminiAnswer({ promptFeedback: { blockReason: "SAFETY" } }), null);
+  assert.strictEqual(scan.geminiAnswer({ candidates: [{ content: { parts: [{ text: "{not json" }] } }] }), null);
+  assert.strictEqual(scan.geminiAnswer(null), null);
+});
