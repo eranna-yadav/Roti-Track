@@ -3,6 +3,7 @@ package com.rotitrack.app.data
 import com.rotitrack.app.data.FoodCategory.BEVERAGES
 import com.rotitrack.app.data.FoodCategory.BREADS
 import com.rotitrack.app.data.FoodCategory.BREAKFAST
+import com.rotitrack.app.data.FoodCategory.CHINESE
 import com.rotitrack.app.data.FoodCategory.DAIRY
 import com.rotitrack.app.data.FoodCategory.DAL
 import com.rotitrack.app.data.FoodCategory.FRUITS
@@ -11,9 +12,10 @@ import com.rotitrack.app.data.FoodCategory.RICE
 import com.rotitrack.app.data.FoodCategory.SABZI
 import com.rotitrack.app.data.FoodCategory.SNACKS
 import com.rotitrack.app.data.FoodCategory.SWEETS
+import com.rotitrack.app.data.FoodCategory.WESTERN
 
 /**
- * Common Indian foods with per-serving nutrition (kcal, protein g, carbs g, fat g).
+ * Common Indian foods (plus popular Western and Indo-Chinese dishes) with per-serving nutrition (kcal, protein g, carbs g, fat g).
  * Values are typical home-style estimates collated from IFCT 2017 and standard
  * recipe analyses — good for day-to-day tracking, not for clinical use.
  */
@@ -149,6 +151,60 @@ val FOODS: List<Food> = listOf(
     Food("sooji-halwa", "Sooji Halwa", "🍮", SWEETS, "1 bowl", 330, 4.0, 45.0, 15.0),
     Food("gajar-halwa", "Gajar Halwa", "🥕", SWEETS, "1 bowl", 300, 6.0, 38.0, 14.0),
     Food("barfi", "Kaju Barfi", "💠", SWEETS, "1 piece", 140, 3.0, 16.0, 7.0, piece = true),
+    // western
+    Food("veg-pizza", "Veg Pizza", "🍕", WESTERN, "1 slice", 200, 8.0, 26.0, 7.0, piece = true),
+    Food("margherita-pizza", "Margherita Pizza", "🍕", WESTERN, "1 slice", 190, 8.0, 24.0, 7.0, piece = true),
+    Food("chicken-pizza", "Chicken Pizza", "🍕", WESTERN, "1 slice", 230, 11.0, 25.0, 9.0, Diet.NONVEG, piece = true),
+    Food("veg-burger", "Veg Burger", "🍔", WESTERN, "1 burger", 350, 9.0, 45.0, 15.0, piece = true),
+    Food("chicken-burger", "Chicken Burger", "🍔", WESTERN, "1 burger", 420, 22.0, 40.0, 19.0, Diet.NONVEG, piece = true),
+    Food("french-fries", "French Fries", "🍟", WESTERN, "1 medium (115 g)", 360, 4.0, 44.0, 17.0),
+    Food("white-pasta", "White Sauce Pasta", "🍝", WESTERN, "1 plate (250 g)", 450, 13.0, 55.0, 19.0),
+    Food("red-pasta", "Red Sauce Pasta", "🍝", WESTERN, "1 plate (250 g)", 350, 11.0, 58.0, 8.0),
+    Food("mac-cheese", "Mac and Cheese", "🧀", WESTERN, "1 bowl (200 g)", 380, 14.0, 44.0, 16.0),
+    Food("veg-sandwich", "Veg Sandwich", "🥪", WESTERN, "1 sandwich", 220, 6.0, 32.0, 7.0, piece = true),
+    Food("grilled-cheese", "Grilled Cheese Sandwich", "🥪", WESTERN, "1 sandwich", 350, 13.0, 30.0, 20.0, piece = true),
+    Food("chicken-sandwich", "Chicken Sandwich", "🥪", WESTERN, "1 sandwich", 320, 22.0, 32.0, 11.0, Diet.NONVEG, piece = true),
+    Food("veg-wrap", "Veg Wrap", "🌯", WESTERN, "1 wrap", 300, 9.0, 40.0, 11.0, piece = true),
+    Food("chicken-wrap", "Chicken Wrap", "🌯", WESTERN, "1 wrap", 380, 24.0, 38.0, 14.0, Diet.NONVEG, piece = true),
+    Food("hot-dog", "Hot Dog", "🌭", WESTERN, "1 hot dog", 290, 11.0, 24.0, 17.0, Diet.NONVEG, piece = true),
+    Food("garlic-bread", "Garlic Bread", "🥖", WESTERN, "2 slices", 200, 5.0, 24.0, 9.0),
+    Food("nachos", "Nachos with Cheese", "🌮", WESTERN, "1 plate (100 g)", 350, 8.0, 36.0, 19.0),
+    Food("caesar-salad", "Caesar Salad", "🥗", WESTERN, "1 bowl", 250, 7.0, 12.0, 19.0),
+    Food("pancakes", "Pancakes", "🥞", WESTERN, "2 pancakes", 300, 7.0, 42.0, 11.0),
+    Food("french-toast", "French Toast", "🍞", WESTERN, "2 slices", 300, 11.0, 36.0, 12.0, Diet.EGG),
+    Food("scrambled-eggs", "Scrambled Eggs", "🍳", WESTERN, "2 eggs", 200, 13.0, 2.0, 15.0, Diet.EGG),
+    Food("pb-toast", "Peanut Butter Toast", "🍞", WESTERN, "1 slice", 190, 7.0, 16.0, 11.0, piece = true),
+    Food("cornflakes", "Cornflakes with Milk", "🥣", WESTERN, "1 bowl", 220, 8.0, 38.0, 4.0),
+    Food("muesli", "Muesli with Milk", "🥣", WESTERN, "1 bowl", 280, 10.0, 45.0, 7.0),
+    Food("doughnut", "Doughnut", "🍩", WESTERN, "1 doughnut", 250, 4.0, 30.0, 13.0, piece = true),
+    Food("brownie", "Chocolate Brownie", "🍫", WESTERN, "1 piece", 230, 3.0, 30.0, 11.0, piece = true),
+    Food("ice-cream", "Ice Cream", "🍨", WESTERN, "1 scoop", 140, 2.5, 16.0, 7.0),
+    Food("cold-coffee", "Cold Coffee", "🥤", WESTERN, "1 glass", 200, 6.0, 28.0, 7.0),
+    // chinese (indo-chinese)
+    Food("veg-fried-rice", "Veg Fried Rice", "🍚", CHINESE, "1 plate (250 g)", 380, 8.0, 60.0, 12.0),
+    Food("egg-fried-rice", "Egg Fried Rice", "🍚", CHINESE, "1 plate (250 g)", 420, 13.0, 60.0, 14.0, Diet.EGG),
+    Food("chicken-fried-rice", "Chicken Fried Rice", "🍚", CHINESE, "1 plate (250 g)", 470, 20.0, 60.0, 16.0, Diet.NONVEG),
+    Food("schezwan-rice", "Schezwan Fried Rice", "🍚", CHINESE, "1 plate (250 g)", 420, 8.0, 62.0, 15.0),
+    Food("hakka-noodles", "Veg Hakka Noodles", "🍜", CHINESE, "1 plate (250 g)", 400, 9.0, 60.0, 14.0),
+    Food("schezwan-noodles", "Schezwan Noodles", "🍜", CHINESE, "1 plate (250 g)", 440, 9.0, 62.0, 17.0),
+    Food("chicken-noodles", "Chicken Hakka Noodles", "🍜", CHINESE, "1 plate (250 g)", 480, 22.0, 58.0, 17.0, Diet.NONVEG),
+    Food("chopsuey", "American Chopsuey", "🍜", CHINESE, "1 plate (250 g)", 450, 8.0, 62.0, 19.0),
+    Food("veg-manchurian", "Veg Manchurian (gravy)", "🥘", CHINESE, "1 bowl (150 g)", 250, 5.0, 24.0, 15.0),
+    Food("gobi-manchurian", "Gobi Manchurian (dry)", "🥦", CHINESE, "1 plate (150 g)", 300, 5.0, 30.0, 18.0),
+    Food("chilli-paneer", "Chilli Paneer", "🌶️", CHINESE, "1 plate (150 g)", 330, 15.0, 14.0, 24.0),
+    Food("chilli-chicken", "Chilli Chicken", "🌶️", CHINESE, "1 plate (150 g)", 330, 24.0, 14.0, 20.0, Diet.NONVEG),
+    Food("chicken-manchurian", "Chicken Manchurian", "🍗", CHINESE, "1 bowl (150 g)", 320, 22.0, 16.0, 19.0, Diet.NONVEG),
+    Food("chicken-lollipop", "Chicken Lollipop", "🍗", CHINESE, "4 pieces", 350, 24.0, 14.0, 22.0, Diet.NONVEG),
+    Food("veg-momos", "Veg Momos (steamed)", "🥟", CHINESE, "6 pieces", 240, 6.0, 38.0, 6.0),
+    Food("fried-momos", "Veg Momos (fried)", "🥟", CHINESE, "6 pieces", 360, 6.0, 40.0, 19.0),
+    Food("chicken-momos", "Chicken Momos (steamed)", "🥟", CHINESE, "6 pieces", 290, 17.0, 32.0, 10.0, Diet.NONVEG),
+    Food("spring-roll", "Veg Spring Roll", "🌯", CHINESE, "2 rolls", 250, 4.0, 28.0, 13.0),
+    Food("crispy-corn", "Crispy Corn", "🌽", CHINESE, "1 plate (100 g)", 280, 5.0, 34.0, 14.0),
+    Food("honey-chilli-potato", "Honey Chilli Potato", "🥔", CHINESE, "1 plate (150 g)", 380, 4.0, 50.0, 18.0),
+    Food("sweet-corn-soup", "Sweet Corn Soup", "🍲", CHINESE, "1 bowl (250 ml)", 130, 3.0, 24.0, 3.0),
+    Food("hot-sour-soup", "Hot and Sour Soup", "🍲", CHINESE, "1 bowl (250 ml)", 100, 3.0, 14.0, 3.5),
+    Food("manchow-soup", "Manchow Soup", "🍲", CHINESE, "1 bowl (250 ml)", 120, 3.0, 16.0, 5.0),
+    Food("chicken-soup", "Chicken Clear Soup", "🍲", CHINESE, "1 bowl (250 ml)", 80, 9.0, 4.0, 3.0, Diet.NONVEG),
     // beverages
     Food("chai", "Masala Chai", "☕", BEVERAGES, "1 cup", 90, 3.0, 12.0, 3.5),
     Food("chai-nosugar", "Chai (no sugar)", "☕", BEVERAGES, "1 cup", 50, 3.0, 4.0, 3.0),

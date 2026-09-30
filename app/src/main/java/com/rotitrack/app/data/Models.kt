@@ -38,7 +38,10 @@ import kotlinx.serialization.Serializable
 enum class FoodCategory(private val labelEn: String) {
     BREAKFAST("Breakfast"), BREADS("Rotis"), RICE("Rice"), DAL("Dals"), SABZI("Sabzi"),
     NONVEG("Non-veg"), DAIRY("Dairy"), SNACKS("Snacks"), SWEETS("Sweets"),
-    BEVERAGES("Drinks"), FRUITS("Fruits"), CUSTOM("My foods");
+    WESTERN("Western"), CHINESE("Chinese"), BEVERAGES("Drinks"), FRUITS("Fruits"), CUSTOM("My foods");
+
+    /** Western and Chinese foods can be logged, but the diet plan stays Indian. */
+    val indian: Boolean get() = this != WESTERN && this != CHINESE
 
     val label: String get() = t(labelEn)
 }

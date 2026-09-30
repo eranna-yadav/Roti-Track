@@ -2,6 +2,7 @@ package com.rotitrack.app
 
 import com.rotitrack.app.data.Diet
 import com.rotitrack.app.data.FOODS
+import com.rotitrack.app.data.FoodCategory
 import com.rotitrack.app.data.Gender
 import com.rotitrack.app.data.MealSlot
 import com.rotitrack.app.data.Profile
@@ -12,6 +13,7 @@ import com.rotitrack.app.data.builtinFood
 import com.rotitrack.app.domain.Nutrition
 import com.rotitrack.app.domain.Planner
 import com.rotitrack.app.domain.formatServings
+import com.rotitrack.app.i18n.I18n
 import com.rotitrack.app.store.AppStore
 import com.rotitrack.app.store.Storage
 import org.junit.Assert.assertEquals
@@ -35,6 +37,28 @@ class DietLogicTest {
 
     @Test fun everyTemplateItemIsAKnownFood() {
         TEMPLATES.values.flatten().flatMap { it.items }.forEach { assertNotNull(it.foodId, builtinFood(it.foodId)) }
+    }
+
+    @Test fun dietPlansUseOnlyIndianFoods() {
+        TEMPLATES.values.flatten().flatMap { it.items }.forEach {
+            assertTrue(it.foodId, builtinFood(it.foodId)!!.category.indian)
+        }
+        for (diet in Diet.entries) for (slot in MealSlot.entries) for (shuffle in 0..20) {
+            val meal = Planner.planMeal("2026-09-30", slot, shuffle, 2000, diet, Region.ALL, ::builtinFood)
+            assertTrue(meal.name, meal.items.all { it.food.category.indian })
+        }
+    }
+
+    @Test fun westernAndChineseListsExistAndAreTranslated() {
+        for (c in listOf(FoodCategory.WESTERN, FoodCategory.CHINESE)) {
+            val foods = FOODS.filter { it.category == c }
+            assertTrue("$c", foods.size >= 20)
+            for (code in listOf("hi", "kn", "te", "ta", "mr", "bn", "gu")) {
+                val table = I18n.table(code)
+                (foods.flatMap { listOf(it.name, it.serving) } + listOf("Western", "Chinese"))
+                    .forEach { assertNotNull("$code: $it", table[it]) }
+            }
+        }
     }
 
     @Test fun calorieTargetFollowsMifflinStJeor() {
