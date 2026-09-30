@@ -1,0 +1,79 @@
+ROTI TRACK – PLAY STORE LISTING
+================================
+
+APP NAME (max 30 characters)
+Roti Track: Indian Diet Plan
+
+SHORT DESCRIPTION (max 80 characters)
+Indian diet plan, calorie counter & water reminders – in your own language.
+
+FULL DESCRIPTION (max 4000 characters)
+Roti Track is a diet planner, calorie counter and water tracker made for Indian food and Indian homes. Plan your meals, count calories and drink enough water – in English or your own language.
+
+🍛 AN INDIAN DIET PLAN MADE FOR YOU
+• A daily meal plan built from your age, height, weight, activity and goal – lose, keep or gain weight
+• Vegetarian, eggetarian or non-vegetarian
+• North, South, East, West or all-India meals: poha, idli, dosa, dal, roti, sabzi, rice and more
+• Don't like a meal? Swap it with one tap (Pro)
+• See the whole week ahead with the 7-day plan (Pro)
+
+🔥 CALORIE & MACRO COUNTER
+• 190+ foods with calories, protein, carbs and fat per serving
+• Indian favourites first – idli to biryani, chai to gulab jamun – plus popular Western and Chinese dishes like pizza, burgers, pasta, fried rice, noodles and momos
+• Log breakfast, lunch, snacks and dinner in seconds, or log a planned meal with one tap
+• Veg, egg and non-veg marks on every food
+• Log exercise and see calories burned
+• Add your own recipes (Pro)
+
+💧 WATER TRACKER & REMINDERS
+• A daily water goal based on your weight and activity
+• Log water, nimbu pani, coconut water, chaas, chai and more
+• Smart water reminders through the day, with pleasant sounds
+• Reminders work even when your phone is locked
+
+🔔 MEAL REMINDERS THAT CARE
+• Gentle reminders for breakfast, lunch, snack and dinner
+• Friendly voice reminders that call you by name
+• Quiet when your phone is on silent or Do Not Disturb
+
+📊 PROGRESS YOU CAN SEE
+• Daily streaks, BMI and weight progress
+• 7-day trends for calories and water, 30-day trends with Pro
+• Download a PDF summary report of your meals, exercise and weight
+
+🗣️ SPEAKS YOUR LANGUAGE
+English, हिन्दी, ಕನ್ನಡ, తెలుగు, தமிழ், मराठी, বাংলা and ગુજરાતી.
+
+📘 EASY TO LEARN
+A built-in User Guide explains every feature, page by page.
+
+👑 ROTI TRACK PRO
+Unlock the full 7-day meal plan, meal swaps, 30-day trends, custom foods and longer reports. Monthly and yearly plans are available (₹990 a year). Cancel anytime from Google Play.
+
+🎁 INVITE FRIENDS, EARN REWARDS
+Share your referral code and earn a reward when friends upgrade to Pro.
+
+Roti Track gives general nutrition information for healthy living. It is not medical advice. If you have a medical condition, are pregnant, or are under 18, please talk to your doctor before changing your diet.
+
+Questions or ideas? Write to us at rotitrack.app@gmail.com
+
+---------------------------------
+OTHER PLAY CONSOLE FIELDS
+Category: Health & Fitness
+Tags: Diet & nutrition, Calorie counter, Water tracker
+Contact email: rotitrack.app@gmail.com
+Privacy policy URL: needed – must be a public web page (the app shows it inside, but Play needs a link)
+
+---------------------------------
+GRAPHICS (in this folder)
+• icon-512.png – App icon, 512 × 512
+• feature-graphic.png – Feature graphic, 1024 × 500
+• screenshot-1.png … screenshot-8.png – Phone screenshots, 1080 × 1920
+  1 Your day at a glance
+  2 An Indian diet plan made for you
+  3 Track calories & macros
+  4 190+ foods, Indian first
+  5 Drink enough water
+  6 Never miss a meal
+  7 Speaks your language
+  8 Go Pro
