@@ -257,5 +257,7 @@ private val PRIVACY = listOf(
     "Payments" to "Payments are handled by Razorpay or Google Play. We never see or store your card, UPI or bank details. We keep a record of your subscription status.",
     "Sharing" to "We don't sell your data or show ads. We share data only with the services that run the app (Firebase, Razorpay, Google Play) or when the law requires it.",
     "Your choices" to "You can edit your details any time, export a PDF of your data, and delete your account from Profile → Delete Account, which removes your account and your data.",
+    "Reminders and voice" to "Meal and water reminders are scheduled on your phone. Voice reminders are spoken by your phone's own text-to-speech; no audio is recorded or sent anywhere.",
+    "Children" to "Roti Track is not meant for children under 13, and we don't knowingly collect their data.",
     "Contact" to "Questions about privacy? Email us at the address below.",
 )

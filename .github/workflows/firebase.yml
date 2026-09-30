@@ -1,7 +1,8 @@
 name: Deploy Firebase
 
-# Deploys the payment server (Cloud Functions) and the Firestore rules to the
-# roti-track Firebase project. Runs when they change, or from the Actions tab.
+# Deploys the payment server (Cloud Functions), the Firestore rules and the web
+# pages in hosting/ (privacy policy, terms, account deletion) to the roti-track
+# Firebase project. Runs when they change, or from the Actions tab.
 #
 # Repository secrets (Settings → Secrets and variables → Actions):
 #   FIREBASE_SERVICE_ACCOUNT   the JSON key from Firebase → Project settings → Service accounts
@@ -14,7 +15,7 @@ name: Deploy Firebase
 on:
   push:
     branches: [main]
-    paths: [functions/**, firestore.rules, firebase.json, .github/workflows/firebase.yml]
+    paths: [functions/**, firestore.rules, firebase.json, hosting/**, .github/workflows/firebase.yml]
   workflow_dispatch:
 
 concurrency:
@@ -77,8 +78,8 @@ jobs:
               --data-file=- --project "$PROJECT" --force --non-interactive
           done
 
-      - name: Deploy functions and Firestore rules
-        run: npx -y firebase-tools@13 deploy --only functions,firestore:rules --project "$PROJECT" --force --non-interactive
+      - name: Deploy functions, Firestore rules and web pages
+        run: npx -y firebase-tools@13 deploy --only functions,firestore:rules,hosting --project "$PROJECT" --force --non-interactive
 
       - name: Webhook URL
         run: |
