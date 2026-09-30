@@ -62,7 +62,9 @@ OTHER PLAY CONSOLE FIELDS
 Category: Health & Fitness
 Tags: Diet & nutrition, Calorie counter, Water tracker
 Contact email: rotitrack.app@gmail.com
-Privacy policy URL: needed – must be a public web page (the app shows it inside, but Play needs a link)
+Privacy policy URL: https://roti-track.web.app/privacy
+Account deletion URL (Data safety form): https://roti-track.web.app/delete-account
+Website: https://roti-track.web.app
 
 ---------------------------------
 GRAPHICS (in this folder)
