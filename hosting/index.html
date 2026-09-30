@@ -1,18 +1,230 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Roti Track · Roti Track</title><style>
-:root{--ink:#0b1220;--soft:#3b4660;--brand:#1B4FF0;--bg:#f2f5fc}
-@media (prefers-color-scheme:dark){:root{--ink:#eef2fb;--soft:#b6c0d8;--brand:#7d9bff;--bg:#0b1220}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-main{max-width:720px;margin:0 auto;padding:40px 16px 64px}a{color:var(--brand)}
-h1{font-size:30px;line-height:1.2;margin:0 0 6px}h2{font-size:19px;margin:28px 0 4px}p,li{color:var(--soft);margin:0 0 10px}
-.brand{font-weight:800;color:var(--brand);text-decoration:none;font-size:15px;letter-spacing:.3px}.meta{font-size:14px;margin-top:36px}
-nav{margin-top:28px;font-size:15px}nav a{margin-right:16px}
-</style></head>
-<body><main><a class="brand" href="/">ROTI TRACK</a>
-<h1>Roti Track</h1>
-<p>Indian diet plan, calorie counter and water tracker, in English and 7 Indian languages.</p>
-<p>Questions? Email <a href="mailto:rotitrack.app@gmail.com">rotitrack.app@gmail.com</a>.</p>
-<p class="meta">Last updated: September 2026. Contact: <a href="mailto:rotitrack.app@gmail.com">rotitrack.app@gmail.com</a></p>
-<nav><a href="/privacy">Privacy Policy</a><a href="/terms">Terms</a><a href="/delete-account">Delete your account</a></nav>
-</main></body></html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Roti Track – Indian Diet Plan, Calorie Counter &amp; Water Tracker</title>
+<meta name="description" content="Roti Track is a diet planner, calorie counter and water tracker made for Indian food. Personal meal plans, 190+ foods, water and meal reminders, in English and 7 Indian languages.">
+<meta property="og:title" content="Roti Track – Indian Diet Plan, Calorie Counter & Water Tracker">
+<meta property="og:description" content="Personal Indian meal plans, calorie and water tracking, friendly reminders – in your own language.">
+<meta property="og:image" content="/img/og.jpg">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#1B4FF0">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--brand:#1B4FF0;--brand-2:#0d2fa8;--saffron:#FF8A1F;--ink:#0b1220;--soft:#4a5570;--muted:#7a869f;--bg:#f2f5fc;--card:#ffffff;--line:#e3e8f4;--chip:#eaf0ff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#eef2fb;--soft:#b9c3da;--muted:#8d98b3;--bg:#0b1220;--card:#141d31;--line:#243049;--chip:#1b2744}}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 Poppins,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}img{max-width:100%;display:block}
+.wrap{max-width:1120px;margin:0 auto;padding:0 16px}
+header.top{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+header.top .wrap{display:flex;align-items:center;gap:16px;height:64px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;text-decoration:none}.logo img{width:34px;height:34px}
+nav.links{margin-left:auto;display:flex;gap:22px;font-size:15px;font-weight:500}nav.links a{text-decoration:none;color:var(--soft)}nav.links a:hover{color:var(--brand)}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:14px 24px;border-radius:999px;font-weight:700;text-decoration:none;font-size:16px;white-space:nowrap}
+.btn.primary{background:var(--saffron);color:#fff;box-shadow:0 10px 24px rgba(255,138,31,.35)}.btn.ghost{background:rgba(255,255,255,.14);color:#fff}
+.btn.small{padding:9px 18px;font-size:14px;background:var(--brand);color:#fff}
+.hero{background:linear-gradient(150deg,#2a5cff 0%,#1B4FF0 45%,#0d2fa8 100%);color:#fff;overflow:hidden;position:relative}
+.hero:before{content:"";position:absolute;width:560px;height:560px;border-radius:50%;background:rgba(255,255,255,.07);top:-200px;right:-160px}
+.hero .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;padding-top:72px;padding-bottom:72px;position:relative}
+.pill{display:inline-block;background:rgba(255,255,255,.16);padding:6px 14px;border-radius:999px;font-size:14px;font-weight:600;margin-bottom:18px}
+h1{font-size:clamp(34px,5.2vw,58px);line-height:1.08;margin:0 0 18px;letter-spacing:-1px;font-weight:800}
+.hero p.lead{font-size:clamp(17px,2vw,20px);opacity:.9;margin:0 0 30px;max-width:540px}
+.cta{display:flex;gap:12px;flex-wrap:wrap}
+.hero .note{font-size:14px;opacity:.75;margin-top:14px}
+.phone{background:#0b1220;border-radius:44px;padding:10px;box-shadow:0 40px 80px rgba(0,0,30,.45);max-width:300px}
+.phone img{border-radius:34px;width:100%}
+.hero .phones{display:flex;justify-content:center;position:relative;height:560px}
+.hero .phones .phone{position:absolute}.hero .phones .a{transform:rotate(-7deg) translateX(-70px);top:30px;opacity:.95}.hero .phones .b{transform:rotate(5deg) translateX(80px)}
+section{padding:84px 0}
+.eyebrow{color:var(--brand);font-weight:700;font-size:14px;letter-spacing:1.5px;text-transform:uppercase}
+h2{font-size:clamp(28px,3.6vw,40px);line-height:1.15;margin:8px 0 14px;letter-spacing:-.5px}
+.sub{color:var(--soft);max-width:640px;margin:0}
+.center{text-align:center}.center .sub{margin:0 auto}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:-44px;position:relative;z-index:2}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px;text-align:center;box-shadow:0 12px 30px rgba(11,18,32,.06)}
+.stat b{display:block;font-size:30px;color:var(--brand);line-height:1.1}.stat span{color:var(--muted);font-size:14px}
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:40px}
+.f{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:26px}
+.f .ic{font-size:30px;width:56px;height:56px;border-radius:16px;background:var(--chip);display:grid;place-items:center;margin-bottom:14px}
+.f h3{margin:0 0 6px;font-size:19px}.f p{margin:0;color:var(--soft);font-size:15.5px}
+.show{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+.show + .show{margin-top:84px}.show.rev .txt{order:2}
+.show .phone{margin:0 auto;max-width:320px}
+.ticks{list-style:none;padding:0;margin:22px 0 0}.ticks li{padding-left:34px;position:relative;margin-bottom:12px;color:var(--soft)}
+.ticks li:before{content:"✓";position:absolute;left:0;top:1px;width:22px;height:22px;border-radius:50%;background:#1f9d55;color:#fff;font-size:13px;display:grid;place-items:center;font-weight:700}
+.gallery{display:flex;gap:18px;overflow-x:auto;padding:34px 16px 18px;scroll-snap-type:x mandatory;max-width:1120px;margin:0 auto}
+.gallery .phone{flex:0 0 220px;scroll-snap-align:center;border-radius:34px;padding:8px}.gallery .phone img{border-radius:27px}
+.langs{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:28px}
+.langs span{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:10px 18px;font-weight:600;font-size:17px}
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:40px;align-items:stretch}
+.plan{background:var(--card);border:1px solid var(--line);border-radius:26px;padding:28px;display:flex;flex-direction:column}
+.plan.best{background:linear-gradient(160deg,#1B4FF0,#0d2fa8);color:#fff;border:0;position:relative}
+.plan.best .tag{position:absolute;top:-13px;right:22px;background:var(--saffron);color:#fff;font-size:12px;font-weight:700;padding:5px 12px;border-radius:999px;letter-spacing:.5px}
+.plan h3{margin:0;font-size:18px}.plan .price{font-size:40px;font-weight:800;margin:10px 0 2px}.plan .price small{font-size:16px;font-weight:600;opacity:.7}
+.plan .per{font-size:14px;opacity:.75;margin-bottom:16px}
+.plan ul{list-style:none;padding:0;margin:0}.plan li{padding:6px 0 6px 26px;position:relative;font-size:15.5px}.plan li:before{content:"✓";position:absolute;left:0;color:#1f9d55;font-weight:800}.plan.best li:before{color:#ffd29e}
+.refer{background:var(--card);border:1px solid var(--line);border-radius:28px;padding:36px;display:grid;grid-template-columns:auto 1fr auto;gap:24px;align-items:center}
+.refer .big{font-size:54px}
+.faq{max-width:780px;margin:36px auto 0}
+details{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px 22px;margin-bottom:12px}
+summary{cursor:pointer;font-weight:600;list-style:none;display:flex;justify-content:space-between;gap:16px}summary::-webkit-details-marker{display:none}
+summary:after{content:"+";color:var(--brand);font-size:22px;line-height:1}details[open] summary:after{content:"–"}
+details p{color:var(--soft);margin:10px 0 0}
+.final{background:linear-gradient(150deg,#2a5cff,#0d2fa8);color:#fff;border-radius:32px;padding:56px 28px;text-align:center}
+.final p{opacity:.88;margin:0 auto 28px;max-width:520px}
+footer{padding:40px 0 56px;color:var(--muted);font-size:14px}
+footer .wrap{display:flex;flex-wrap:wrap;gap:18px;align-items:center}footer nav{display:flex;gap:18px;flex-wrap:wrap;margin-left:auto}footer a{text-decoration:none}footer a:hover{color:var(--brand)}
+.disclaimer{max-width:760px;margin:24px auto 0;font-size:13px;color:var(--muted);text-align:center}
+@media (max-width:900px){
+ nav.links{display:none}
+ .hero .wrap{grid-template-columns:1fr;padding-top:48px;padding-bottom:40px;text-align:center}
+ .hero p.lead{margin-left:auto;margin-right:auto}.cta{justify-content:center}
+ .hero .phones{height:380px}.hero .phones .phone{width:180px;border-radius:32px;padding:7px}.hero .phones .phone img{border-radius:26px}.hero .phones .a{transform:rotate(-7deg) translateX(-60px)}.hero .phones .b{transform:rotate(5deg) translateX(62px)}
+ .stats{grid-template-columns:repeat(2,1fr);margin-top:-24px}
+ .features,.plans{grid-template-columns:1fr}
+ .show{grid-template-columns:1fr;gap:28px}.show.rev .txt{order:0}
+ .refer{grid-template-columns:1fr;text-align:center}
+ section{padding:60px 0}
+}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/"><img src="/favicon.svg" alt="">Roti Track</a>
+  <nav class="links"><a href="#features">Features</a><a href="#languages">Languages</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a></nav>
+  <a class="btn small" href="#download">Get the app</a>
+</div></header>
+
+<div class="hero"><div class="wrap">
+  <div>
+    <span class="pill">🇮🇳 Made for Indian food</span>
+    <h1>Eat Indian. Stay healthy. Track it all in one app.</h1>
+    <p class="lead">Roti Track gives you a personal Indian diet plan, counts your calories, reminds you to drink water, and speaks your language.</p>
+    <div class="cta" id="download">
+      <a class="btn primary" href="https://play.google.com/store/apps/details?id=com.rotitrack.app">▶ Get it on Google Play</a>
+      <a class="btn ghost" href="#features">See features</a>
+    </div>
+    <div class="note">Free to use · Pro from ₹990 a year · Android</div>
+  </div>
+  <div class="phones">
+    <div class="phone a"><img src="/img/plan.jpg" alt="Diet plan screen" width="540" height="960"></div>
+    <div class="phone b"><img src="/img/home.jpg" alt="Home screen with calories and water" width="540" height="960"></div>
+  </div>
+</div></div>
+
+<div class="wrap"><div class="stats">
+  <div class="stat"><b>190+</b><span>Indian, Western &amp; Chinese foods</span></div>
+  <div class="stat"><b>8</b><span>languages</span></div>
+  <div class="stat"><b>7-day</b><span>personal meal plan</span></div>
+  <div class="stat"><b>₹990</b><span>a year for Pro</span></div>
+</div></div>
+
+<section id="features"><div class="wrap">
+  <div class="center"><div class="eyebrow">Everything you need</div>
+  <h2>One app for your meals, water and weight</h2>
+  <p class="sub">No foreign food lists, no confusing numbers. Just dal, roti, idli and the food you actually eat.</p></div>
+  <div class="features">
+    <div class="f"><div class="ic">🍛</div><h3>Indian diet plan</h3><p>A daily plan built for your body and goal: veg, egg or non-veg, and North, South, East, West or all-India food.</p></div>
+    <div class="f"><div class="ic">🔥</div><h3>Calorie counter</h3><p>Calories, protein, carbs and fat for 190+ foods. Log a meal in seconds, or log your planned meal with one tap.</p></div>
+    <div class="f"><div class="ic">💧</div><h3>Water tracker</h3><p>A daily water goal, quick glasses, and gentle reminders that work even when your phone is locked.</p></div>
+    <div class="f"><div class="ic">🔔</div><h3>Caring reminders</h3><p>Warm meal reminders that call you by name, and can even be read out loud in your language.</p></div>
+    <div class="f"><div class="ic">📈</div><h3>Progress &amp; reports</h3><p>Streaks, BMI, weight progress and trends, plus a PDF report to share with your doctor or dietitian.</p></div>
+    <div class="f"><div class="ic">🗣️</div><h3>Your language</h3><p>Use the whole app in English, Hindi, Kannada, Telugu, Tamil, Marathi, Bengali or Gujarati.</p></div>
+  </div>
+</div></section>
+
+<section style="padding-top:0"><div class="wrap">
+  <div class="show">
+    <div class="txt"><div class="eyebrow">Diet plan</div><h2>Your meals, planned every day</h2>
+      <p class="sub">Tell Roti Track your age, height, weight and goal. It works out your calories and plans breakfast, lunch, snack and dinner from food you know.</p>
+      <ul class="ticks"><li>Lose, keep or gain weight at a safe pace</li><li>Don't like a meal? Swap it with one tap</li><li>See the whole week ahead with Pro</li></ul></div>
+    <div class="phone"><img src="/img/plan.jpg" alt="Diet plan" width="540" height="960"></div>
+  </div>
+  <div class="show rev">
+    <div class="txt"><div class="eyebrow">Food log</div><h2>From idli to biryani, it's all here</h2>
+      <p class="sub">Search 190+ foods with proper Indian servings (1 roti, 1 katori dal, 1 plate poha), plus pizza, noodles and momos for the cheat days.</p>
+      <ul class="ticks"><li>Veg, egg and non-veg marks on every food</li><li>Add your own recipes with Pro</li><li>Log exercise and see calories burned</li></ul></div>
+    <div class="phone"><img src="/img/add.jpg" alt="Add food" width="540" height="960"></div>
+  </div>
+  <div class="show">
+    <div class="txt"><div class="eyebrow">Water</div><h2>Drink enough water, every day</h2>
+      <p class="sub">Your water goal is set from your weight and activity. Log water, nimbu pani, coconut water, chaas or chai with one tap.</p>
+      <ul class="ticks"><li>Smart reminders from morning to night</li><li>Pleasant sounds, or silent vibration</li><li>Streaks to keep you going</li></ul></div>
+    <div class="phone"><img src="/img/water.jpg" alt="Water tracker" width="540" height="960"></div>
+  </div>
+</div></section>
+
+<section style="padding-top:0"><div class="wrap center">
+  <div class="eyebrow">A closer look</div><h2>Simple, clean and friendly</h2>
+</div>
+<div class="gallery">
+  <div class="phone"><img src="/img/home.jpg" alt="Home" width="540" height="960"></div>
+  <div class="phone"><img src="/img/food.jpg" alt="Calories" width="540" height="960"></div>
+  <div class="phone"><img src="/img/plan.jpg" alt="Diet plan" width="540" height="960"></div>
+  <div class="phone"><img src="/img/water.jpg" alt="Water" width="540" height="960"></div>
+  <div class="phone"><img src="/img/reminders.jpg" alt="Reminders" width="540" height="960"></div>
+  <div class="phone"><img src="/img/hindi.jpg" alt="Hindi" width="540" height="960"></div>
+  <div class="phone"><img src="/img/pro.jpg" alt="Pro" width="540" height="960"></div>
+</div></section>
+
+<section id="languages" style="padding-top:20px"><div class="wrap center">
+  <div class="eyebrow">Speaks your language</div><h2>Use Roti Track in 8 languages</h2>
+  <p class="sub">Every screen, every food name and every reminder, in the language you're most comfortable with.</p>
+  <div class="langs"><span>English</span><span>हिन्दी</span><span>ಕನ್ನಡ</span><span>తెలుగు</span><span>தமிழ்</span><span>मराठी</span><span>বাংলা</span><span>ગુજરાતી</span></div>
+</div></section>
+
+<section id="pricing"><div class="wrap">
+  <div class="center"><div class="eyebrow">Pricing</div><h2>Start free. Go Pro when you're ready.</h2>
+  <p class="sub">Prices include GST. Cancel anytime.</p></div>
+  <div class="plans">
+    <div class="plan"><h3>Free</h3><div class="price">₹0</div><div class="per">forever</div>
+      <ul><li>Today's meal plan</li><li>Calorie &amp; macro tracking</li><li>190+ foods</li><li>Water tracking &amp; reminders</li><li>Meal reminders</li><li>7-day trends</li></ul></div>
+    <div class="plan best"><span class="tag">BEST VALUE</span><h3>Pro Yearly</h3><div class="price">₹990<small> / year</small></div><div class="per">about ₹83 a month</div>
+      <ul><li>Everything in Free</li><li>Full 7-day meal plan</li><li>Swap any meal</li><li>30-day trends</li><li>Your own recipes</li><li>Longer PDF reports</li></ul></div>
+    <div class="plan"><h3>Pro Monthly</h3><div class="price">₹359<small> / month</small></div><div class="per">billed monthly</div>
+      <ul><li>Everything in Pro</li><li>Try Pro month by month</li><li>Cancel anytime</li></ul></div>
+  </div>
+</div></section>
+
+<section style="padding-top:0"><div class="wrap">
+  <div class="refer">
+    <div class="big">🎁</div>
+    <div><h2 style="margin:0 0 6px;font-size:28px">Invite friends, earn up to ₹500</h2>
+      <p class="sub">Share your referral code from the app. When a friend joins and buys Pro, you earn a reward: ₹500 for a yearly plan.</p></div>
+    <a class="btn small" href="#download">Get your code</a>
+  </div>
+</div></section>
+
+<section id="faq" style="padding-top:0"><div class="wrap">
+  <div class="center"><div class="eyebrow">FAQ</div><h2>Questions? We've got answers.</h2></div>
+  <div class="faq">
+    <details><summary>Is Roti Track free?</summary><p>Yes. Tracking calories and water, today's meal plan and reminders are free. Pro adds the full 7-day plan, meal swaps, 30-day trends, custom recipes and longer reports.</p></details>
+    <details><summary>Is it only for vegetarians?</summary><p>No. Choose vegetarian, eggetarian or non-vegetarian, and the plan and food list follow your choice.</p></details>
+    <details><summary>Does it have food from my region?</summary><p>Yes. Pick North, South, East, West or all-India, and your plan uses dishes from that region, like poha, dosa, sambar, thepla or fish curry.</p></details>
+    <details><summary>Can I track pizza, noodles or momos?</summary><p>Yes. Along with Indian food there are popular Western and Chinese dishes, so you can log everything you eat. Your diet plan stays Indian.</p></details>
+    <details><summary>Will reminders work when my phone is locked?</summary><p>Yes. On some phones (like Xiaomi, Vivo, Oppo) you may need to allow the app to run in the background; the app shows you how.</p></details>
+    <details><summary>How do I cancel Pro?</summary><p>Cancel anytime in Google Play → Subscriptions, or from the Pro screen if you paid with Razorpay. You keep Pro until the end of the paid period.</p></details>
+    <details><summary>Is my data safe?</summary><p>Your food and water logs stay on your phone. We never see your card or UPI details, don't sell your data and show no ads. Read our <a href="/privacy">Privacy Policy</a>.</p></details>
+  </div>
+</div></section>
+
+<section style="padding-top:0"><div class="wrap">
+  <div class="final">
+    <h2 style="margin-top:0">Start your healthy journey today</h2>
+    <p>Join Roti Track and make every roti count.</p>
+    <a class="btn primary" href="https://play.google.com/store/apps/details?id=com.rotitrack.app">▶ Get it on Google Play</a>
+  </div>
+  <p class="disclaimer">Roti Track gives general nutrition information for healthy living and is not medical advice. If you have a medical condition or are pregnant, please talk to your doctor before changing your diet.</p>
+</div></section>
+
+<footer><div class="wrap">
+  <a class="logo" href="/" style="font-size:17px"><img src="/favicon.svg" alt="" style="width:28px;height:28px">Roti Track</a>
+  <span>© 2026 Roti Track</span>
+  <nav><a href="mailto:rotitrack.app@gmail.com">rotitrack.app@gmail.com</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/delete-account">Delete account</a></nav>
+</div></footer>
+</body>
+</html>
