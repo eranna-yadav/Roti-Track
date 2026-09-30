@@ -1,0 +1,63 @@
+name: Release build
+
+# Builds the Play Store release: a signed app bundle (.aab) to upload to Play Console,
+# plus a signed release APK to try on a phone first. Run it from the Actions tab
+# ("Run workflow"). Both files land in a draft GitHub release, visible only to you.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Load the upload key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::error::Add the RELEASE_KEYSTORE_BASE64, RELEASE_KEYSTORE_PASSWORD and RELEASE_KEY_ALIAS repository secrets first."
+            exit 1
+          fi
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/upload.keystore"
+          echo "RELEASE_KEYSTORE_FILE=$RUNNER_TEMP/upload.keystore" >> "$GITHUB_ENV"
+
+      - name: Unit tests
+        run: ./gradlew --no-daemon testReleaseUnitTest
+
+      - name: Build signed bundle and APK
+        env:
+          RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+        run: ./gradlew --no-daemon bundleRelease assembleRelease
+
+      - name: Check it is not signed with the debug key
+        run: |
+          if keytool -printcert -jarfile app/build/outputs/bundle/release/app-release.aab | grep -q "CN=Android Debug"; then
+            echo "::error::The bundle is signed with the debug key."; exit 1
+          fi
+
+      - name: Publish draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(grep -oP 'versionName = "\K[^"]+' app/build.gradle.kts)
+          cp app/build/outputs/bundle/release/app-release.aab "RotiTrack-$VERSION.aab"
+          cp app/build/outputs/apk/release/app-release.apk "RotiTrack-$VERSION.apk"
+          gh release delete "v$VERSION" --yes --cleanup-tag || true
+          gh release create "v$VERSION" "RotiTrack-$VERSION.aab" "RotiTrack-$VERSION.apk" \
+            --draft \
+            --target "$GITHUB_SHA" \
+            --title "Roti Track $VERSION" \
+            --notes "Upload RotiTrack-$VERSION.aab to Play Console. RotiTrack-$VERSION.apk is the same build, for trying on a phone first (uninstall the test build before installing it; Pro here uses real Google Play billing)."

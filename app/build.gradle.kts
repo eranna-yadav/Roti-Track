@@ -19,8 +19,8 @@ android {
         applicationId = "com.rotitrack.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 4
-        versionName = "1.4.0"
+        versionCode = 5
+        versionName = "1.5.0"
     }
 
     signingConfigs {
@@ -35,6 +35,17 @@ android {
             enableV1Signing = true
             enableV2Signing = true
         }
+        // The Play Store upload key. CI writes it from the RELEASE_KEYSTORE_* repository
+        // secrets (see .github/workflows/release.yml); it is never committed.
+        val uploadKeystore = System.getenv("RELEASE_KEYSTORE_FILE")?.let(::file)
+        if (uploadKeystore != null && uploadKeystore.exists()) {
+            create("upload") {
+                storeFile = uploadKeystore
+                storePassword = System.getenv("RELEASE_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("RELEASE_KEY_ALIAS")
+                keyPassword = System.getenv("RELEASE_KEYSTORE_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
@@ -42,9 +53,9 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            // Signed with the debug key so a release APK installs straight away.
-            // Swap in your own keystore before publishing to the Play Store.
-            signingConfig = signingConfigs.getByName("debug")
+            // The upload key when CI provides it; otherwise the debug key, so a local
+            // release build still installs.
+            signingConfig = signingConfigs.findByName("upload") ?: signingConfigs.getByName("debug")
         }
     }
 

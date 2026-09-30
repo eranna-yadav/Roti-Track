@@ -33,6 +33,9 @@ jobs:
       - name: Build debug APK
         run: ./gradlew --no-daemon assembleDebug
 
+      - name: Check the release build (R8 + lint)
+        run: ./gradlew --no-daemon assembleRelease
+
       - name: Rename APK
         run: cp app/build/outputs/apk/debug/app-debug.apk RotiTrack-test.apk
 
