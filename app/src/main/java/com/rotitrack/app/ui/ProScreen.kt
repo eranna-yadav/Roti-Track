@@ -18,6 +18,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
+import com.rotitrack.app.account.normalizeReferralCode
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -59,9 +62,13 @@ fun ProScreen(
     account: Account,
     summary: UserSummary?,
     platform: Platform,
+    /** Why a referral code can't be used, or null when it gives the first-year price. */
+    checkReferralCode: suspend (String) -> String?,
     onBack: () -> Unit,
 ) {
     var selected by remember { mutableStateOf(Plan.YEARLY) }
+    // Yearly opens a second page where the user may enter a friend's referral code.
+    var codeStep by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val playPlan = billing.activePlan
     val rzpPlan = summary?.razorpayPlan
@@ -72,10 +79,26 @@ fun ProScreen(
     val usePlay = billing !is DemoBilling && billing.unavailableReason == null
     val useRazorpay = !usePlay && razorpay.unavailableReason == null
     val demo = !usePlay && !useRazorpay && billing is DemoBilling
-    // Signed up with a friend's code: the yearly plan's first year is cheaper.
-    val referralPrice = if (summary?.referralPriceEligible == true) {
-        if (usePlay) billing.referralPrice(Plan.YEARLY) else Plan.YEARLY.referralPrice
-    } else null
+
+    if (codeStep && playPlan == null && rzpPlan == null && !compPro) {
+        ReferralCodeStep(
+            regularPrice = billing.price(Plan.YEARLY),
+            referralPrice = if (usePlay) billing.referralPrice(Plan.YEARLY) else Plan.YEARLY.referralPrice,
+            prefill = summary?.referredByCode.orEmpty(),
+            busy = razorpay.busy,
+            message = razorpay.message,
+            enabled = usePlay || useRazorpay || demo,
+            check = checkReferralCode,
+            onPay = { code ->
+                when {
+                    usePlay || demo -> billing.purchase(Plan.YEARLY, referralCode = code)
+                    useRazorpay -> scope.launch { runCatching { razorpay.subscribe(Plan.YEARLY, account, referralCode = code) } }
+                }
+            },
+            onBack = { codeStep = false },
+        )
+        return
+    }
 
     Column(Modifier.fillMaxSize().background(Palette.night)) {
         Row(Modifier.fillMaxWidth().padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -120,19 +143,11 @@ fun ProScreen(
                 )
                 compPro -> Status(t("You're Pro 🎉"), t("Pro access has been granted to your account by the Roti Track team."))
                 else -> {
-                    if (referralPrice != null) {
-                        PlanCard(
-                            Plan.YEARLY, referralPrice, selected == Plan.YEARLY,
-                            note = t("Code {0}: {1} for the first year, then {2}/year", summary?.referredByCode.orEmpty(), referralPrice, billing.price(Plan.YEARLY)),
-                            badge = t("REFERRAL PRICE"), oldPrice = billing.price(Plan.YEARLY),
-                        ) { selected = Plan.YEARLY }
-                    } else {
-                        PlanCard(
-                            Plan.YEARLY, billing.price(Plan.YEARLY), selected == Plan.YEARLY,
-                            note = t("Just ₹{0}/month · save {1}%", Plan.YEARLY.rupees / 12, yearlySavingPercent),
-                            badge = t("BEST VALUE"),
-                        ) { selected = Plan.YEARLY }
-                    }
+                    PlanCard(
+                        Plan.YEARLY, billing.price(Plan.YEARLY), selected == Plan.YEARLY,
+                        note = t("Just ₹{0}/month · save {1}%", Plan.YEARLY.rupees / 12, yearlySavingPercent),
+                        badge = t("BEST VALUE"),
+                    ) { selected = Plan.YEARLY; codeStep = true }
                     Spacer(Modifier.height(10.dp))
                     PlanCard(Plan.MONTHLY, billing.price(Plan.MONTHLY), selected == Plan.MONTHLY, note = t("Billed every month")) { selected = Plan.MONTHLY }
                     Text(
@@ -175,12 +190,13 @@ fun ProScreen(
                 else -> PillButton(
                     when {
                         razorpay.busy -> t("Please wait…")
-                        selected == Plan.YEARLY && referralPrice != null -> t("Subscribe · {0} for the first year", referralPrice)
+                        selected == Plan.YEARLY -> t("Continue · {0}/{1}", billing.price(selected), selected.period)
                         else -> t("Subscribe · {0}/{1}", billing.price(selected), selected.period)
                     },
                     {
                         when {
-                            usePlay || demo -> billing.purchase(selected, referral = selected == Plan.YEARLY && referralPrice != null)
+                            selected == Plan.YEARLY -> codeStep = true
+                            usePlay || demo -> billing.purchase(selected)
                             useRazorpay -> scope.launch { runCatching { razorpay.subscribe(selected, account) } }
                         }
                     },
@@ -201,7 +217,7 @@ fun ProScreen(
 private fun longDate(t: Long): String = java.text.SimpleDateFormat("d MMM yyyy", com.rotitrack.app.i18n.I18n.locale).format(java.util.Date(t))
 
 @Composable
-private fun PlanCard(plan: Plan, price: String, selected: Boolean, note: String, badge: String? = null, oldPrice: String? = null, onClick: () -> Unit) {
+private fun PlanCard(plan: Plan, price: String, selected: Boolean, note: String, badge: String? = null, onClick: () -> Unit) {
     Row(
         Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp))
             .background(if (selected) Color.White else Color.White.copy(alpha = 0.08f))
@@ -216,20 +232,10 @@ private fun PlanCard(plan: Plan, price: String, selected: Boolean, note: String,
             }
             Text(note, style = Type.small.copy(color = if (selected) Color(0xFF3A4762) else Color.White.copy(alpha = 0.6f)))
         }
-        Column(horizontalAlignment = Alignment.End) {
-            oldPrice?.let {
-                Text(
-                    it, style = Type.small.copy(
-                        color = if (selected) Color(0xFF7A869F) else Color.White.copy(alpha = 0.5f),
-                        textDecoration = TextDecoration.LineThrough,
-                    ),
-                )
-            }
-            Text(
-                "$price\n/${plan.period}", style = Type.title.copy(color = if (selected) Palette.night else Color.White),
-                textAlign = TextAlign.End,
-            )
-        }
+        Text(
+            "$price\n/${plan.period}", style = Type.title.copy(color = if (selected) Palette.night else Color.White),
+            textAlign = TextAlign.End,
+        )
     }
 }
 
@@ -239,6 +245,108 @@ private fun Status(title: String, body: String) {
         Column {
             Text(title, style = Type.h2.copy(color = Color.White))
             Text(body, style = Type.body.copy(color = Color.White.copy(alpha = 0.9f)), modifier = Modifier.padding(top = 4.dp))
+        }
+    }
+}
+
+/** The yearly plan's second page: an optional friend's referral code, then payment. */
+@Composable
+private fun ReferralCodeStep(
+    regularPrice: String,
+    referralPrice: String?,
+    prefill: String,
+    busy: Boolean,
+    message: String?,
+    enabled: Boolean,
+    check: suspend (String) -> String?,
+    onPay: (code: String?) -> Unit,
+    onBack: () -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+    var code by remember { mutableStateOf(prefill) }
+    var applied by remember { mutableStateOf<String?>(null) }
+    var checking by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    val saving = Plan.YEARLY.referralRupees?.let { "₹${Plan.YEARLY.rupees - it}" }.orEmpty()
+    val dim = Color.White.copy(alpha = 0.7f)
+
+    Column(Modifier.fillMaxSize().background(Palette.night)) {
+        Row(Modifier.fillMaxWidth().padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text("←", fontSize = 26.sp, color = Color.White, modifier = Modifier.clickable(onClick = onBack).padding(14.dp))
+        }
+        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp)) {
+            Text("👑", fontSize = 40.sp)
+            Text(t("Pro · {0}", Plan.YEARLY.label), style = Type.screenTitle.copy(color = Color.White))
+            Spacer(Modifier.height(16.dp))
+
+            // The price, which drops once a valid code is applied.
+            Column(
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Color.White)
+                    .border(2.dp, Palette.saffron, RoundedCornerShape(20.dp)).padding(18.dp),
+            ) {
+                if (applied != null && referralPrice != null) {
+                    Text(regularPrice, style = Type.body.copy(color = Color(0xFF7A869F), textDecoration = TextDecoration.LineThrough))
+                    Text(referralPrice, style = Type.screenTitle.copy(color = Palette.night))
+                    Text(t("{0} for the first year, then {1}/year", referralPrice, regularPrice), style = Type.small.copy(color = Color(0xFF3A4762)))
+                } else {
+                    Text("$regularPrice /${Plan.YEARLY.period}", style = Type.screenTitle.copy(color = Palette.night))
+                    Text(t("Just ₹{0}/month · save {1}%", Plan.YEARLY.rupees / 12, yearlySavingPercent), style = Type.small.copy(color = Color(0xFF3A4762)))
+                }
+            }
+            Spacer(Modifier.height(20.dp))
+
+            Text(t("Have a referral code?"), style = Type.h2.copy(color = Color.White))
+            Text(
+                t("Enter a friend's code to get your first year for {0} instead of {1}.", referralPrice ?: Plan.YEARLY.referralPrice.orEmpty(), regularPrice),
+                style = Type.body.copy(color = dim), modifier = Modifier.padding(top = 4.dp, bottom = 12.dp),
+            )
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                OutlinedTextField(
+                    code, { code = it.uppercase().replace(" ", "").take(12); error = null; applied = null },
+                    label = { Text(t("Referral code")) }, singleLine = true, enabled = !checking && !busy,
+                    modifier = Modifier.weight(1f),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.White, unfocusedTextColor = Color.White, disabledTextColor = dim,
+                        focusedLabelColor = Palette.saffron, unfocusedLabelColor = dim,
+                        focusedBorderColor = Palette.saffron, unfocusedBorderColor = dim, cursorColor = Palette.saffron,
+                    ),
+                )
+                PillButton(
+                    when {
+                        checking -> t("Checking…")
+                        applied != null -> t("Remove")
+                        else -> t("Apply")
+                    },
+                    {
+                        if (applied != null) { applied = null; code = "" } else scope.launch {
+                            checking = true
+                            error = check(code) ?: if (referralPrice == null) t("The referral price isn't available right now. You can still subscribe at the regular price.") else null
+                            if (error == null) applied = normalizeReferralCode(code)
+                            checking = false
+                        }
+                    },
+                    Modifier.width(118.dp), color = Color.White, textColor = Palette.night,
+                    enabled = !checking && !busy && (applied != null || code.isNotBlank()), height = 56.dp,
+                )
+            }
+            error?.let { Text(it, style = Type.small.copy(color = Palette.carbs), modifier = Modifier.padding(top = 10.dp)) }
+            if (applied != null) Text(t("✓ Code applied. You save {0} on your first year.", saving), style = Type.small.copy(color = Palette.leaf), modifier = Modifier.padding(top = 10.dp))
+            message?.let { Text(it, style = Type.small.copy(color = Palette.carbs), modifier = Modifier.padding(top = 12.dp)) }
+            Text(
+                t("No code? Just continue at the regular price."),
+                style = Type.small.copy(color = Color.White.copy(alpha = 0.5f)), modifier = Modifier.padding(vertical = 16.dp),
+            )
+        }
+        Column(Modifier.fillMaxWidth().padding(20.dp)) {
+            PillButton(
+                when {
+                    busy -> t("Please wait…")
+                    applied != null && referralPrice != null -> t("Pay {0} for the first year", referralPrice)
+                    else -> t("Pay {0}/{1}", regularPrice, Plan.YEARLY.period)
+                },
+                { onPay(applied) },
+                Modifier.fillMaxWidth(), color = Palette.saffron, enabled = enabled && !busy && !checking, height = 58.dp,
+            )
         }
     }
 }

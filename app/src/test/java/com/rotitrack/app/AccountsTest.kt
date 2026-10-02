@@ -15,6 +15,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import com.rotitrack.app.account.referralCodeProblem
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Test
@@ -163,10 +164,17 @@ class AccountsTest {
         assertEquals(1099, Plan.YEARLY.rupees)
         assertEquals("₹990", Plan.YEARLY.referralPrice)
         assertEquals(null, Plan.MONTHLY.referralPrice)
-        val referred = UserSummary("u1", "Asha", "asha@example.com", referredByCode = "RTABC234")
-        assertTrue(referred.referralPriceEligible)
-        assertFalse(UserSummary("u2", "Ravi", "ravi@example.com").referralPriceEligible)
-        assertFalse(referred.copy(razorpayPlanId = Plan.YEARLY.productId).referralPriceEligible)
-        assertFalse(referred.copy(planId = Plan.YEARLY.productId).referralPriceEligible)
+        val me = UserSummary("u1", "Asha", "asha@example.com")
+        assertTrue(me.firstSubscription)
+        assertFalse(me.copy(razorpayPlanId = Plan.YEARLY.productId).firstSubscription)
+        assertFalse(me.copy(planId = Plan.YEARLY.productId).firstSubscription)
+        // A code entered on the yearly plan's payment page.
+        val owners = mapOf("RTFRIEND1" to "u2", "RTMINE123" to "u1")
+        val check = { code: String?, who: UserSummary -> runBlocking { referralCodeProblem(code, who) { owners[it] } } }
+        assertEquals(null, check(" rtfriend1 ", me))
+        assertNotNull(check("RTNOBODY9", me))
+        assertNotNull(check("RTMINE123", me))
+        assertNotNull(check("", me))
+        assertNotNull(check("RTFRIEND1", me.copy(razorpayPlanId = Plan.MONTHLY.productId)))
     }
 }

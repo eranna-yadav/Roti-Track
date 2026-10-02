@@ -40,10 +40,11 @@ test("plan prices match the app", () => {
 });
 
 test("referral price: yearly, someone else's code, first subscription only", () => {
-  const user = { referredByCode: "RTABC234" };
+  const user = {};
   assert.ok(lib.referralPriceEligible(user, "rotitrack_pro_yearly", "friend", "me"));
   assert.ok(!lib.referralPriceEligible(user, "rotitrack_pro_monthly", "friend", "me"));
-  assert.ok(!lib.referralPriceEligible({}, "rotitrack_pro_yearly", "friend", "me"));
+  assert.strictEqual(lib.normalizeReferralCode(" rt 4dj492 "), "RT4DJ492");
+  assert.strictEqual(lib.normalizeReferralCode(""), null);
   assert.ok(!lib.referralPriceEligible(user, "rotitrack_pro_yearly", null, "me"), "unknown code");
   assert.ok(!lib.referralPriceEligible(user, "rotitrack_pro_yearly", "me", "me"), "own code");
   assert.ok(!lib.referralPriceEligible({ ...user, razorpayPlanId: "rotitrack_pro_yearly" }, "rotitrack_pro_yearly", "friend", "me"), "already subscribed once");

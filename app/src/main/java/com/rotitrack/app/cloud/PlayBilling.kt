@@ -39,7 +39,8 @@ class PlayBilling(
      * external transaction token. Only turn on once enrolled in Play Console.
      */
     override val offersAlternative: Boolean,
-    private val onAlternativeChosen: (Plan, String) -> Unit,
+    /** Plan, Google's external transaction token, and the referral code entered before paying. */
+    private val onAlternativeChosen: (Plan, String, String?) -> Unit,
 ) : Billing, PurchasesUpdatedListener {
 
     private val client = BillingClient.newBuilder(context)
@@ -49,7 +50,7 @@ class PlayBilling(
             if (offersAlternative) {
                 enableUserChoiceBilling { details ->
                     val plan = details.products.firstNotNullOfOrNull { Plan.byProductId(it.id) }
-                    if (plan != null) onAlternativeChosen(plan, details.externalTransactionToken)
+                    if (plan != null) onAlternativeChosen(plan, details.externalTransactionToken, pendingReferralCode)
                 }
             }
         }
@@ -122,10 +123,14 @@ class PlayBilling(
     override fun referralPrice(plan: Plan): String? =
         referralOffer(plan)?.pricingPhases?.pricingPhaseList?.firstOrNull()?.formattedPrice
 
-    override fun purchase(plan: Plan, referral: Boolean) {
+    /** Kept for Play's choice screen, in case the user picks Razorpay there. */
+    private var pendingReferralCode: String? = null
+
+    override fun purchase(plan: Plan, referralCode: String?) {
         val act = activity() ?: return
         val pd = details[plan] ?: return
-        val offer = (if (referral) referralOffer(plan) else null) ?: baseOffer(plan) ?: return
+        pendingReferralCode = referralCode
+        val offer = (if (referralCode != null) referralOffer(plan) else null) ?: baseOffer(plan) ?: return
         val params = BillingFlowParams.newBuilder()
             .setProductDetailsParamsList(
                 listOf(BillingFlowParams.ProductDetailsParams.newBuilder().setProductDetails(pd).setOfferToken(offer.offerToken).build())

@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.rotitrack.app.account.referralCodeProblem
 import com.rotitrack.app.account.Services
 import com.rotitrack.app.account.UserSummary
 import com.rotitrack.app.account.summarize
@@ -230,7 +231,11 @@ private fun SignedIn(services: Services, platform: Platform, nav: Navigator, acc
                 is Route.Article -> ArticleScreen(route.id, onBack = nav::pop)
                 Route.Guide -> GuideScreen(onOpen = { nav.push(Route.GuidePage(it)) }, onBack = nav::pop)
                 is Route.GuidePage -> GuidePageScreen(route.id, onBack = nav::pop)
-                Route.Pro -> ProScreen(services.billing, services.razorpay, account, summary, platform, onBack = nav::pop)
+                Route.Pro -> ProScreen(
+                    services.billing, services.razorpay, account, summary, platform,
+                    checkReferralCode = { code -> referralCodeProblem(code, summary, services.directory::referralCodeOwner) },
+                    onBack = nav::pop,
+                )
                 Route.Admin -> if (isAdmin) AdminScreen(services.directory, onOpen = { nav.push(Route.AdminUser(it)) }, onBack = nav::pop) else LaunchedEffect(Unit) { nav.pop() }
                 is Route.AdminUser -> if (isAdmin) AdminUserScreen(services.directory, route.uid, onBack = nav::pop) else LaunchedEffect(Unit) { nav.pop() }
                 is Route.Page -> when (route.page) {

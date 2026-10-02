@@ -100,7 +100,7 @@ fun ReferralScreen(store: AppStore, account: Account, summary: UserSummary?, pla
 
 /** The referral programme's rules, shown from Profile and from Refer & earn. */
 val REFERRAL_RULES get() = listOf(
-    t("Share your promo code") to t("Find it under Profile → Refer a friend. Your friend must enter it while creating their Roti Track account; it can't be added later."),
+    t("Share your promo code") to t("Find it under Profile → Refer a friend. Your friend enters it when creating their Roti Track account, or on the payment page when buying the yearly plan."),
     t("Yearly plan: ₹{0}", REFERRAL_REWARD_RUPEES) to t("Your friend gets the yearly plan for {1} instead of {2} in the first year, and you earn ₹{0} once their payment is confirmed.", REFERRAL_REWARD_RUPEES, Plan.YEARLY.referralPrice.orEmpty(), Plan.YEARLY.fallbackPrice),
     t("Monthly plan: ₹{0} + ₹{1}", REFERRAL_MONTHLY_INSTALMENT, REFERRAL_MONTHLY_INSTALMENT) to t("When your friend buys the monthly plan (₹359), you earn ₹{0} after their 1st month's payment and another ₹{1} after their 2nd month's payment: ₹{2} in total.", REFERRAL_MONTHLY_INSTALMENT, REFERRAL_MONTHLY_INSTALMENT, REFERRAL_REWARD_RUPEES),
     t("If they stop after one month") to t("If your friend cancels or their 2nd monthly payment doesn't go through, you keep the first ₹{0} but don't earn the second.", REFERRAL_MONTHLY_INSTALMENT),

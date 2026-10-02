@@ -152,6 +152,7 @@ class LocalDirectory(private val storage: Storage) : UserDirectory {
     }
 
     override suspend fun markReferralPaid(uid: String) = edit(uid) { it.copy(referralPaid = it.referralEarnings) }
+    override suspend fun referralCodeOwner(code: String): String? = all().firstOrNull { it.referralCode == code }?.uid
 
     override suspend fun delete(uid: String) {
         users = users - uid
@@ -185,7 +186,7 @@ class DemoBilling(private val storage: Storage, private val uid: () -> String?) 
     override fun price(plan: Plan) = plan.fallbackPrice
     override val unavailableReason: String? = null
 
-    override fun purchase(plan: Plan, referral: Boolean) {
+    override fun purchase(plan: Plan, referralCode: String?) {
         val u = uid() ?: return
         owned = owned + (u to plan.productId)
         storage.save(json.encodeToString(serializer, owned))

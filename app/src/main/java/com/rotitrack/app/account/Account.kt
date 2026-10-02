@@ -83,11 +83,21 @@ data class UserSummary(
     }
     val isPro: Boolean get() = plan != null || compPro
 
-    /**
-     * Signed up with a friend's code and hasn't subscribed before, so the yearly plan's
-     * first year is at [Plan.referralRupees]. The server checks this again before charging.
-     */
-    val referralPriceEligible: Boolean get() = !referredByCode.isNullOrBlank() && razorpayPlanId == null && planId == null
+    /** Has never subscribed, so a referral code can still give the first-year price. */
+    val firstSubscription: Boolean get() = razorpayPlanId == null && planId == null
+}
+
+/**
+ * Why [code] can't give [me] the yearly plan's referral price, or null when it can.
+ * The payments server checks the same things again before charging.
+ */
+suspend fun referralCodeProblem(code: String?, me: UserSummary?, ownerOf: suspend (String) -> String?): String? {
+    val c = normalizeReferralCode(code) ?: return t("Enter a referral code")
+    if (me != null && !me.firstSubscription) return t("The referral price is only for your first Pro subscription.")
+    val owner = runCatching { ownerOf(c) }.getOrElse { return t("Couldn't check the code. Check your internet and try again.") }
+        ?: return t("That referral code doesn't exist. Check it and try again.")
+    if (owner == me?.uid) return t("You can't use your own referral code.")
+    return null
 }
 
 class AuthException(message: String) : Exception(message)
@@ -115,6 +125,8 @@ interface UserDirectory {
     suspend fun delete(uid: String)
     /** Admin: records that everything earned so far has been paid to the user. */
     suspend fun markReferralPaid(uid: String)
+    /** The uid that owns a referral code, or null if no one has it. */
+    suspend fun referralCodeOwner(code: String): String?
 }
 
 /** Most a user earns per friend who buys Pro with their code. Must match functions/lib.js. */
@@ -173,8 +185,8 @@ interface Billing {
     val unavailableReason: String?
     /** True when Google Play's user choice screen also offers Razorpay. */
     val offersAlternative: Boolean get() = false
-    /** [referral]: buy at the first-year referral price (see [referralPrice]). */
-    fun purchase(plan: Plan, referral: Boolean = false)
+    /** [referralCode]: a friend's code, already checked, for the first-year referral price (see [referralPrice]). */
+    fun purchase(plan: Plan, referralCode: String? = null)
     fun restore()
 }
 
@@ -196,7 +208,8 @@ interface RazorpayGateway {
      * Creates a subscription on the server, opens Razorpay Checkout and verifies
      * the result. [externalTransactionToken] comes from Google Play's user choice screen.
      */
-    suspend fun subscribe(plan: Plan, account: Account, externalTransactionToken: String? = null)
+    /** [referralCode]: a friend's code entered before paying, for the yearly plan's first-year price. */
+    suspend fun subscribe(plan: Plan, account: Account, externalTransactionToken: String? = null, referralCode: String? = null)
 
     /** Turns off auto-renew; Pro stays until the paid period ends. */
     suspend fun cancel()
@@ -207,7 +220,7 @@ class NoRazorpay(override val unavailableReason: String = t("Razorpay needs the 
     override val busy = false
     override val message: String? = null
     override val version = 0
-    override suspend fun subscribe(plan: Plan, account: Account, externalTransactionToken: String?) =
+    override suspend fun subscribe(plan: Plan, account: Account, externalTransactionToken: String?, referralCode: String?) =
         throw AuthException(unavailableReason)
     override suspend fun cancel() = throw AuthException(unavailableReason)
 }

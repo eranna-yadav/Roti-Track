@@ -71,10 +71,10 @@ class RotiTrackApp : Application() {
             PlayBilling(
                 this, { currentActivity }, { auth.account?.uid },
                 offersAlternative = resources.getBoolean(R.bool.user_choice_billing) && usesFirebase,
-                onAlternativeChosen = { plan, token ->
+                onAlternativeChosen = { plan, token, referralCode ->
                     // The user picked Razorpay on Google Play's choice screen.
                     auth.account?.let { account ->
-                        scope.launch { runCatching { razorpay.subscribe(plan, account, token) } }
+                        scope.launch { runCatching { razorpay.subscribe(plan, account, token, referralCode) } }
                     }
                 },
             ).also { it.connect() }

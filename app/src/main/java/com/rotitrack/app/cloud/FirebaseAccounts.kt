@@ -166,6 +166,9 @@ class FirestoreDirectory : UserDirectory {
     suspend fun referralCodeExists(code: String): Boolean =
         withTimeout(15_000) { codes.document(code).get(Source.SERVER).await().exists() }
 
+    override suspend fun referralCodeOwner(code: String): String? =
+        withTimeout(15_000) { codes.document(code).get(Source.SERVER).await().getString("uid") }
+
     /**
      * referralCodes/{code} → {uid} lets sign-up check a code and the server find the referrer.
      * Takes the user's first code nobody else holds, atomically, so two users never share one.

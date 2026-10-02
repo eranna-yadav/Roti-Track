@@ -10,15 +10,20 @@ const PLANS = {
 
 const YEAR_SECONDS = 365 * 86400;
 
+/** "rt 4dj 492" → "RT4DJ492"; null when empty. Must match normalizeReferralCode in the app. */
+function normalizeReferralCode(code) {
+  const c = String(code || "").trim().toUpperCase().replace(/ /g, "");
+  return c || null;
+}
+
 /**
- * True when this user gets the first-year referral price: the yearly plan, signed up
- * with someone else's code, and never subscribed through Razorpay before.
+ * True when this user gets the first-year referral price: the yearly plan, a code that
+ * belongs to someone else, and never subscribed through Razorpay before.
  */
 function referralPriceEligible(user, planId, referrerUid, uid) {
   return planId === "rotitrack_pro_yearly"
-    && !!(user && user.referredByCode)
     && !!referrerUid && referrerUid !== uid
-    && !user.razorpayPlanId && !user.razorpaySubscriptionId;
+    && !(user && (user.razorpayPlanId || user.razorpaySubscriptionId));
 }
 
 /**
@@ -120,5 +125,5 @@ function referralToCredit(user, now) {
 }
 
 module.exports = {
-  referralPriceEligible, referralSubscriptionFields, YEAR_SECONDS,
+  normalizeReferralCode, referralPriceEligible, referralSubscriptionFields, YEAR_SECONDS,
   REFERRAL_REWARD, REFERRAL_MONTHLY_INSTALMENT, referralEarnedFor, referralCreditedSoFar, referralToCredit, keepHighestPaidCount, PLANS, hmac, verifyPaymentSignature, verifyWebhookSignature, userFieldsFromSubscription, playAmounts };

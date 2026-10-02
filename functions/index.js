@@ -60,13 +60,20 @@ exports.createRazorpaySubscription = onCall(
       throw new HttpsError("already-exists", "You already have an active Pro subscription.");
     }
 
-    // A friend's referral code makes the first year cheaper; checked here, never trusted from the app.
-    let referrerUid = null;
-    if (user.referredByCode) {
-      const codeDoc = await db.doc(`referralCodes/${user.referredByCode}`).get();
-      referrerUid = codeDoc.exists ? codeDoc.data().uid : null;
+    // A friend's referral code, typed on the yearly plan's payment page, makes the first year
+    // cheaper. Checked here, never trusted from the app.
+    const code = lib.normalizeReferralCode(req.data && req.data.referralCode);
+    let referralPrice = false;
+    if (code) {
+      const codeDoc = await db.doc(`referralCodes/${code}`).get();
+      const referrerUid = codeDoc.exists ? codeDoc.data().uid : null;
+      if (!lib.referralPriceEligible(user, planId, referrerUid, uid)) {
+        throw new HttpsError("failed-precondition", "This referral code can't be used. Remove it to pay the regular price.");
+      }
+      referralPrice = true;
+      // The friend who shared the code earns their reward once this is paid (see creditReferral).
+      if (!user.referredByCode) await db.doc(`users/${uid}`).set({ referredByCode: code }, { merge: true });
     }
-    const referralPrice = lib.referralPriceEligible(user, planId, referrerUid, uid);
 
     const sub = await razorpay().subscriptions.create({
       plan_id: rzpPlan,

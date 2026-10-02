@@ -35,11 +35,11 @@ class FirebaseRazorpay(private val activity: () -> Activity?) : RazorpayGateway 
     override var version by mutableIntStateOf(0)
         private set
 
-    override suspend fun subscribe(plan: Plan, account: Account, externalTransactionToken: String?) = guarded {
+    override suspend fun subscribe(plan: Plan, account: Account, externalTransactionToken: String?, referralCode: String?) = guarded {
         // 1. The server creates the subscription with the secret key.
         val created = call(
             "createRazorpaySubscription",
-            mapOf("plan" to plan.productId, "externalTransactionToken" to externalTransactionToken),
+            mapOf("plan" to plan.productId, "externalTransactionToken" to externalTransactionToken, "referralCode" to referralCode),
         )
         val subscriptionId = created["subscriptionId"] as String
         val act = activity() ?: throw AuthException(t("Open Roti Track and try again."))
