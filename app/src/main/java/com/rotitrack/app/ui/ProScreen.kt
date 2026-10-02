@@ -84,7 +84,6 @@ fun ProScreen(
         ReferralCodeStep(
             regularPrice = billing.price(Plan.YEARLY),
             referralPrice = if (usePlay) billing.referralPrice(Plan.YEARLY) else Plan.YEARLY.referralPrice,
-            prefill = summary?.referredByCode.orEmpty(),
             busy = razorpay.busy,
             message = razorpay.message,
             enabled = usePlay || useRazorpay || demo,
@@ -254,7 +253,6 @@ private fun Status(title: String, body: String) {
 private fun ReferralCodeStep(
     regularPrice: String,
     referralPrice: String?,
-    prefill: String,
     busy: Boolean,
     message: String?,
     enabled: Boolean,
@@ -263,7 +261,7 @@ private fun ReferralCodeStep(
     onBack: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    var code by remember { mutableStateOf(prefill) }
+    var code by remember { mutableStateOf("") }
     var applied by remember { mutableStateOf<String?>(null) }
     var checking by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
