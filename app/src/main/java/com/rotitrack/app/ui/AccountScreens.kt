@@ -103,7 +103,7 @@ private fun signed(v: Double): String = (if (v > 0) "+" else "") + fmt((v * 10).
 fun NutritionGoalsScreen(store: AppStore, onBack: () -> Unit) {
     val p = store.profile
     val suggested = Nutrition.recommendedCalories(p)
-    val suggestedWater = Nutrition.recommendedWaterMl(p.weightKg, p.gender)
+    val suggestedWater = Nutrition.recommendedWaterMl(p.weightKg, p.gender, p.activity)
     val macros = store.macroTargets()
 
     SubScreen(t("Nutrition goals"), onBack) {

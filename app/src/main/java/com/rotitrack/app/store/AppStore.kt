@@ -225,7 +225,7 @@ class AppStore(private val storage: Storage) {
         fun withDerivedGoals(s: AppState): AppState {
             var p = s.profile
             if (!p.calorieGoalCustom) p = p.copy(calorieGoal = Nutrition.recommendedCalories(p))
-            if (!p.waterGoalCustom) p = p.copy(waterGoalMl = Nutrition.recommendedWaterMl(p.weightKg, p.gender))
+            if (!p.waterGoalCustom) p = p.copy(waterGoalMl = Nutrition.recommendedWaterMl(p.weightKg, p.gender, p.activity))
             return if (p == s.profile) s else s.copy(profile = p)
         }
 

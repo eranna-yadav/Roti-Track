@@ -1,5 +1,6 @@
 package com.rotitrack.app
 
+import com.rotitrack.app.data.Activity
 import com.rotitrack.app.data.Diet
 import com.rotitrack.app.data.FOODS
 import com.rotitrack.app.data.FoodCategory
@@ -106,7 +107,16 @@ class DietLogicTest {
         val restored = AppStore(storage)
         assertEquals(220, restored.totals("2026-09-25").kcal)
         assertEquals(425, restored.waterTotal(com.rotitrack.app.domain.Days.today()))
-        assertEquals(2310, restored.profile.waterGoalMl)
+        assertEquals(2450, restored.profile.waterGoalMl)
+    }
+
+    @Test fun waterGoalFollowsWeightGenderAndActivity() {
+        // Drinks only: close to the ~3 L / ~2.2 L behind the 3.7 L / 2.7 L total-fluid advice.
+        assertEquals(2800, Nutrition.recommendedWaterMl(70.0, Gender.MALE, Activity.SEDENTARY))
+        assertEquals(1930, Nutrition.recommendedWaterMl(55.0, Gender.FEMALE, Activity.LIGHT))
+        assertEquals(3050, Nutrition.recommendedWaterMl(70.0, Gender.MALE, Activity.MODERATE))
+        assertEquals(2430, Nutrition.recommendedWaterMl(55.0, Gender.FEMALE, Activity.ATHLETE))
+        assertEquals(5000, Nutrition.recommendedWaterMl(150.0, Gender.MALE, Activity.ACTIVE))
     }
 
     @Test fun loggingAPlannedMealMarksItLogged() {

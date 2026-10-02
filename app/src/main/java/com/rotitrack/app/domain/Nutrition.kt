@@ -2,6 +2,7 @@ package com.rotitrack.app.domain
 
 import com.rotitrack.app.i18n.t
 
+import com.rotitrack.app.data.Activity
 import com.rotitrack.app.data.Gender
 import com.rotitrack.app.data.Profile
 import com.rotitrack.app.data.WeightGoal
@@ -29,14 +30,24 @@ object Nutrition {
         return (raw / 10).roundToInt() * 10
     }
 
-    /** ~35 ml per kg of body weight, nudged by gender, clamped and rounded to 10 ml. */
-    fun recommendedWaterMl(weightKg: Double, gender: Gender): Int {
+    /**
+     * Water to drink each day: 40 ml/kg for men, 35 for women, plus 250 ml when moderately
+     * active and 500 ml when very active. That is close to the ~3 L (men) / ~2.2 L (women)
+     * of drinks behind the usual 3.7 L / 2.7 L total-fluid advice, since about a fifth of
+     * fluid comes from food. Clamped and rounded to 10 ml.
+     */
+    fun recommendedWaterMl(weightKg: Double, gender: Gender, activity: Activity = Activity.LIGHT): Int {
         val perKg = when (gender) {
-            Gender.MALE -> 36.0
-            Gender.FEMALE -> 33.0
-            Gender.OTHER -> 34.5
+            Gender.MALE -> 40.0
+            Gender.FEMALE -> 35.0
+            Gender.OTHER -> 37.5
         }
-        return (min(5000.0, max(800.0, weightKg * perKg)) / 10).roundToInt() * 10
+        val extra = when (activity) {
+            Activity.SEDENTARY, Activity.LIGHT -> 0
+            Activity.MODERATE -> 250
+            Activity.ACTIVE, Activity.ATHLETE -> 500
+        }
+        return (min(5000.0, max(800.0, weightKg * perKg + extra)) / 10).roundToInt() * 10
     }
 
     data class Macros(val protein: Int, val carbs: Int, val fat: Int)

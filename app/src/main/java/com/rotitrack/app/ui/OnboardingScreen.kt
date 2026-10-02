@@ -62,7 +62,7 @@ fun OnboardingScreen(store: AppStore, platform: Platform) {
     }
 
     val kcal = Nutrition.recommendedCalories(draft)
-    val water = Nutrition.recommendedWaterMl(draft.weightKg, draft.gender)
+    val water = Nutrition.recommendedWaterMl(draft.weightKg, draft.gender, draft.activity)
     Box(Modifier.fillMaxSize().background(Palette.background).safeDrawingPadding()) {
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 100.dp)) {
             ScreenHeader(t("ABOUT YOU"))
