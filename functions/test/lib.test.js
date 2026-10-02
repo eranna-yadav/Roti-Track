@@ -35,7 +35,28 @@ test("Play amounts split 18% GST out of the price", () => {
 
 test("plan prices match the app", () => {
   assert.strictEqual(lib.PLANS.rotitrack_pro_monthly.rupees, 359);
-  assert.strictEqual(lib.PLANS.rotitrack_pro_yearly.rupees, 990);
+  assert.strictEqual(lib.PLANS.rotitrack_pro_yearly.rupees, 1099);
+  assert.strictEqual(lib.PLANS.rotitrack_pro_yearly.referralRupees, 990);
+});
+
+test("referral price: yearly, someone else's code, first subscription only", () => {
+  const user = { referredByCode: "RTABC234" };
+  assert.ok(lib.referralPriceEligible(user, "rotitrack_pro_yearly", "friend", "me"));
+  assert.ok(!lib.referralPriceEligible(user, "rotitrack_pro_monthly", "friend", "me"));
+  assert.ok(!lib.referralPriceEligible({}, "rotitrack_pro_yearly", "friend", "me"));
+  assert.ok(!lib.referralPriceEligible(user, "rotitrack_pro_yearly", null, "me"), "unknown code");
+  assert.ok(!lib.referralPriceEligible(user, "rotitrack_pro_yearly", "me", "me"), "own code");
+  assert.ok(!lib.referralPriceEligible({ ...user, razorpayPlanId: "rotitrack_pro_yearly" }, "rotitrack_pro_yearly", "friend", "me"), "already subscribed once");
+});
+
+test("referral subscription: ₹990 now, regular yearly billing from next year", () => {
+  const f = lib.referralSubscriptionFields("rotitrack_pro_yearly", 1_000_000);
+  assert.strictEqual(f.start_at, 1_000_000 + 365 * 86400);
+  assert.strictEqual(f.addons[0].item.amount, 99000);
+  assert.strictEqual(f.addons[0].item.currency, "INR");
+  // Paid up until the regular plan's first charge.
+  const fields = lib.userFieldsFromSubscription({ id: "sub_1", status: "authenticated", charge_at: f.start_at, paid_count: 0 }, "rotitrack_pro_yearly");
+  assert.strictEqual(fields.razorpayUntil, f.start_at * 1000);
 });
 
 test("referral pays once, only for a verified paid plan", () => {

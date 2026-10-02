@@ -27,6 +27,8 @@ import com.rotitrack.app.account.Plan
  * Note: entitlement is checked on the device. For stronger protection, verify
  * purchase tokens on a server with the Google Play Developer API.
  */
+private const val REFERRAL_OFFER_TAG = "referral"
+
 class PlayBilling(
     context: Context,
     private val activity: () -> Activity?,
@@ -113,10 +115,17 @@ class PlayBilling(
     override fun price(plan: Plan): String =
         baseOffer(plan)?.pricingPhases?.pricingPhaseList?.lastOrNull()?.formattedPrice ?: plan.fallbackPrice
 
-    override fun purchase(plan: Plan) {
+    /** The first-year discount for referred users, set up in Play Console as an offer tagged "referral". */
+    private fun referralOffer(plan: Plan) =
+        details[plan]?.subscriptionOfferDetails?.firstOrNull { REFERRAL_OFFER_TAG in it.offerTags }
+
+    override fun referralPrice(plan: Plan): String? =
+        referralOffer(plan)?.pricingPhases?.pricingPhaseList?.firstOrNull()?.formattedPrice
+
+    override fun purchase(plan: Plan, referral: Boolean) {
         val act = activity() ?: return
         val pd = details[plan] ?: return
-        val offer = baseOffer(plan) ?: return
+        val offer = (if (referral) referralOffer(plan) else null) ?: baseOffer(plan) ?: return
         val params = BillingFlowParams.newBuilder()
             .setProductDetailsParamsList(
                 listOf(BillingFlowParams.ProductDetailsParams.newBuilder().setProductDetails(pd).setOfferToken(offer.offerToken).build())

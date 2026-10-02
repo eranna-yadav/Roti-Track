@@ -27,7 +27,7 @@ const KEY_ID = defineSecret("RAZORPAY_KEY_ID");
 const KEY_SECRET = defineSecret("RAZORPAY_KEY_SECRET");
 const WEBHOOK_SECRET = defineSecret("RAZORPAY_WEBHOOK_SECRET");
 const PLAN_MONTHLY = defineString("RAZORPAY_PLAN_MONTHLY", { description: "Razorpay plan_id for ₹359/month" });
-const PLAN_YEARLY = defineString("RAZORPAY_PLAN_YEARLY", { description: "Razorpay plan_id for ₹990/year" });
+const PLAN_YEARLY = defineString("RAZORPAY_PLAN_YEARLY", { description: "Razorpay plan_id for ₹1,099/year" });
 const ANDROID_PACKAGE = "com.rotitrack.app";
 
 function razorpay() {
@@ -56,17 +56,27 @@ exports.createRazorpaySubscription = onCall(
 
     const user = (await db.doc(`users/${uid}`).get()).data() || {};
     if (user.blocked) throw new HttpsError("permission-denied", "Account blocked.");
-    if (user.razorpayUntil > Date.now() && user.razorpayStatus === "active") {
+    if (user.razorpayUntil > Date.now() && ["active", "authenticated"].includes(user.razorpayStatus)) {
       throw new HttpsError("already-exists", "You already have an active Pro subscription.");
     }
+
+    // A friend's referral code makes the first year cheaper; checked here, never trusted from the app.
+    let referrerUid = null;
+    if (user.referredByCode) {
+      const codeDoc = await db.doc(`referralCodes/${user.referredByCode}`).get();
+      referrerUid = codeDoc.exists ? codeDoc.data().uid : null;
+    }
+    const referralPrice = lib.referralPriceEligible(user, planId, referrerUid, uid);
 
     const sub = await razorpay().subscriptions.create({
       plan_id: rzpPlan,
       total_count: lib.PLANS[planId].totalCount,
       customer_notify: 1,
+      ...(referralPrice ? lib.referralSubscriptionFields(planId, Math.floor(Date.now() / 1000)) : {}),
       notes: {
         uid,
         planId,
+        referralPrice: referralPrice ? "1" : "",
         // Present when the user picked Razorpay on Google Play's choice screen.
         externalTransactionToken: (req.data && req.data.externalTransactionToken) || "",
       },
@@ -74,8 +84,9 @@ exports.createRazorpaySubscription = onCall(
     await db.doc(`payments/${sub.id}`).set({
       uid, planId, status: sub.status, createdAt: Date.now(),
       externalTransactionToken: sub.notes.externalTransactionToken || null,
+      referralPrice,
     });
-    return { subscriptionId: sub.id, keyId: KEY_ID.value() };
+    return { subscriptionId: sub.id, keyId: KEY_ID.value(), referralPrice };
   }
 );
 
@@ -172,7 +183,8 @@ async function reportToPlay(sub, paymentId, initial) {
   const payments = db.doc(`payments/${sub.id}`);
   const first = (await payments.get()).data() || {};
   const body = {
-    ...lib.playAmounts(lib.PLANS[sub.notes.planId].rupees),
+    // The first payment of a referral-price subscription is the cheaper first year.
+    ...lib.playAmounts(initial && sub.notes.referralPrice ? lib.PLANS[sub.notes.planId].referralRupees : lib.PLANS[sub.notes.planId].rupees),
     transactionTime: new Date().toISOString(),
     userTaxAddress: { regionCode: "IN" },
     recurringTransaction: initial

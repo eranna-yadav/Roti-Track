@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rotitrack.app.account.Account
@@ -71,6 +72,10 @@ fun ProScreen(
     val usePlay = billing !is DemoBilling && billing.unavailableReason == null
     val useRazorpay = !usePlay && razorpay.unavailableReason == null
     val demo = !usePlay && !useRazorpay && billing is DemoBilling
+    // Signed up with a friend's code: the yearly plan's first year is cheaper.
+    val referralPrice = if (summary?.referralPriceEligible == true) {
+        if (usePlay) billing.referralPrice(Plan.YEARLY) else Plan.YEARLY.referralPrice
+    } else null
 
     Column(Modifier.fillMaxSize().background(Palette.night)) {
         Row(Modifier.fillMaxWidth().padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -115,11 +120,19 @@ fun ProScreen(
                 )
                 compPro -> Status(t("You're Pro 🎉"), t("Pro access has been granted to your account by the Roti Track team."))
                 else -> {
-                    PlanCard(
-                        Plan.YEARLY, billing.price(Plan.YEARLY), selected == Plan.YEARLY,
-                        note = t("Just ₹{0}/month · save {1}%", Plan.YEARLY.rupees / 12, yearlySavingPercent),
-                        badge = t("BEST VALUE"),
-                    ) { selected = Plan.YEARLY }
+                    if (referralPrice != null) {
+                        PlanCard(
+                            Plan.YEARLY, referralPrice, selected == Plan.YEARLY,
+                            note = t("Code {0}: {1} for the first year, then {2}/year", summary?.referredByCode.orEmpty(), referralPrice, billing.price(Plan.YEARLY)),
+                            badge = t("REFERRAL PRICE"), oldPrice = billing.price(Plan.YEARLY),
+                        ) { selected = Plan.YEARLY }
+                    } else {
+                        PlanCard(
+                            Plan.YEARLY, billing.price(Plan.YEARLY), selected == Plan.YEARLY,
+                            note = t("Just ₹{0}/month · save {1}%", Plan.YEARLY.rupees / 12, yearlySavingPercent),
+                            badge = t("BEST VALUE"),
+                        ) { selected = Plan.YEARLY }
+                    }
                     Spacer(Modifier.height(10.dp))
                     PlanCard(Plan.MONTHLY, billing.price(Plan.MONTHLY), selected == Plan.MONTHLY, note = t("Billed every month")) { selected = Plan.MONTHLY }
                     Text(
@@ -160,10 +173,14 @@ fun ProScreen(
                 )
                 rzpPlan != null || compPro -> PillButton(t("Done"), onBack, light, color = Color.White, textColor = Palette.night)
                 else -> PillButton(
-                    if (razorpay.busy) t("Please wait…") else t("Subscribe · {0}/{1}", billing.price(selected), selected.period),
+                    when {
+                        razorpay.busy -> t("Please wait…")
+                        selected == Plan.YEARLY && referralPrice != null -> t("Subscribe · {0} for the first year", referralPrice)
+                        else -> t("Subscribe · {0}/{1}", billing.price(selected), selected.period)
+                    },
                     {
                         when {
-                            usePlay || demo -> billing.purchase(selected)
+                            usePlay || demo -> billing.purchase(selected, referral = selected == Plan.YEARLY && referralPrice != null)
                             useRazorpay -> scope.launch { runCatching { razorpay.subscribe(selected, account) } }
                         }
                     },
@@ -184,7 +201,7 @@ fun ProScreen(
 private fun longDate(t: Long): String = java.text.SimpleDateFormat("d MMM yyyy", com.rotitrack.app.i18n.I18n.locale).format(java.util.Date(t))
 
 @Composable
-private fun PlanCard(plan: Plan, price: String, selected: Boolean, note: String, badge: String? = null, onClick: () -> Unit) {
+private fun PlanCard(plan: Plan, price: String, selected: Boolean, note: String, badge: String? = null, oldPrice: String? = null, onClick: () -> Unit) {
     Row(
         Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp))
             .background(if (selected) Color.White else Color.White.copy(alpha = 0.08f))
@@ -199,10 +216,20 @@ private fun PlanCard(plan: Plan, price: String, selected: Boolean, note: String,
             }
             Text(note, style = Type.small.copy(color = if (selected) Color(0xFF3A4762) else Color.White.copy(alpha = 0.6f)))
         }
-        Text(
-            "$price\n/${plan.period}", style = Type.title.copy(color = if (selected) Palette.night else Color.White),
-            textAlign = TextAlign.End,
-        )
+        Column(horizontalAlignment = Alignment.End) {
+            oldPrice?.let {
+                Text(
+                    it, style = Type.small.copy(
+                        color = if (selected) Color(0xFF7A869F) else Color.White.copy(alpha = 0.5f),
+                        textDecoration = TextDecoration.LineThrough,
+                    ),
+                )
+            }
+            Text(
+                "$price\n/${plan.period}", style = Type.title.copy(color = if (selected) Palette.night else Color.White),
+                textAlign = TextAlign.End,
+            )
+        }
     }
 }
 

@@ -108,11 +108,11 @@ class AccountsTest {
         val s = AdminStats.of(users, now)
         assertEquals(5, s.total)
         assertEquals(4, s.pro)
-        assertEquals(2 * 359 + 990 / 12, s.mrr)
+        assertEquals(2 * 359 + 1099 / 12, s.mrr)
         assertEquals(1, s.new7d)
         assertEquals(1, s.active24h)
         assertEquals(1, s.comp)
-        assertEquals(77, yearlySavingPercent)
+        assertEquals(74, yearlySavingPercent)
     }
 
     @Test fun razorpayProLastsUntilThePaidPeriodEnds() {
@@ -157,5 +157,16 @@ class AccountsTest {
         assertEquals(750, r.paid)
         assertEquals(500, r.due)
         assertEquals(3, r.wentPro)
+    }
+
+    @Test fun yearlyIsCheaperForTheFirstYearWithAReferralCode() {
+        assertEquals(1099, Plan.YEARLY.rupees)
+        assertEquals("₹990", Plan.YEARLY.referralPrice)
+        assertEquals(null, Plan.MONTHLY.referralPrice)
+        val referred = UserSummary("u1", "Asha", "asha@example.com", referredByCode = "RTABC234")
+        assertTrue(referred.referralPriceEligible)
+        assertFalse(UserSummary("u2", "Ravi", "ravi@example.com").referralPriceEligible)
+        assertFalse(referred.copy(razorpayPlanId = Plan.YEARLY.productId).referralPriceEligible)
+        assertFalse(referred.copy(planId = Plan.YEARLY.productId).referralPriceEligible)
     }
 }

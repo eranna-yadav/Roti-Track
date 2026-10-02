@@ -48,7 +48,8 @@ water and calories.
 **Account**: sign up, sign in, forgot password and sign out, with email and a
 password. Each account keeps its own logs on the phone.
 
-**Pro**: ₹359/month or ₹990/year (77% cheaper). Pro unlocks the full 7-day
+**Pro**: ₹359/month or ₹1,099/year (74% cheaper). Users who sign up with a
+friend's referral code pay ₹990 for their first year. Pro unlocks the full 7-day
 plan, meal swaps, 30-day trends and your own recipes; everything else is free.
 Users pay through Razorpay or Google Play, and can turn off Razorpay auto-renew
 from the Pro screen.
@@ -152,7 +153,8 @@ Firebase **Blaze** (pay-as-you-go) plan.
 1. In the [Razorpay Dashboard](https://dashboard.razorpay.com), go to
    **Subscriptions → Plans** and create two plans. Start in Test mode.
    - ₹359, every 1 month
-   - ₹990, every 1 year
+   - ₹1,099, every 1 year (referred users pay ₹990 up front for the first year;
+     the server adds that as an add-on and starts this plan a year later)
 2. Copy `functions/.env.example` to `functions/.env` and paste in the two
    `plan_…` IDs.
 3. Install the [Firebase CLI](https://firebase.google.com/docs/cli), then run
@@ -180,7 +182,9 @@ admins can read.
 2. Go to **Monetize → Subscriptions** and create two subscriptions, each with an
    auto-renewing base plan:
    - `rotitrack_pro_monthly`: ₹359, renews every month
-   - `rotitrack_pro_yearly`: ₹990, renews every year
+   - `rotitrack_pro_yearly`: ₹1,099, renews every year. Add a **developer-determined
+     offer** with the tag `referral`: ₹990 for the first year (1 billing period).
+     The app picks it only for users who signed up with a referral code.
 3. Add your Google account as a license tester so test purchases are free.
 4. **To offer Razorpay on Play:** enrol in **Play Console → Monetization setup
    → Alternative billing (user choice billing, India)**. Then:

@@ -1,5 +1,6 @@
 package com.rotitrack.app.ui
 
+import com.rotitrack.app.account.Plan
 import com.rotitrack.app.i18n.t
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.width
@@ -138,6 +139,10 @@ fun LoginScreen(auth: AuthService) {
                 if (mode == Mode.SIGN_UP) {
                     Text(t("At least 8 characters, with letters and numbers."), style = Type.small)
                     Field(referral, { referral = it.uppercase().take(12) }, t("Referral code (optional)"))
+                    Text(
+                        t("Have a code from a friend? Get Pro yearly for {0} instead of {1} for the first year.", Plan.YEARLY.referralPrice.orEmpty(), Plan.YEARLY.fallbackPrice),
+                        style = Type.small,
+                    )
                 }
             }
             error?.let { Text(it, style = Type.small.copy(color = Palette.danger)) }

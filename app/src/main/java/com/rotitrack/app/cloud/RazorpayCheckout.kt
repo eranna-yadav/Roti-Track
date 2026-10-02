@@ -48,7 +48,11 @@ class FirebaseRazorpay(private val activity: () -> Activity?) : RazorpayGateway 
         val result = CompletableDeferred<Result<PaymentData>>().also { pending = it }
         val options = JSONObject()
             .put("name", "Roti Track")
-            .put("description", t("Pro · {0} ({1}/{2})", plan.label, plan.fallbackPrice, plan.period))
+            .put(
+                "description",
+                if (created["referralPrice"] == true && plan.referralPrice != null) t("Pro · {0} ({1} for the first year)", plan.label, plan.referralPrice)
+                else t("Pro · {0} ({1}/{2})", plan.label, plan.fallbackPrice, plan.period),
+            )
             .put("subscription_id", subscriptionId)
             .put("theme", JSONObject().put("color", "#1B4FF0"))
             .put("prefill", JSONObject().put("email", account.email).put("name", account.name))

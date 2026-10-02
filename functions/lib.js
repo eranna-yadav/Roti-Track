@@ -4,8 +4,34 @@ const crypto = require("crypto");
 /** App product IDs → price in rupees. Must match Plan in the Android app. */
 const PLANS = {
   rotitrack_pro_monthly: { rupees: 359, period: "monthly", totalCount: 120 },
-  rotitrack_pro_yearly: { rupees: 990, period: "yearly", totalCount: 10 },
+  // Friends who sign up with a referral code pay referralRupees for the first year.
+  rotitrack_pro_yearly: { rupees: 1099, referralRupees: 990, period: "yearly", totalCount: 10 },
 };
+
+const YEAR_SECONDS = 365 * 86400;
+
+/**
+ * True when this user gets the first-year referral price: the yearly plan, signed up
+ * with someone else's code, and never subscribed through Razorpay before.
+ */
+function referralPriceEligible(user, planId, referrerUid, uid) {
+  return planId === "rotitrack_pro_yearly"
+    && !!(user && user.referredByCode)
+    && !!referrerUid && referrerUid !== uid
+    && !user.razorpayPlanId && !user.razorpaySubscriptionId;
+}
+
+/**
+ * Razorpay subscription for the referral price: the friend pays referralRupees now (an
+ * upfront add-on), and the regular yearly plan starts charging one year later.
+ */
+function referralSubscriptionFields(planId, nowSec) {
+  const plan = PLANS[planId];
+  return {
+    start_at: nowSec + YEAR_SECONDS,
+    addons: [{ item: { name: "Roti Track Pro – first year (referral price)", amount: plan.referralRupees * 100, currency: "INR" } }],
+  };
+}
 
 function hmac(secret, payload) {
   return crypto.createHmac("sha256", secret).update(payload).digest("hex");
@@ -94,4 +120,5 @@ function referralToCredit(user, now) {
 }
 
 module.exports = {
+  referralPriceEligible, referralSubscriptionFields, YEAR_SECONDS,
   REFERRAL_REWARD, REFERRAL_MONTHLY_INSTALMENT, referralEarnedFor, referralCreditedSoFar, referralToCredit, keepHighestPaidCount, PLANS, hmac, verifyPaymentSignature, verifyWebhookSignature, userFieldsFromSubscription, playAmounts };

@@ -7,9 +7,19 @@ import kotlinx.serialization.Serializable
 data class Account(val uid: String, val name: String, val email: String, val isAdmin: Boolean)
 
 /** Play Console product IDs. Create two auto-renewing subscriptions with these IDs. */
-enum class Plan(val productId: String, private val labelEn: String, val fallbackPrice: String, private val periodEn: String, val rupees: Int) {
+enum class Plan(
+    val productId: String,
+    private val labelEn: String,
+    val fallbackPrice: String,
+    private val periodEn: String,
+    val rupees: Int,
+    /** First-year price for users who signed up with a friend's referral code. */
+    val referralRupees: Int? = null,
+) {
     MONTHLY("rotitrack_pro_monthly", "Monthly", "₹359", "month", 359),
-    YEARLY("rotitrack_pro_yearly", "Yearly", "₹990", "year", 990);
+    YEARLY("rotitrack_pro_yearly", "Yearly", "₹1,099", "year", 1099, referralRupees = 990);
+
+    val referralPrice: String? get() = referralRupees?.let { "₹$it" }
 
     val label: String get() = t(labelEn)
     val period: String get() = t(periodEn)
@@ -72,6 +82,12 @@ data class UserSummary(
         else -> null
     }
     val isPro: Boolean get() = plan != null || compPro
+
+    /**
+     * Signed up with a friend's code and hasn't subscribed before, so the yearly plan's
+     * first year is at [Plan.referralRupees]. The server checks this again before charging.
+     */
+    val referralPriceEligible: Boolean get() = !referredByCode.isNullOrBlank() && razorpayPlanId == null && planId == null
 }
 
 class AuthException(message: String) : Exception(message)
@@ -151,11 +167,14 @@ interface Billing {
     val activePlan: Plan?
     /** Localised price per plan from the store, falling back to [Plan.fallbackPrice]. */
     fun price(plan: Plan): String
+    /** First-year price with a referral code, or null when the store doesn't offer one. */
+    fun referralPrice(plan: Plan): String? = plan.referralPrice
     /** Non-null when purchases can't happen right now (e.g. not installed from Google Play). */
     val unavailableReason: String?
     /** True when Google Play's user choice screen also offers Razorpay. */
     val offersAlternative: Boolean get() = false
-    fun purchase(plan: Plan)
+    /** [referral]: buy at the first-year referral price (see [referralPrice]). */
+    fun purchase(plan: Plan, referral: Boolean = false)
     fun restore()
 }
 
