@@ -29,6 +29,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.rotitrack.app.data.DIET_TIPS
 import com.rotitrack.app.data.Region
@@ -99,7 +103,13 @@ fun PlanScreen(store: AppStore, isPro: Boolean, onUpgrade: () -> Unit, onOpenArt
                     Text(meal.slot.emoji, fontSize = 28.sp)
                     Spacer(Modifier.width(12.dp))
                     Column(Modifier.weight(1f)) {
-                        Text("${meal.slot.label.uppercase()} · ${meal.slot.time}", style = Type.tiny)
+                        Text(
+                            buildAnnotatedString {
+                                withStyle(SpanStyle(color = Palette.brand, fontWeight = FontWeight.ExtraBold)) { append(meal.slot.label.uppercase()) }
+                                append(" · ${meal.slot.time}")
+                            },
+                            style = Type.tiny.copy(fontSize = 14.sp, color = Palette.inkSoft, letterSpacing = 0.8.sp),
+                        )
                         Text(t(meal.name), style = Type.title)
                     }
                     Text(t("{0} kcal", meal.kcal), style = Type.title)
