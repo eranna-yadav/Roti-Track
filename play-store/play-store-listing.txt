@@ -5,7 +5,7 @@ APP NAME (max 30 characters)
 Roti Track: Indian Diet Plan
 
 SHORT DESCRIPTION (max 80 characters)
-Indian diet plan, calorie counter & water reminders – in your own language.
+Indian diet plan, calorie counter & water reminders — in your own language.
 
 FULL DESCRIPTION (max 4000 characters)
 Roti Track is a diet planner, calorie counter and water tracker made for Indian food and Indian homes. Plan your meals, count calories and drink enough water – in English or your own language.
