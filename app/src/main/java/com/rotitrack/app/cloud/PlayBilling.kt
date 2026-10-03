@@ -100,9 +100,9 @@ class PlayBilling(
                     .build()
             }
         ).build()
-        client.queryProductDetailsAsync(params) { result, list ->
+        client.queryProductDetailsAsync(params) { result, found ->
             if (result.responseCode == BillingClient.BillingResponseCode.OK) {
-                details = list.mapNotNull { pd -> Plan.byProductId(pd.productId)?.let { it to pd } }.toMap()
+                details = found.productDetailsList.mapNotNull { pd -> Plan.byProductId(pd.productId)?.let { it to pd } }.toMap()
                 if (details.isEmpty()) unavailableReason = t("Pro plans aren't available yet. Please try again later.")
             }
         }

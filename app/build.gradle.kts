@@ -13,14 +13,14 @@ if (file("google-services.json").exists()) {
 
 android {
     namespace = "com.rotitrack.app"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.rotitrack.app"
         minSdk = 26
-        targetSdk = 35
-        versionCode = 7
-        versionName = "1.6.1"
+        targetSdk = 36
+        versionCode = 8
+        versionName = "1.6.2"
     }
 
     signingConfigs {
@@ -56,6 +56,8 @@ android {
             // The upload key when CI provides it; otherwise the debug key, so a local
             // release build still installs.
             signingConfig = signingConfigs.findByName("upload") ?: signingConfigs.getByName("debug")
+            // Ship native debug symbols (from Razorpay/Firebase libraries) so Play can read crash reports.
+            ndk { debugSymbolLevel = "FULL" }
         }
     }
 
