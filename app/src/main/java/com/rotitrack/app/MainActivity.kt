@@ -25,6 +25,15 @@ import androidx.compose.runtime.setValue
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.credentials.CredentialManager
+import androidx.credentials.CustomCredential
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialCancellationException
+import androidx.credentials.exceptions.GetCredentialException
+import androidx.credentials.exceptions.NoCredentialException
+import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.rotitrack.app.account.AuthException
 import com.razorpay.Checkout
 import com.razorpay.PaymentData
 import com.razorpay.PaymentResultWithDataListener
@@ -129,6 +138,34 @@ class MainActivity : ComponentActivity(), Platform, PaymentResultWithDataListene
 
     override fun onPaymentError(code: Int, response: String?, data: PaymentData?) {
         rotiTrack.razorpay?.onPaymentError(code, response)
+    }
+
+    /** Set by the google-services plugin once Google sign-in is enabled in Firebase; missing until then. */
+    private val webClientId: String? by lazy {
+        val id = resources.getIdentifier("default_web_client_id", "string", packageName)
+        if (id == 0) null else getString(id).takeIf { it.isNotBlank() }
+    }
+
+    override val googleSignInAvailable: Boolean get() = webClientId != null
+
+    override suspend fun googleIdToken(): String? {
+        val clientId = webClientId ?: return null
+        val request = GetCredentialRequest.Builder()
+            .addCredentialOption(GetSignInWithGoogleOption.Builder(clientId).build())
+            .build()
+        val credential = try {
+            CredentialManager.create(this).getCredential(this, request).credential
+        } catch (e: GetCredentialCancellationException) {
+            return null
+        } catch (e: NoCredentialException) {
+            throw AuthException(t("No Google account on this phone. Add one in Settings, or use email and password."))
+        } catch (e: GetCredentialException) {
+            throw AuthException(t("Google sign-in didn't work. Try again, or use email and password."))
+        }
+        if (credential is CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+            return GoogleIdTokenCredential.createFrom(credential.data).idToken
+        }
+        throw AuthException(t("Google sign-in didn't work. Try again, or use email and password."))
     }
 
     override fun openUrl(url: String) {

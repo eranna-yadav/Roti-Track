@@ -12,6 +12,7 @@ import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
@@ -91,6 +92,36 @@ class FirebaseAuthService(private val directory: FirestoreDirectory) : AuthServi
                 // The account exists now; a failed profile write is retried by the app's next publish.
                 runCatching { withTimeout(NETWORK_TIMEOUT_MS) { directory.create(user.uid, name, email, code) } }
                 refresh(user, name)
+            } finally {
+                signingUp = false
+            }
+        }.await()
+    }
+
+    override val supportsGoogle = true
+
+    override suspend fun signInWithGoogle(idToken: String, referralCode: String?) = friendly {
+        val code = normalizeReferralCode(referralCode)
+        if (code != null && !directory.referralCodeExists(code)) {
+            throw AuthException(t("That referral code doesn't exist. Check it or leave it empty."))
+        }
+        scope.async {
+            signingUp = true
+            try {
+                val user = auth.signInWithCredential(GoogleAuthProvider.getCredential(idToken, null)).await().user
+                    ?: throw AuthException(t("Sign-in failed"))
+                // Only a confirmed "no record" makes a new one; a failed read must not overwrite an existing user.
+                val existing = runCatching { withTimeout(NETWORK_TIMEOUT_MS) { directory.get(user.uid) } }
+                if (existing.getOrNull()?.blocked == true) {
+                    auth.signOut()
+                    throw AuthException(t("This account has been blocked. Contact support."))
+                }
+                if (existing.isSuccess && existing.getOrNull() == null) {
+                    runCatching {
+                        withTimeout(NETWORK_TIMEOUT_MS) { directory.create(user.uid, user.displayName.orEmpty(), user.email.orEmpty(), code) }
+                    }
+                }
+                refresh(user)
             } finally {
                 signingUp = false
             }

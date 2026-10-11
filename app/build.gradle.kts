@@ -19,8 +19,8 @@ android {
         applicationId = "com.rotitrack.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 8
-        versionName = "1.6.2"
+        versionCode = 9
+        versionName = "1.6.3"
     }
 
     signingConfigs {
@@ -91,6 +91,9 @@ dependencies {
     implementation(libs.razorpay.checkout)
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.billing.ktx)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services)
+    implementation(libs.googleid)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     testImplementation(libs.junit)

@@ -1085,4 +1085,11 @@ internal val KN: Map<String, String> = mapOf(
     "Pay {0}/{1}" to "{0}/{1} ಪಾವತಿಸಿ",
     "Continue · {0}/{1}" to "ಮುಂದುವರಿಯಿರಿ · {0}/{1}",
     "Find it under Profile → Refer a friend. Your friend enters it when creating their Roti Track account, or on the payment page when buying the yearly plan." to "ಇದನ್ನು Profile → Refer a friend ನಲ್ಲಿ ಕಾಣಬಹುದು. ನಿಮ್ಮ ಸ್ನೇಹಿತರು ಇದನ್ನು Roti Track ಖಾತೆ ತೆರೆಯುವಾಗ ಅಥವಾ ವಾರ್ಷಿಕ ಪ್ಲಾನ್ ಖರೀದಿಸುವಾಗ ಪಾವತಿ ಪುಟದಲ್ಲಿ ನಮೂದಿಸುತ್ತಾರೆ.",
+    "Invite friends and family" to "ಗೆಳೆಯರು ಮತ್ತು ಕುಟುಂಬದವರನ್ನು ಆಹ್ವಾನಿಸಿ",
+    "I use Roti Track to plan my Indian diet, count calories and drink enough water. Try it free:" to "ನಾನು Roti Track ಮೂಲಕ ನನ್ನ ಭಾರತೀಯ ಡಯಟ್ ಪ್ಲಾನ್ ಮಾಡುತ್ತೇನೆ, ಕ್ಯಾಲೊರಿ ಎಣಿಸುತ್ತೇನೆ ಮತ್ತು ಸಾಕಷ್ಟು ನೀರು ಕುಡಿಯುತ್ತೇನೆ. ಉಚಿತವಾಗಿ ಪ್ರಯತ್ನಿಸಿ:",
+    "Google sign-in isn't available. Use email and password." to "Google ಸೈನ್-ಇನ್ ಲಭ್ಯವಿಲ್ಲ. ಇಮೇಲ್ ಮತ್ತು ಪಾಸ್‌ವರ್ಡ್ ಬಳಸಿ.",
+    "or" to "ಅಥವಾ",
+    "Continue with Google" to "Google ಮೂಲಕ ಮುಂದುವರಿಸಿ",
+    "No Google account on this phone. Add one in Settings, or use email and password." to "ಈ ಫೋನ್‌ನಲ್ಲಿ Google ಖಾತೆ ಇಲ್ಲ. Settings ನಲ್ಲಿ ಸೇರಿಸಿ, ಅಥವಾ ಇಮೇಲ್ ಮತ್ತು ಪಾಸ್‌ವರ್ಡ್ ಬಳಸಿ.",
+    "Google sign-in didn't work. Try again, or use email and password." to "Google ಸೈನ್-ಇನ್ ಆಗಲಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ, ಅಥವಾ ಇಮೇಲ್ ಮತ್ತು ಪಾಸ್‌ವರ್ಡ್ ಬಳಸಿ.",
 )

@@ -53,7 +53,8 @@ fun ReferralScreen(store: AppStore, account: Account, summary: UserSummary?, pla
     // The code is assigned by the server at sign-up; show it once the account details have loaded.
     val code = summary?.referralCode?.takeIf { it.isNotBlank() }
     var upi by remember { mutableStateOf(store.prefs.payoutUpi) }
-    val shareText = t("I track my Indian diet, calories and water with Roti Track. Sign up with my code {0} and get Pro for {1} instead of {2} for the first year!", code.orEmpty(), Plan.YEARLY.referralPrice.orEmpty(), Plan.YEARLY.fallbackPrice)
+    val shareText = t("I track my Indian diet, calories and water with Roti Track. Sign up with my code {0} and get Pro for {1} instead of {2} for the first year!", code.orEmpty(), Plan.YEARLY.referralPrice.orEmpty(), Plan.YEARLY.fallbackPrice) +
+        "\n" + PLAY_STORE_URL
 
     SubScreen(t("Refer & earn"), onBack) {
         AppCard(color = Palette.saffronSoft) {

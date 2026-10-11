@@ -1085,4 +1085,11 @@ internal val TA: Map<String, String> = mapOf(
     "Pay {0}/{1}" to "{0}/{1} செலுத்து",
     "Continue · {0}/{1}" to "தொடர் · {0}/{1}",
     "Find it under Profile → Refer a friend. Your friend enters it when creating their Roti Track account, or on the payment page when buying the yearly plan." to "இதை Profile → Refer a friend-இல் காணலாம். உங்கள் நண்பர் Roti Track கணக்கை உருவாக்கும்போது அல்லது வருடாந்திர திட்டம் வாங்கும்போது பணம் செலுத்தும் பக்கத்தில் இதை உள்ளிடுவார்.",
+    "Invite friends and family" to "நண்பர்கள், குடும்பத்தினரை அழையுங்கள்",
+    "I use Roti Track to plan my Indian diet, count calories and drink enough water. Try it free:" to "நான் Roti Track மூலம் என் இந்திய டயட்டைத் திட்டமிடுகிறேன், கலோரிகளைக் கணக்கிடுகிறேன், போதுமான தண்ணீர் குடிக்கிறேன். இலவசமாக முயற்சிக்கவும்:",
+    "Google sign-in isn't available. Use email and password." to "Google உள்நுழைவு கிடைக்கவில்லை. மின்னஞ்சல், கடவுச்சொல்லைப் பயன்படுத்துங்கள்.",
+    "or" to "அல்லது",
+    "Continue with Google" to "Google மூலம் தொடரவும்",
+    "No Google account on this phone. Add one in Settings, or use email and password." to "இந்த போனில் Google கணக்கு இல்லை. Settings-ல் சேர்க்கவும், அல்லது மின்னஞ்சல், கடவுச்சொல்லைப் பயன்படுத்துங்கள்.",
+    "Google sign-in didn't work. Try again, or use email and password." to "Google உள்நுழைவு வேலை செய்யவில்லை. மீண்டும் முயற்சிக்கவும், அல்லது மின்னஞ்சல், கடவுச்சொல்லைப் பயன்படுத்துங்கள்.",
 )

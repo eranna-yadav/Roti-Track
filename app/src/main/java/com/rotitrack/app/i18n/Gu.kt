@@ -1085,4 +1085,11 @@ internal val GU: Map<String, String> = mapOf(
     "Pay {0}/{1}" to "{0}/{1} ચૂકવો",
     "Continue · {0}/{1}" to "આગળ વધો · {0}/{1}",
     "Find it under Profile → Refer a friend. Your friend enters it when creating their Roti Track account, or on the payment page when buying the yearly plan." to "તે Profile → Refer a friend માં મળશે. તમારો મિત્ર Roti Track એકાઉન્ટ બનાવતી વખતે, અથવા વાર્ષિક પ્લાન ખરીદતી વખતે પેમેન્ટ પેજ પર તે દાખલ કરે છે.",
+    "Invite friends and family" to "મિત્રો અને પરિવારને આમંત્રિત કરો",
+    "I use Roti Track to plan my Indian diet, count calories and drink enough water. Try it free:" to "હું Roti Track થી મારો ભારતીય ડાયટ પ્લાન બનાવું છું, કેલરી ગણું છું અને પૂરતું પાણી પીઉં છું. મફતમાં અજમાવો:",
+    "Google sign-in isn't available. Use email and password." to "Google સાઇન-ઇન ઉપલબ્ધ નથી. ઇમેઇલ અને પાસવર્ડ વાપરો.",
+    "or" to "અથવા",
+    "Continue with Google" to "Google સાથે ચાલુ રાખો",
+    "No Google account on this phone. Add one in Settings, or use email and password." to "આ ફોનમાં Google એકાઉન્ટ નથી. Settings માં ઉમેરો, અથવા ઇમેઇલ અને પાસવર્ડ વાપરો.",
+    "Google sign-in didn't work. Try again, or use email and password." to "Google સાઇન-ઇન થયું નહીં. ફરી પ્રયાસ કરો, અથવા ઇમેઇલ અને પાસવર્ડ વાપરો.",
 )

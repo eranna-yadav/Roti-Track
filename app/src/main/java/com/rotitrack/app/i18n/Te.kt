@@ -1085,4 +1085,11 @@ internal val TE: Map<String, String> = mapOf(
     "Pay {0}/{1}" to "{0}/{1} చెల్లించండి",
     "Continue · {0}/{1}" to "కొనసాగండి · {0}/{1}",
     "Find it under Profile → Refer a friend. Your friend enters it when creating their Roti Track account, or on the payment page when buying the yearly plan." to "దీన్ని Profile → Refer a friend లో చూడండి. మీ స్నేహితులు Roti Track ఖాతా సృష్టించేటప్పుడు లేదా వార్షిక ప్లాన్ కొనేటప్పుడు చెల్లింపు పేజీలో దీన్ని నమోదు చేస్తారు.",
+    "Invite friends and family" to "స్నేహితులు, కుటుంబాన్ని ఆహ్వానించండి",
+    "I use Roti Track to plan my Indian diet, count calories and drink enough water. Try it free:" to "నేను Roti Track తో నా భారతీయ డైట్ ప్లాన్ చేసుకుంటాను, కేలరీలు లెక్కిస్తాను, సరిపడా నీళ్లు తాగుతాను. ఉచితంగా ప్రయత్నించండి:",
+    "Google sign-in isn't available. Use email and password." to "Google సైన్-ఇన్ అందుబాటులో లేదు. ఈమెయిల్, పాస్‌వర్డ్ ఉపయోగించండి.",
+    "or" to "లేదా",
+    "Continue with Google" to "Google తో కొనసాగండి",
+    "No Google account on this phone. Add one in Settings, or use email and password." to "ఈ ఫోన్‌లో Google ఖాతా లేదు. Settings లో జోడించండి, లేదా ఈమెయిల్, పాస్‌వర్డ్ ఉపయోగించండి.",
+    "Google sign-in didn't work. Try again, or use email and password." to "Google సైన్-ఇన్ కాలేదు. మళ్లీ ప్రయత్నించండి, లేదా ఈమెయిల్, పాస్‌వర్డ్ ఉపయోగించండి.",
 )

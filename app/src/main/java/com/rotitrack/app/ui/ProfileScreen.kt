@@ -38,9 +38,11 @@ import com.rotitrack.app.account.Account
 import com.rotitrack.app.account.REFERRAL_REWARD_RUPEES
 import com.rotitrack.app.store.AppStore
 
-const val APP_VERSION = "1.4.0"
+const val APP_VERSION = "1.6.3"
 /** Where "Support Email" and "Request a Feature" send mail. Change to your own address. */
 const val SUPPORT_EMAIL = "rotitrack.app@gmail.com"
+/** Added to share messages so friends can install the app with one tap. */
+const val PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.rotitrack.app"
 
 enum class ProfilePage { PERSONAL, PREFERENCES, LANGUAGE, GOALS, FASTING, REMINDERS, WATER_REMINDERS, REFERRAL, REFERRAL_RULES, BADGES, REPORT, TERMS, PRIVACY, ARTICLES, ADMIN, PRO, GUIDE }
 
@@ -134,6 +136,9 @@ fun ProfileScreen(
 
         SectionLabel(t("Support & Legal"))
         SettingsGroup {
+            SettingsRow("📲", t("Share Roti Track"), subtitle = t("Invite friends and family"), onClick = {
+                platform.share(t("I use Roti Track to plan my Indian diet, count calories and drink enough water. Try it free:") + "\n" + PLAY_STORE_URL)
+            })
             SettingsRow("📣", t("Request a Feature"), onClick = {
                 platform.openUrl("mailto:$SUPPORT_EMAIL?subject=" + encode("Roti Track feature request"))
             })

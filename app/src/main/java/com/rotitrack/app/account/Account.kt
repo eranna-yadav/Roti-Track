@@ -110,6 +110,15 @@ interface AuthService {
     suspend fun signIn(email: String, password: String)
     suspend fun signUp(name: String, email: String, password: String, referralCode: String? = null)
     suspend fun sendPasswordReset(email: String)
+    /** Whether [signInWithGoogle] works with this backend. */
+    val supportsGoogle: Boolean get() = false
+    /**
+     * Signs in with a Google ID token, creating the account on first use.
+     * [referralCode] only counts for a new account.
+     */
+    suspend fun signInWithGoogle(idToken: String, referralCode: String? = null) {
+        throw AuthException(t("Google sign-in isn't available. Use email and password."))
+    }
     fun signOut()
     /** Deletes the account and its server record. The caller clears data on the phone. */
     suspend fun deleteAccount()

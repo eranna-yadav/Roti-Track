@@ -6,6 +6,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.Image
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -48,7 +50,7 @@ import kotlinx.coroutines.launch
 private enum class Mode { SIGN_IN, SIGN_UP, RESET }
 
 @Composable
-fun LoginScreen(auth: AuthService) {
+fun LoginScreen(auth: AuthService, googleIdToken: (suspend () -> String?)? = null) {
     var mode by remember { mutableStateOf(Mode.SIGN_IN) }
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -84,6 +86,23 @@ fun LoginScreen(auth: AuthService) {
                         mode = Mode.SIGN_IN
                     }
                 }
+            } catch (e: Exception) {
+                error = e.message ?: t("Something went wrong. Try again.")
+            } finally {
+                busy = false
+            }
+        }
+    }
+
+    fun google(getToken: suspend () -> String?) {
+        error = null
+        info = null
+        busy = true
+        scope.launch {
+            try {
+                // Null means the user closed Google's account picker.
+                val token = getToken() ?: return@launch
+                auth.signInWithGoogle(token, referral.takeIf { mode == Mode.SIGN_UP })
             } catch (e: Exception) {
                 error = e.message ?: t("Something went wrong. Try again.")
             } finally {
@@ -156,6 +175,20 @@ fun LoginScreen(auth: AuthService) {
                 },
                 ::submit, Modifier.fillMaxWidth(), enabled = !busy,
             )
+            if (googleIdToken != null && mode != Mode.RESET) {
+                Text(t("or"), style = Type.small, modifier = Modifier.align(Alignment.CenterHorizontally))
+                Row(
+                    Modifier.fillMaxWidth().height(52.dp).clip(RoundedCornerShape(50))
+                        .border(1.dp, Color(0xFFDADCE0), RoundedCornerShape(50))
+                        .clickable(enabled = !busy) { google(googleIdToken) },
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Image(GoogleLogo, contentDescription = null, modifier = Modifier.size(20.dp))
+                    Spacer(Modifier.width(10.dp))
+                    Text(t("Continue with Google"), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1F1F1F))
+                }
+            }
             if (mode == Mode.SIGN_IN) {
                 Text(
                     t("Forgot password?"), style = Type.small.copy(color = Palette.brand),

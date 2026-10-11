@@ -48,6 +48,10 @@ interface Platform {
     fun scheduleReminders(profile: Profile)
     /** Called when someone signs in (uid) or out (null), so background work follows the right account. */
     fun sessionChanged(uid: String?)
+    /** Whether this build can show Google's account picker (needs Firebase's Google sign-in set up). */
+    val googleSignInAvailable: Boolean get() = false
+    /** Shows Google's account picker and returns an ID token, or null if the user closed it. */
+    suspend fun googleIdToken(): String? = null
     fun openUrl(url: String)
     fun share(text: String)
     fun copyText(text: String)
@@ -116,7 +120,12 @@ fun App(services: Services, platform: Platform, nav: Navigator = remember { Navi
     val account = services.auth.account
     if (account == null) {
         LaunchedEffect(Unit) { platform.setDarkTheme(false) }
-        RotiTrackTheme { LoginScreen(services.auth) }
+        RotiTrackTheme {
+            LoginScreen(
+                services.auth,
+                googleIdToken = if (services.auth.supportsGoogle && platform.googleSignInAvailable) platform::googleIdToken else null,
+            )
+        }
         return
     }
     val store = remember(account.uid) { services.storeFor(account.uid) }

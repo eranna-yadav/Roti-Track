@@ -1085,4 +1085,11 @@ internal val HI: Map<String, String> = mapOf(
     "Pay {0}/{1}" to "{0}/{1} चुकाएँ",
     "Continue · {0}/{1}" to "आगे बढ़ें · {0}/{1}",
     "Find it under Profile → Refer a friend. Your friend enters it when creating their Roti Track account, or on the payment page when buying the yearly plan." to "इसे Profile → Refer a friend में पाएँ। आपका दोस्त इसे Roti Track अकाउंट बनाते समय, या सालाना प्लान खरीदते समय पेमेंट पेज पर डालता है।",
+    "Invite friends and family" to "दोस्तों और परिवार को बुलाएँ",
+    "I use Roti Track to plan my Indian diet, count calories and drink enough water. Try it free:" to "मैं Roti Track से अपना भारतीय डाइट प्लान बनाता हूँ, कैलोरी गिनता हूँ और पूरा पानी पीता हूँ। मुफ़्त में आज़माएँ:",
+    "Google sign-in isn't available. Use email and password." to "Google साइन-इन उपलब्ध नहीं है। ईमेल और पासवर्ड से साइन इन करें।",
+    "or" to "या",
+    "Continue with Google" to "Google से जारी रखें",
+    "No Google account on this phone. Add one in Settings, or use email and password." to "इस फ़ोन पर कोई Google अकाउंट नहीं है। Settings में जोड़ें, या ईमेल और पासवर्ड इस्तेमाल करें।",
+    "Google sign-in didn't work. Try again, or use email and password." to "Google साइन-इन नहीं हो सका। फिर से कोशिश करें, या ईमेल और पासवर्ड इस्तेमाल करें।",
 )
