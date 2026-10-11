@@ -8,50 +8,59 @@ SHORT DESCRIPTION (max 80 characters)
 Indian diet plan, calorie counter & water reminders — in your own language.
 
 FULL DESCRIPTION (max 4000 characters)
-Roti Track is a diet planner, calorie counter and water tracker made for Indian food and Indian homes. Plan your meals, count calories and drink enough water – in English or your own language.
+Roti Track is a free Indian diet plan app, calorie counter and water reminder in one. Get a personal Indian diet chart for weight loss, weight gain or healthy eating, count the calories in Indian food, and drink enough water every day – in English or your own language.
 
-🍛 AN INDIAN DIET PLAN MADE FOR YOU
-• A daily meal plan built from your age, height, weight, activity and goal – lose, keep or gain weight
-• Vegetarian, eggetarian or non-vegetarian
-• North, South, East, West or all-India meals: poha, idli, dosa, dal, roti, sabzi, rice and more
+Made for Indian food and Indian homes: dal, roti, rice, sabzi, idli, dosa, poha, paratha, biryani and chai are all in the app, with calories, protein, carbs and fat for every serving.
+
+🍛 INDIAN DIET PLAN FOR WEIGHT LOSS OR GAIN
+• A personal daily meal plan from your age, height, weight, activity and goal – lose weight, maintain or gain weight
+• Vegetarian, eggetarian or non-vegetarian diet plans
+• North Indian, South Indian, East, West or all-India meals
+• Breakfast, lunch, evening snack and dinner, with the right calories for each
 • Don't like a meal? Swap it with one tap (Pro)
-• See the whole week ahead with the 7-day plan (Pro)
+• Plan the whole week with the 7-day diet chart (Pro)
 
-🔥 CALORIE & MACRO COUNTER
-• 190+ foods with calories, protein, carbs and fat per serving
-• Indian favourites first – idli to biryani, chai to gulab jamun – plus popular Western and Chinese dishes like pizza, burgers, pasta, fried rice, noodles and momos
-• Log breakfast, lunch, snacks and dinner in seconds, or log a planned meal with one tap
+🔥 CALORIE COUNTER & NUTRITION TRACKER
+• 190+ foods with calories and macros – Indian food first, plus popular Western and Chinese dishes like pizza, burgers, pasta, fried rice, noodles and momos
+• Track calories, protein, carbs and fat for every meal
+• Log a food in seconds, or log your planned meal with one tap
 • Veg, egg and non-veg marks on every food
-• Log exercise and see calories burned
-• Add your own recipes (Pro)
+• Log exercise and walking to see calories burned
+• Save your own home recipes (Pro)
 
-💧 WATER TRACKER & REMINDERS
-• A daily water goal based on your weight and activity
+💧 WATER TRACKER & DRINK WATER REMINDER
+• A daily water goal based on your weight, gender and activity
 • Log water, nimbu pani, coconut water, chaas, chai and more
 • Smart water reminders through the day, with pleasant sounds
 • Reminders work even when your phone is locked
 
-🔔 MEAL REMINDERS THAT CARE
+🔔 MEAL REMINDERS & VOICE REMINDERS
 • Gentle reminders for breakfast, lunch, snack and dinner
-• Friendly voice reminders that call you by name
+• Friendly voice reminders that call you by name, in your language
 • Quiet when your phone is on silent or Do Not Disturb
 
-📊 PROGRESS YOU CAN SEE
-• Daily streaks, BMI and weight progress
-• 7-day trends for calories and water, 30-day trends with Pro
-• Download a PDF summary report of your meals, exercise and weight
+⏳ INTERMITTENT FASTING TIMER
+• Track your fasting window – 12:12, 14:10, 16:8 and more
+
+📊 PROGRESS, BMI & REPORTS
+• BMI, weight progress and daily streaks
+• 7-day calorie and water trends, 30-day trends with Pro
+• Download a PDF report of your meals, exercise and weight to share with your doctor or dietitian
 
 🗣️ SPEAKS YOUR LANGUAGE
-English, हिन्दी, ಕನ್ನಡ, తెలుగు, தமிழ், मराठी, বাংলা and ગુજરાતી.
+English, हिन्दी, ಕನ್ನಡ, తెలుగు, தமிழ், मराठी, বাংলা and ગુજરાતી – the whole app, not just the menus.
 
-📘 EASY TO LEARN
-A built-in User Guide explains every feature, page by page.
+📚 HEALTH ARTICLES & USER GUIDE
+Simple articles on Indian nutrition and healthy habits, and a built-in guide that explains every feature.
+
+🔐 QUICK SIGN-IN
+Continue with Google in one tap, or use email and password. Your data syncs safely to your account.
 
 👑 ROTI TRACK PRO
-Unlock the full 7-day meal plan, meal swaps, 30-day trends, custom foods and longer reports. Monthly (₹359) and yearly (₹1,099) plans are available, and the first year costs just ₹990 with a friend's referral code. Cancel anytime from Google Play.
+Unlock the full 7-day meal plan, meal swaps, 30-day trends, your own recipes and longer reports. Monthly (₹359) and yearly (₹1,099) plans, and the first year costs just ₹990 with a friend's referral code. Cancel anytime from Google Play.
 
-🎁 INVITE FRIENDS, EARN REWARDS
-Share your referral code: your friend gets the first year of Pro for ₹990 instead of ₹1,099, and you earn a reward when they upgrade.
+🎁 SHARE & EARN
+Share Roti Track with friends and family. With your referral code your friend gets the first year of Pro for ₹990 instead of ₹1,099, and you earn a reward when they upgrade.
 
 Roti Track gives general nutrition information for healthy living. It is not medical advice. If you have a medical condition, are pregnant, or are under 18, please talk to your doctor before changing your diet.
 
@@ -78,4 +87,4 @@ GRAPHICS (in this folder)
   5 Drink enough water
   6 Never miss a meal
   7 Speaks your language
-  8 Go Pro
+  8 Health articles
