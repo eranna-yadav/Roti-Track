@@ -12,7 +12,36 @@
           "package_name": "com.rotitrack.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "756637519670-bero75uic46cp3b9ccva94db2h0cmiv5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rotitrack.app",
+            "certificate_hash": "656ef88609d837111fdf8e17e0ed1cb95526cb70"
+          }
+        },
+        {
+          "client_id": "756637519670-nh5lnad2ft3eik18uufv466d5bra4fcv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rotitrack.app",
+            "certificate_hash": "f1c39c2593befed2d1a28bbf8509d7ac4922a4e7"
+          }
+        },
+        {
+          "client_id": "756637519670-tap0veivob7p3afnsmsk5i6oa0sp12ah.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rotitrack.app",
+            "certificate_hash": "5df5fa99dd099992c39095eda14c0f09dc5b84eb"
+          }
+        },
+        {
+          "client_id": "756637519670-af5qudbio2hsi0vsnjk61obp3pn6h61u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCq90MHXDTkzEBrlLkgV75CmefEz4LMY3A"
@@ -20,7 +49,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "756637519670-af5qudbio2hsi0vsnjk61obp3pn6h61u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
