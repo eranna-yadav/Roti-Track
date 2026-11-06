@@ -8,9 +8,11 @@ SHORT DESCRIPTION (max 80 characters)
 Indian diet plan, calorie counter & water reminders — in your own language.
 
 FULL DESCRIPTION (max 4000 characters)
-Roti Track is an Indian diet plan app, calorie counter and water reminder in one. Get a personal Indian diet chart for weight loss, weight gain or healthy eating, count the calories in Indian food, and drink enough water every day – in English or your own language. Free to download, with an optional Pro plan for extra features.
+Roti Track helps Indians lose weight without changing the food they love. Track roti, rice, dosa, idli, biryani, chapati, dal, sabzi, snacks, water intake, and calories in just a few taps.
 
-Made for Indian food and Indian homes: dal, roti, rice, sabzi, idli, dosa, poha, paratha, biryani and chai are all in the app, with calories, protein, carbs and fat for every serving.
+Get a personal Indian diet chart for weight loss, weight gain or healthy eating, count the calories in Indian food, and drink enough water every day – in English or your own language. Free to download, with an optional Pro plan for extra features.
+
+Made for Indian food and Indian homes, with calories, protein, carbs and fat for every serving – from poha and paratha to chai.
 
 🍛 INDIAN DIET PLAN FOR WEIGHT LOSS OR GAIN
 • A personal daily meal plan from your age, height, weight, activity and goal – lose weight, maintain or gain weight
