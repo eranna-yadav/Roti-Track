@@ -17,7 +17,7 @@ enum class Plan(
     val referralRupees: Int? = null,
 ) {
     MONTHLY("rotitrack_pro_monthly", "Monthly", "₹359", "month", 359),
-    YEARLY("rotitrack_pro_yearly", "Yearly", "₹1,099", "year", 1099, referralRupees = 990);
+    YEARLY("rotitrack_pro_yearly", "Yearly", "₹1,099", "year", 1099, referralRupees = 999);
 
     val referralPrice: String? get() = referralRupees?.let { "₹$it" }
 
@@ -55,7 +55,7 @@ data class UserSummary(
     val razorpayPlanId: String? = null,
     val razorpayStatus: String? = null,
     val razorpayUntil: Long = 0,
-    /** This user's own code to share, e.g. "RTK7P2QX". */
+    /** This user's own code to share, e.g. "PRIYA100". */
     val referralCode: String = "",
     /** The code this user signed up with, if any. Set once, at sign-up. */
     val referredByCode: String? = null,
@@ -64,12 +64,18 @@ data class UserSummary(
     val referralCount: Int = 0,
     /** Server-maintained: this user's own Pro purchase has already paid out their referrer. */
     val referralCredited: Boolean = false,
-    /** ₹ this user's payments have earned their referrer so far (0, 250 or 500). */
+    /** ₹ this user's payments have earned their referrer so far (0, 150 or 300). */
     val referralCreditedAmount: Int = 0,
     /** Where referral earnings should be paid. */
     val payoutUpi: String = "",
     /** Admin-maintained: ₹ of [referralEarnings] already paid out. */
     val referralPaid: Int = 0,
+    /** Server-maintained: ₹ of [referralEarnings] that came from monthly bonuses. */
+    val referralBonusEarnings: Int = 0,
+    /** Server-maintained: the month ("2026-11", India time) of the last yearly sale, its sale count and bonus. */
+    val referralMonth: String = "",
+    val referralMonthYearly: Int = 0,
+    val referralMonthBonus: Int = 0,
 ) {
     val referralDue: Int get() = (referralEarnings - referralPaid).coerceAtLeast(0)
 
@@ -139,46 +145,72 @@ interface UserDirectory {
 }
 
 /** Most a user earns per friend who buys Pro with their code. Must match functions/lib.js. */
-const val REFERRAL_REWARD_RUPEES = 500
+const val REFERRAL_REWARD_RUPEES = 300
 
 /** On a monthly plan the reward comes in two parts: after the 1st and after the 2nd payment. */
-const val REFERRAL_MONTHLY_INSTALMENT = 250
+const val REFERRAL_MONTHLY_INSTALMENT = 150
 
-/** Total a friend's payments have earned so far: yearly ₹500; monthly ₹250 per payment, up to ₹500. */
+/**
+ * Monthly bonus: yearly sales made with the user's code in one calendar month (India time) →
+ * bonus for that month. Only the highest level reached counts. Must match functions/lib.js.
+ */
+val REFERRAL_BONUS_LEVELS: List<Pair<Int, Int>> = listOf(20 to 2000, 30 to 3500, 40 to 5000, 50 to 7000, 75 to 8500, 100 to 10000)
+
+fun referralBonusFor(yearlySales: Int): Int = REFERRAL_BONUS_LEVELS.lastOrNull { yearlySales >= it.first }?.second ?: 0
+
+/** The next bonus level above [yearlySales], or null once the top level is reached. */
+fun nextReferralBonusLevel(yearlySales: Int): Pair<Int, Int>? = REFERRAL_BONUS_LEVELS.firstOrNull { yearlySales < it.first }
+
+/** "2026-11" for [ms] in India time, the month the bonus counts in. Must match istMonthKey in functions/lib.js. */
+fun istMonthKey(ms: Long): String {
+    val d = java.time.Instant.ofEpochMilli(ms).atOffset(java.time.ZoneOffset.ofHoursMinutes(5, 30))
+    return "%d-%02d".format(d.year, d.monthValue)
+}
+
+/** Total a friend's payments have earned so far: yearly ₹300; monthly ₹150 per payment, up to ₹300. */
 fun referralEarnedFor(plan: Plan, payments: Int): Int = when (plan) {
     Plan.YEARLY -> REFERRAL_REWARD_RUPEES
     Plan.MONTHLY -> minOf(REFERRAL_REWARD_RUPEES, REFERRAL_MONTHLY_INSTALMENT * maxOf(payments, 1))
 }
 
 /**
- * A stable, shareable code for a user, e.g. "RTK7P2QX". No 0/O/1/I to avoid mix-ups.
- * [attempt] 0 is the usual code; later attempts give other codes for when one is already taken.
+ * The letters of a referral code, from the user's name: the first word with at least three
+ * English letters ("K Erappa" → "ERAPPA"), at most 8 letters, or "ROTI" when there's none.
  */
-fun referralCodeFor(uid: String, attempt: Int = 0): String {
-    val alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
-    var h = 1125899906842597L
-    for (c in if (attempt == 0) uid else "$uid#$attempt") h = 31 * h + c.code
-    val sb = StringBuilder("RT")
-    var x = h and Long.MAX_VALUE
-    repeat(6) {
-        sb.append(alphabet[(x % alphabet.length).toInt()])
-        x /= alphabet.length
+fun referralCodeName(name: String): String {
+    val words = name.uppercase().split(Regex("[^A-Z]+")).filter { it.isNotEmpty() }
+    val word = words.firstOrNull { it.length >= 3 } ?: words.joinToString("").takeIf { it.length >= 3 }
+    return (word ?: "ROTI").take(8)
+}
+
+/**
+ * A memorable, shareable code, e.g. "PRIYA100". [attempt] 0 is the usual code; later attempts
+ * give PRIYA101… and then other numbers, for when one is already taken.
+ */
+fun referralCodeFor(name: String, uid: String, attempt: Int = 0): String {
+    val number = if (attempt < 10) 100 + attempt else {
+        var h = 1125899906842597L
+        for (c in "$uid#$attempt") h = 31 * h + c.code
+        110 + ((h and Long.MAX_VALUE) % 890).toInt()
     }
-    return sb.toString()
+    return referralCodeName(name) + number
 }
 
 /** How many codes to try before giving up; a clash on all of them is practically impossible. */
-const val REFERRAL_CODE_ATTEMPTS = 20
+const val REFERRAL_CODE_ATTEMPTS = 40
 
 /** The user's first code that nobody else holds. [ownerOf] returns who holds a code, or null if it's free. */
-fun firstFreeReferralCode(uid: String, ownerOf: (String) -> String?): String {
+fun firstFreeReferralCode(name: String, uid: String, ownerOf: (String) -> String?): String {
     for (attempt in 0 until REFERRAL_CODE_ATTEMPTS) {
-        val code = referralCodeFor(uid, attempt)
+        val code = referralCodeFor(name, uid, attempt)
         val owner = ownerOf(code)
         if (owner == null || owner == uid) return code
     }
     throw IllegalStateException("No free referral code")
 }
+
+/** Codes from before name codes looked like "RTK7P2QX"; they're replaced by a name code. */
+fun isNameReferralCode(code: String): Boolean = Regex("[A-Z]{3,8}[0-9]{3}").matches(code)
 
 fun normalizeReferralCode(code: String?): String? =
     code?.trim()?.uppercase()?.replace(" ", "")?.takeIf { it.isNotEmpty() }

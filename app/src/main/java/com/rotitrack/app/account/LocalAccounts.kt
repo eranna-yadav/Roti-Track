@@ -75,7 +75,7 @@ class LocalAuth(private val storage: Storage, private val directory: LocalDirect
         directory.create(
             UserSummary(
                 u.uid, u.name, u.email, createdAt = u.createdAt, lastActive = u.createdAt, isAdmin = u.isAdmin,
-                referralCode = firstFreeReferralCode(u.uid) { holders[it] }, referredByCode = code,
+                referralCode = firstFreeReferralCode(u.name, u.uid) { holders[it] }, referredByCode = code,
             )
         )
         account = u.toAccount()
@@ -134,7 +134,7 @@ class LocalDirectory(private val storage: Storage) : UserDirectory {
             referralCode = old.referralCode,
         )
         // Stand-in for the server, which pays as each payment is confirmed. On this device there are
-        // no renewals, so a paid plan counts as one payment: ₹500 for yearly, ₹250 for monthly.
+        // no renewals, so a paid plan counts as one payment: ₹300 for yearly, ₹150 for monthly.
         val referrer = merged.referredByCode?.let { code -> users.values.firstOrNull { it.referralCode == code } }
         val plan = merged.plan
         if (plan != null && referrer != null && referrer.uid != merged.uid) {

@@ -66,7 +66,8 @@ exports.createRazorpaySubscription = onCall(
     let referralPrice = false;
     if (code) {
       const codeDoc = await db.doc(`referralCodes/${code}`).get();
-      const referrerUid = codeDoc.exists ? codeDoc.data().uid : null;
+      // A replaced (retired) code still pays for friends who already used it, but takes no new ones.
+      const referrerUid = codeDoc.exists && !codeDoc.data().retired ? codeDoc.data().uid : null;
       if (!lib.referralPriceEligible(user, planId, referrerUid, uid)) {
         throw new HttpsError("failed-precondition", "This referral code can't be used. Remove it to pay the regular price.");
       }
@@ -208,8 +209,64 @@ async function reportToPlay(sub, paymentId, initial) {
 }
 
 /**
+ * Google Play purchase check. The app sends each Play subscription it sees; the server asks
+ * Google whether it's real and who bought it, then records the paid plan on the user so the
+ * referral rules below apply to Play payments too. Needs the Android Publisher API enabled
+ * and this service account invited in Play Console (see README).
+ */
+exports.verifyPlayPurchase = onCall({ region: REGION }, async (req) => {
+  const uid = requireAuth(req);
+  const { purchaseToken, productId } = req.data || {};
+  if (!purchaseToken || !lib.PLANS[productId]) throw new HttpsError("invalid-argument", "Missing purchase details.");
+
+  const { google } = require("googleapis");
+  const auth = new google.auth.GoogleAuth({ scopes: ["https://www.googleapis.com/auth/androidpublisher"] });
+  const publisher = google.androidpublisher({ version: "v3", auth });
+  const { data: sub } = await publisher.purchases.subscriptionsv2.get({ packageName: ANDROID_PACKAGE, token: purchaseToken });
+
+  const buyer = sub.externalAccountIdentifiers && sub.externalAccountIdentifiers.obfuscatedExternalAccountId;
+  if (buyer && buyer !== uid) throw new HttpsError("permission-denied", "This purchase belongs to another account.");
+  const item = (sub.lineItems || []).find((i) => i.productId === productId);
+  if (!item) throw new HttpsError("invalid-argument", "Purchase doesn't match the plan.");
+
+  // One purchase can only ever count for one Roti Track account.
+  const tokenRef = db.doc(`playPurchases/${lib.hmac("play", purchaseToken)}`);
+  const owner = await db.runTransaction(async (tx) => {
+    const doc = await tx.get(tokenRef);
+    if (doc.exists) return doc.data().uid;
+    tx.set(tokenRef, { uid, productId, createdAt: Date.now() });
+    return uid;
+  });
+  if (owner !== uid) throw new HttpsError("permission-denied", "This purchase is already linked to another account.");
+
+  const expiry = Date.parse(item.expiryTime || "") || 0;
+  const paid = lib.PLAY_PAID_STATES.includes(sub.subscriptionState);
+  const fields = {
+    playPlanId: productId,
+    playState: sub.subscriptionState || null,
+    playUntil: paid ? expiry : 0,
+    playPaidCount: lib.playPaymentsSoFar(productId, Date.parse(sub.startTime || "") || expiry, expiry),
+    playTest: !!sub.testPurchase,
+  };
+
+  // The referral code typed on the payment page counts like one entered at sign-up.
+  const userRef = db.doc(`users/${uid}`);
+  const user = (await userRef.get()).data() || {};
+  const code = lib.normalizeReferralCode(req.data.referralCode);
+  if (code && !user.referredByCode) {
+    const codeDoc = await db.doc(`referralCodes/${code}`).get();
+    if (codeDoc.exists && !codeDoc.data().retired && codeDoc.data().uid !== uid) fields.referredByCode = code;
+  }
+  // Keep the highest payment count seen, in case Google reports an older state.
+  fields.playPaidCount = Math.max(fields.playPaidCount, user.playPlanId === productId ? user.playPaidCount || 0 : 0);
+  await userRef.set(fields, { merge: true });
+  return { ok: true, until: fields.playUntil };
+});
+
+/**
  * Referral rewards, paid as a friend's payments are confirmed (see lib.js for the rules):
- * ₹500 for a yearly plan; ₹250 + ₹250 over the first two monthly payments.
+ * ₹300 for a yearly plan; ₹150 + ₹150 over the first two monthly payments; and a bonus
+ * when the referrer's yearly sales in a month reach a new level.
  * Runs in a transaction and keeps a running total per friend, so nothing is paid twice.
  */
 exports.creditReferral = onDocumentWritten({ document: "users/{uid}", region: REGION }, async (event) => {
@@ -223,23 +280,42 @@ exports.creditReferral = onDocumentWritten({ document: "users/{uid}", region: RE
   if (!referrerUid || referrerUid === uid) return;
 
   const credited = await db.runTransaction(async (tx) => {
+    const now = Date.now();
     const userRef = db.doc(`users/${uid}`);
+    const referrerRef = db.doc(`users/${referrerUid}`);
     const fresh = (await tx.get(userRef)).data() || {};
-    const amount = lib.referralToCredit(fresh, Date.now());
-    if (amount <= 0) return 0;
+    const referrer = (await tx.get(referrerRef)).data() || {};
+    const amount = lib.referralToCredit(fresh, now);
+    if (amount <= 0) return null;
     const before = lib.referralCreditedSoFar(fresh);
     const total = before + amount;
+    const plan = lib.paidPlan(fresh, now);
+    const yearly = lib.isYearlySale(fresh, now);
+    const sale = yearly ? lib.addYearlySale(referrer, lib.istMonthKey(now)) : null;
+    const bonus = sale ? sale.bonusNow : 0;
+
     tx.set(userRef, { referralCredited: true, referralCreditedAmount: total, referralCreditedTo: referrerUid }, { merge: true });
-    tx.set(db.doc(`users/${referrerUid}`), {
-      referralEarnings: admin.firestore.FieldValue.increment(amount),
+    tx.set(referrerRef, {
+      referralEarnings: admin.firestore.FieldValue.increment(amount + bonus),
       // A friend counts once, on their first reward.
       referralCount: admin.firestore.FieldValue.increment(before === 0 ? 1 : 0),
+      ...(sale ? {
+        referralBonusEarnings: admin.firestore.FieldValue.increment(bonus),
+        referralMonths: { [sale.month]: { yearly: sale.yearly, bonus: sale.bonus } },
+        // This month's numbers, for the Refer & earn screen.
+        referralMonth: sale.month, referralMonthYearly: sale.yearly, referralMonthBonus: sale.bonus,
+      } : {}),
     }, { merge: true });
     tx.set(db.doc(`referrals/${uid}_${total}`), {
       referrerUid, referredUid: uid, amount, totalForFriend: total,
-      planId: fresh.razorpayPlanId || null, payments: fresh.razorpayPaidCount || 0, createdAt: Date.now(),
+      planId: plan ? plan.planId : null, payments: plan ? plan.payments : 0, createdAt: now,
     });
-    return amount;
+    if (bonus > 0) {
+      tx.set(db.doc(`referrals/bonus_${referrerUid}_${sale.month}_${sale.bonus}`), {
+        referrerUid, amount: bonus, bonusLevel: sale.yearly, month: sale.month, createdAt: now,
+      });
+    }
+    return { amount, bonus };
   });
-  if (credited) logger.info("Referral credited", { uid, referrerUid, amount: credited });
+  if (credited) logger.info("Referral credited", { uid, referrerUid, ...credited });
 });

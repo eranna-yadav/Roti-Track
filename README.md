@@ -49,7 +49,7 @@ water and calories.
 password. Each account keeps its own logs on the phone.
 
 **Pro**: ₹359/month or ₹1,099/year (74% cheaper). Users who sign up with a
-friend's referral code pay ₹990 for their first year. Pro unlocks the full 7-day
+friend's referral code pay ₹999 for their first year. Pro unlocks the full 7-day
 plan, meal swaps, 30-day trends and your own recipes; everything else is free.
 Users pay through Razorpay or Google Play, and can turn off Razorpay auto-renew
 from the Pro screen.
@@ -62,9 +62,13 @@ from the Pro screen.
   block the account, and see referral earnings owed with a "mark paid" button.
 
 **Profile**:
-- **Invite friends**: each user gets a promo code. When a friend signs up with
-  it and then buys Pro, the referrer earns up to ₹500: all at once for a yearly
-  plan, or ₹250 after the friend's 1st monthly payment and ₹250 after the 2nd.
+- **Invite friends**: each user gets a promo code made from their name, e.g.
+  `PRIYA100`. When a friend signs up with it and then buys Pro, the referrer
+  earns up to ₹300: all at once for a yearly plan, or ₹150 after the friend's
+  1st monthly payment and ₹150 after the 2nd. Yearly sales in a calendar month
+  (India time) also earn a bonus: ₹2,000 at 20, ₹3,500 at 30, ₹5,000 at 40,
+  ₹7,000 at 50, ₹8,500 at 75 and ₹10,000 at 100. Google Play purchases are
+  checked on the server (`verifyPlayPurchase`) so they count too.
   The full rules are under Profile → Referral rules. Users add a
   UPI ID for payouts.
 - **Personal details**: name, age, gender, height, a weight log with history,
@@ -153,7 +157,7 @@ Firebase **Blaze** (pay-as-you-go) plan.
 1. In the [Razorpay Dashboard](https://dashboard.razorpay.com), go to
    **Subscriptions → Plans** and create two plans. Start in Test mode.
    - ₹359, every 1 month
-   - ₹1,099, every 1 year (referred users pay ₹990 up front for the first year;
+   - ₹1,099, every 1 year (referred users pay ₹999 up front for the first year;
      the server adds that as an add-on and starts this plan a year later)
 2. Copy `functions/.env.example` to `functions/.env` and paste in the two
    `plan_…` IDs.
@@ -183,10 +187,18 @@ admins can read.
    auto-renewing base plan:
    - `rotitrack_pro_monthly`: ₹359, renews every month
    - `rotitrack_pro_yearly`: ₹1,099, renews every year. Add a **developer-determined
-     offer** with the tag `referral`: ₹990 for the first year (1 billing period).
+     offer** with the tag `referral`: ₹999 for the first year (1 billing period).
      The app picks it only for users who signed up with a referral code.
 3. Add your Google account as a license tester so test purchases are free.
-4. **To offer Razorpay on Play:** enrol in **Play Console → Monetization setup
+4. **So Play purchases earn referral rewards:** the app sends each Play purchase
+   to the `verifyPlayPurchase` function, which checks it with Google. For that:
+   - enable the **Google Play Android Developer API** in Google Cloud for the
+     Firebase project;
+   - in **Play Console → Users and permissions → Invite new users**, add the
+     Cloud Functions service account
+     (`<project-number>-compute@developer.gserviceaccount.com`) with **View app
+     information** and **View financial data** for Roti Track.
+5. **To offer Razorpay on Play:** enrol in **Play Console → Monetization setup
    → Alternative billing (user choice billing, India)**. Then:
    - set `user_choice_billing` to `true` in `app/src/main/res/values/config.xml`;
    - enable the Google Play Android Developer API in Google Cloud;
@@ -197,9 +209,8 @@ admins can read.
    programme requires. Google charges a reduced service fee on these
    transactions.
 
-Razorpay payments are verified on the server. Google Play purchases are still
-checked on the device only. For Play, add server-side purchase verification
-with the Google Play Developer API before a large launch.
+Razorpay payments are verified on the server. Google Play purchases switch Pro
+on from the device, and are also checked on the server for referral rewards.
 
 ## Layout
 

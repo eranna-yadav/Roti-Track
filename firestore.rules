@@ -19,8 +19,10 @@ service cloud.firestore {
     function adminOnly() {
       return ['role', 'compPro', 'blocked',
               'razorpaySubscriptionId', 'razorpayPlanId', 'razorpayStatus', 'razorpayUntil', 'razorpayPaidCount',
+              'playPlanId', 'playState', 'playUntil', 'playPaidCount', 'playTest',
               'referralEarnings', 'referralCount', 'referralCredited', 'referralCreditedAmount',
-              'referralCreditedTo', 'referralPaid'];
+              'referralCreditedTo', 'referralPaid', 'referralBonusEarnings', 'referralMonths',
+              'referralMonth', 'referralMonthYearly', 'referralMonthBonus'];
     }
 
     match /users/{uid} {
@@ -49,8 +51,20 @@ service cloud.firestore {
     match /referralCodes/{code} {
       allow get: if true;
       allow list: if false;
-      allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
-      allow update, delete: if false;
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid
+        && !request.resource.data.get('retired', false);
+      // An owner can retire their old code when it's replaced by a name code. A retired code
+      // takes no new friends but still pays for friends who already used it.
+      allow update: if signedIn() && resource.data.uid == request.auth.uid
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['retired'])
+        && request.resource.data.retired == true;
+      allow delete: if false;
+    }
+
+    // Google Play purchase token → account it counts for: server only.
+    match /playPurchases/{id} {
+      allow read, write: if false;
     }
 
     // Referral payouts owed: written by the server, readable by admins.

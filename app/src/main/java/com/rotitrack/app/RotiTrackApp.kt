@@ -5,10 +5,12 @@ import android.app.Application
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import com.google.firebase.FirebaseApp
+import com.google.firebase.functions.FirebaseFunctions
 import com.rotitrack.app.account.DemoBilling
 import com.rotitrack.app.account.LocalAuth
 import com.rotitrack.app.account.LocalDirectory
 import com.rotitrack.app.account.NoRazorpay
+import com.rotitrack.app.account.Plan
 import com.rotitrack.app.account.Services
 import com.rotitrack.app.cloud.FirebaseAuthService
 import com.rotitrack.app.cloud.FirestoreDirectory
@@ -18,6 +20,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import com.rotitrack.app.i18n.I18n
 import com.rotitrack.app.reminders.MealReminders
 import com.rotitrack.app.reminders.Reminders
@@ -77,9 +80,21 @@ class RotiTrackApp : Application() {
                         scope.launch { runCatching { razorpay.subscribe(plan, account, token, referralCode) } }
                     }
                 },
+                verifyOnServer = if (usesFirebase) ::verifyPlayPurchase else null,
             ).also { it.connect() }
         }
         services = Services(auth, directory, billing, razorpay, ::storeFor)
+    }
+
+    /** Lets the server check a Google Play purchase with Google, so it can pay the referrer. */
+    private fun verifyPlayPurchase(token: String, plan: Plan, referralCode: String?) {
+        scope.launch {
+            runCatching {
+                FirebaseFunctions.getInstance(FirebaseRazorpay.REGION).getHttpsCallable("verifyPlayPurchase")
+                    .call(mapOf("purchaseToken" to token, "productId" to plan.productId, "referralCode" to referralCode))
+                    .await()
+            }
+        }
     }
 
     fun storeFor(uid: String): AppStore = stores.getOrPut(uid) { AppStore(AndroidStorage(this, "state-$uid.json")) }

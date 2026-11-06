@@ -19,8 +19,8 @@ android {
         applicationId = "com.rotitrack.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 9
-        versionName = "1.6.3"
+        versionCode = 10
+        versionName = "1.6.4"
     }
 
     signingConfigs {

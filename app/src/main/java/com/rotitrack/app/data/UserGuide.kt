@@ -253,7 +253,7 @@ val USER_GUIDE: List<GuidePage> = listOf(
             ),
             GuideFeature(
                 "🎁", "Refer & earn",
-                "Share your promo code. When a friend signs up with it and buys Pro, you earn up to ₹500.",
+                "Share your promo code. When a friend signs up with it and buys Pro, you earn up to ₹300, plus a monthly bonus for yearly sales.",
                 listOf(
                     "Tap Invite friends and share your code on WhatsApp or anywhere.",
                     "Your friend enters the code when creating their account.",

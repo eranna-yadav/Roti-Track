@@ -10,6 +10,10 @@ import com.rotitrack.app.account.REFERRAL_REWARD_RUPEES
 import com.rotitrack.app.account.referralEarnedFor
 import com.rotitrack.app.account.UserSummary
 import com.rotitrack.app.account.referralCodeFor
+import com.rotitrack.app.account.isNameReferralCode
+import com.rotitrack.app.account.referralBonusFor
+import com.rotitrack.app.account.nextReferralBonusLevel
+import com.rotitrack.app.account.istMonthKey
 import com.rotitrack.app.data.MealSlot
 import com.rotitrack.app.data.builtinFood
 import com.rotitrack.app.data.exerciseById
@@ -86,11 +90,31 @@ class ProfileFeaturesTest {
         assertEquals(1, s.celebrations.size)
     }
 
-    @Test fun referralCodesAreStableAndReadable() {
-        val a = referralCodeFor("user-123")
-        assertEquals(a, referralCodeFor("user-123"))
-        assertTrue(a.matches(Regex("RT[A-HJ-NP-Z2-9]{6}")))
-        assertFalse(a == referralCodeFor("user-124"))
+    @Test fun referralCodesAreMemorableNameCodes() {
+        assertEquals("PRIYA100", referralCodeFor("Priya Sharma", "user-123"))
+        assertEquals("PRIYA100", referralCodeFor("priya", "user-124"))
+        // The first word with 3+ English letters, at most 8 letters; ROTI when there's none.
+        assertEquals("ERAPPA100", referralCodeFor("K Erappa", "u"))
+        assertEquals("VENKATES100", referralCodeFor("Venkateswara Rao", "u"))
+        assertEquals("ROTI100", referralCodeFor("अनन्या", "u"))
+        assertTrue(isNameReferralCode(referralCodeFor("Priya", "u")))
+        assertFalse(isNameReferralCode("RTK7P2QX"))
+    }
+
+    @Test fun referralBonusLevelsMatchTheTable() {
+        assertEquals(0, referralBonusFor(19))
+        assertEquals(2000, referralBonusFor(20))
+        assertEquals(2000, referralBonusFor(29))
+        assertEquals(3500, referralBonusFor(30))
+        assertEquals(10000, referralBonusFor(150))
+        assertEquals(8000, 20 * REFERRAL_REWARD_RUPEES + referralBonusFor(20))
+        assertEquals(40000, 100 * REFERRAL_REWARD_RUPEES + referralBonusFor(100))
+        assertEquals(20 to 2000, nextReferralBonusLevel(5))
+        assertEquals(75 to 8500, nextReferralBonusLevel(50))
+        assertNull(nextReferralBonusLevel(100))
+        // Months run on India time: 30 Nov 19:00 UTC is 1 Dec 00:30 in India.
+        assertEquals("2026-12", istMonthKey(java.time.Instant.parse("2026-11-30T19:00:00Z").toEpochMilli()))
+        assertEquals("2026-11", istMonthKey(java.time.Instant.parse("2026-11-30T18:00:00Z").toEpochMilli()))
     }
 
     @Test fun referrerEarns500WhenFriendGoesPro() = runBlocking {
@@ -98,7 +122,8 @@ class ProfileFeaturesTest {
         val auth = LocalAuth(Mem(), dir)
         auth.signUp("Asha", "asha@example.com", "chai1234")
         val asha = auth.account!!.uid
-        val code = referralCodeFor(asha)
+        val code = dir.get(asha)!!.referralCode
+        assertEquals("ASHA100", code)
         auth.signOut()
 
         try {
@@ -116,7 +141,7 @@ class ProfileFeaturesTest {
         // …going Pro pays out once.
         dir.publish(UserSummary(ravi, "Ravi", "ravi@example.com", planId = Plan.MONTHLY.productId))
         dir.publish(UserSummary(ravi, "Ravi", "ravi@example.com", planId = Plan.MONTHLY.productId))
-        // Monthly pays ₹250 for the first payment (the server adds ₹250 more on the second).
+        // Monthly pays ₹150 for the first payment (the server adds ₹150 more on the second).
         assertEquals(REFERRAL_MONTHLY_INSTALMENT, dir.get(asha)!!.referralEarnings)
         // Switching to yearly pays the rest, and the friend still counts once.
         dir.publish(UserSummary(ravi, "Ravi", "ravi@example.com", planId = Plan.YEARLY.productId))
@@ -162,28 +187,18 @@ class ProfileFeaturesTest {
 }
 
 class ReferralCodeTest {
-    @Test fun firstAttemptKeepsTheOriginalCode() {
+    @Test fun laterAttemptsGiveOtherNumbers() {
         val uid = "abc123"
-        org.junit.Assert.assertEquals(com.rotitrack.app.account.referralCodeFor(uid), com.rotitrack.app.account.referralCodeFor(uid, 0))
-        org.junit.Assert.assertNotEquals(com.rotitrack.app.account.referralCodeFor(uid), com.rotitrack.app.account.referralCodeFor(uid, 1))
-        org.junit.Assert.assertTrue(com.rotitrack.app.account.referralCodeFor(uid, 3).matches(Regex("RT[A-HJ-NP-Z2-9]{6}")))
+        org.junit.Assert.assertEquals(com.rotitrack.app.account.referralCodeFor("Priya", uid), com.rotitrack.app.account.referralCodeFor("Priya", uid, 0))
+        org.junit.Assert.assertEquals("PRIYA101", com.rotitrack.app.account.referralCodeFor("Priya", uid, 1))
+        org.junit.Assert.assertTrue(com.rotitrack.app.account.referralCodeFor("Priya", uid, 25).matches(Regex("PRIYA[0-9]{3}")))
     }
 
     @Test fun takenCodeMovesToTheNextOne() {
         val uid = "user-b"
-        val first = com.rotitrack.app.account.referralCodeFor(uid)
-        val code = com.rotitrack.app.account.firstFreeReferralCode(uid) { if (it == first) "user-a" else null }
-        org.junit.Assert.assertEquals(com.rotitrack.app.account.referralCodeFor(uid, 1), code)
+        val code = com.rotitrack.app.account.firstFreeReferralCode("Priya", uid) { if (it == "PRIYA100") "user-a" else null }
+        org.junit.Assert.assertEquals("PRIYA101", code)
         // A code the user already holds is theirs.
-        org.junit.Assert.assertEquals(first, com.rotitrack.app.account.firstFreeReferralCode(uid) { if (it == first) uid else null })
-    }
-}
-
-class ReferralRewardTest {
-    @Test fun monthlyPaysInTwoParts() {
-        org.junit.Assert.assertEquals(250, referralEarnedFor(Plan.MONTHLY, 1))
-        org.junit.Assert.assertEquals(500, referralEarnedFor(Plan.MONTHLY, 2))
-        org.junit.Assert.assertEquals(500, referralEarnedFor(Plan.MONTHLY, 12))
-        org.junit.Assert.assertEquals(500, referralEarnedFor(Plan.YEARLY, 1))
+        org.junit.Assert.assertEquals("PRIYA100", com.rotitrack.app.account.firstFreeReferralCode("Priya", uid) { if (it == "PRIYA100") uid else null })
     }
 }

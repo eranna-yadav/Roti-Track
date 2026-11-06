@@ -162,7 +162,7 @@ class AccountsTest {
 
     @Test fun yearlyIsCheaperForTheFirstYearWithAReferralCode() {
         assertEquals(1099, Plan.YEARLY.rupees)
-        assertEquals("₹990", Plan.YEARLY.referralPrice)
+        assertEquals("₹999", Plan.YEARLY.referralPrice)
         assertEquals(null, Plan.MONTHLY.referralPrice)
         val me = UserSummary("u1", "Asha", "asha@example.com")
         assertTrue(me.firstSubscription)

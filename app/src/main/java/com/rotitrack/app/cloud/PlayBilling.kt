@@ -24,8 +24,8 @@ import com.rotitrack.app.account.Plan
  * Google Play Billing for the two Pro subscriptions. Purchases are tagged with
  * the app account's uid, so Pro follows the Roti Track account, not just the phone.
  *
- * Note: entitlement is checked on the device. For stronger protection, verify
- * purchase tokens on a server with the Google Play Developer API.
+ * Pro is switched on from the purchases on the device; each purchase is also sent to the
+ * server ([verifyOnServer]), which checks it with Google so it can pay referral rewards.
  */
 private const val REFERRAL_OFFER_TAG = "referral"
 
@@ -41,6 +41,11 @@ class PlayBilling(
     override val offersAlternative: Boolean,
     /** Plan, Google's external transaction token, and the referral code entered before paying. */
     private val onAlternativeChosen: (Plan, String, String?) -> Unit,
+    /**
+     * Sends a Play subscription to the server to be checked with Google (purchase token, plan,
+     * referral code typed before paying), so it earns the referrer their reward. Null without a server.
+     */
+    private val verifyOnServer: ((String, Plan, String?) -> Unit)? = null,
 ) : Billing, PurchasesUpdatedListener {
 
     private val client = BillingClient.newBuilder(context)
@@ -151,8 +156,22 @@ class PlayBilling(
         if (result.responseCode == BillingClient.BillingResponseCode.OK && list != null) handle(list + purchases.filter { p -> list.none { it.orderId == p.orderId } })
     }
 
+    /** Purchase tokens already sent to the server since the app started. */
+    private val verified = mutableSetOf<String>()
+
     private fun handle(list: List<Purchase>) {
         purchases = list
+        // Once per app start, so renewals (a monthly plan's 2nd payment) reach the server too.
+        val me = uid()
+        if (me != null && verifyOnServer != null) {
+            list.filter { it.purchaseState == Purchase.PurchaseState.PURCHASED && it.purchaseToken !in verified }
+                .filter { it.accountIdentifiers?.obfuscatedAccountId.let { id -> id == null || id == me } }
+                .forEach { p ->
+                    val plan = p.products.firstNotNullOfOrNull { Plan.byProductId(it) } ?: return@forEach
+                    verified += p.purchaseToken
+                    verifyOnServer.invoke(p.purchaseToken, plan, pendingReferralCode)
+                }
+        }
         // Unacknowledged subscriptions are refunded by Google after three days.
         list.filter { it.purchaseState == Purchase.PurchaseState.PURCHASED && !it.isAcknowledged }.forEach { p ->
             client.acknowledgePurchase(AcknowledgePurchaseParams.newBuilder().setPurchaseToken(p.purchaseToken).build()) {}
