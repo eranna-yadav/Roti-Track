@@ -1104,4 +1104,5 @@ internal val HI: Map<String, String> = mapOf(
     "Plus a monthly bonus of up to ₹{0} for yearly sales." to "साथ ही सालाना बिक्री पर ₹{0} तक का मासिक बोनस।",
     "Pro plans your friend pays for in the Roti Track app, through Google Play or Razorpay. Free Pro given by Roti Track and refunded payments don't count." to "आपके दोस्त द्वारा Roti Track ऐप में Google Play या Razorpay से खरीदे गए Pro प्लान। Roti Track द्वारा दिया गया मुफ़्त Pro और रिफ़ंड हुए पेमेंट नहीं गिने जाते।",
     "Share your promo code. When a friend signs up with it and buys Pro, you earn up to ₹300, plus a monthly bonus for yearly sales." to "अपना प्रोमो कोड शेयर करें। जब कोई दोस्त इससे साइन अप करके Pro खरीदता है, तो आप ₹300 तक कमाते हैं, साथ ही सालाना बिक्री पर मासिक बोनस।",
+    "e.g. Ananya Sharma" to "जैसे Ananya Sharma",
 )

@@ -18,7 +18,8 @@ fun summarize(account: Account, store: AppStore, plan: Plan?): UserSummary {
     val s = store.state
     return UserSummary(
         uid = account.uid,
-        name = account.name,
+        // The name typed in the app (About you, Personal details) wins over the sign-up name.
+        name = s.profile.name.ifBlank { account.name },
         email = account.email,
         createdAt = System.currentTimeMillis(),
         lastActive = System.currentTimeMillis(),

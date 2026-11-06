@@ -16,7 +16,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,6 +42,8 @@ import com.rotitrack.app.store.AppStore
 fun OnboardingScreen(store: AppStore, platform: Platform) {
     var started by remember { mutableStateOf(false) }
     var draft by remember { mutableStateOf(store.profile) }
+    // The name from the account arrives just after this screen opens; show it once it does.
+    LaunchedEffect(store.profile.name) { if (draft.name.isBlank()) draft = draft.copy(name = store.profile.name) }
 
     if (!started) {
         Column(
@@ -67,6 +75,15 @@ fun OnboardingScreen(store: AppStore, platform: Platform) {
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 100.dp)) {
             ScreenHeader(t("ABOUT YOU"))
             Text(t("We use this to set your calorie and water targets and build your meal plan."), style = Type.body.copy(color = Palette.inkSoft))
+            FormLabel(t("Your name"))
+            OutlinedTextField(
+                draft.name, { draft = draft.copy(name = it.take(40)) },
+                placeholder = { Text(t("e.g. Ananya Sharma")) }, singleLine = true,
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
+                shape = RoundedCornerShape(16.dp),
+                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Palette.brand),
+                modifier = Modifier.fillMaxWidth(),
+            )
             ProfileForm(draft, { draft = it })
             Spacer(Modifier.height(16.dp))
             AppCard(color = Palette.saffronSoft) {
@@ -78,10 +95,11 @@ fun OnboardingScreen(store: AppStore, platform: Platform) {
         PillButton(
             t("Start planning"),
             {
-                store.updateProfile { draft.copy(onboarded = true) }
+                store.updateProfile { draft.copy(name = draft.name.trim(), onboarded = true) }
                 platform.scheduleReminders(store.profile)
             },
             Modifier.fillMaxWidth().align(Alignment.BottomCenter).padding(16.dp),
+            enabled = draft.name.isNotBlank(),
         )
     }
 }

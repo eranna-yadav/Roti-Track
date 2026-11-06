@@ -1104,4 +1104,5 @@ internal val KN: Map<String, String> = mapOf(
     "Plus a monthly bonus of up to ₹{0} for yearly sales." to "ಜೊತೆಗೆ ವಾರ್ಷಿಕ ಮಾರಾಟಗಳಿಗೆ ₹{0} ವರೆಗೆ ಮಾಸಿಕ ಬೋನಸ್.",
     "Pro plans your friend pays for in the Roti Track app, through Google Play or Razorpay. Free Pro given by Roti Track and refunded payments don't count." to "ನಿಮ್ಮ ಗೆಳೆಯರು Roti Track ಆ್ಯಪ್‌ನಲ್ಲಿ Google Play ಅಥವಾ Razorpay ಮೂಲಕ ಪಾವತಿಸಿದ Pro ಪ್ಲಾನ್‌ಗಳು. Roti Track ಉಚಿತವಾಗಿ ನೀಡಿದ Pro ಮತ್ತು ಮರುಪಾವತಿಯಾದ ಪಾವತಿಗಳು ಲೆಕ್ಕಕ್ಕೆ ಬರುವುದಿಲ್ಲ.",
     "Share your promo code. When a friend signs up with it and buys Pro, you earn up to ₹300, plus a monthly bonus for yearly sales." to "ನಿಮ್ಮ ಪ್ರೊಮೊ ಕೋಡ್ ಹಂಚಿಕೊಳ್ಳಿ. ಗೆಳೆಯರು ಅದರಿಂದ ಸೈನ್ ಅಪ್ ಮಾಡಿ Pro ಕೊಂಡರೆ, ನೀವು ₹300 ವರೆಗೆ ಗಳಿಸುತ್ತೀರಿ, ಜೊತೆಗೆ ವಾರ್ಷಿಕ ಮಾರಾಟಗಳಿಗೆ ಮಾಸಿಕ ಬೋನಸ್.",
+    "e.g. Ananya Sharma" to "ಉದಾ. Ananya Sharma",
 )
