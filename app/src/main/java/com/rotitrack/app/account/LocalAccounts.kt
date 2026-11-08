@@ -128,7 +128,8 @@ class LocalDirectory(private val storage: Storage) : UserDirectory {
             razorpayPlanId = old.razorpayPlanId, razorpayStatus = old.razorpayStatus, razorpayUntil = old.razorpayUntil,
             referredByCode = old.referredByCode, referralEarnings = old.referralEarnings,
             referralCount = old.referralCount, referralCredited = old.referralCredited, referralPaid = old.referralPaid,
-            referralCreditedAmount = old.referralCreditedAmount,
+            referralCreditedAmount = old.referralCreditedAmount, referralBonusEarnings = old.referralBonusEarnings,
+            referralMonth = old.referralMonth, referralMonthYearly = old.referralMonthYearly, referralMonthBonus = old.referralMonthBonus,
             createdAt = if (old.createdAt > 0) old.createdAt else s.createdAt,
             // The code is chosen once, at sign-up.
             referralCode = old.referralCode,

@@ -1096,7 +1096,7 @@ internal val BN: Map<String, String> = mapOf(
     "Bonus this month" to "এই মাসের বোনাস",
     "{0} more yearly sales to unlock a ₹{1} bonus" to "₹{1} বোনাস পেতে আরও {0}টি বার্ষিক বিক্রি",
     "You've reached the top bonus level this month!" to "এই মাসে আপনি সর্বোচ্চ বোনাস স্তরে পৌঁছে গেছেন!",
-    "{0} yearly sales" to "{0}টি বার্ষিক বিক্রি",
+    "{0} sales" to "{0}টি বার্ষিক বিক্রি",
     "₹{0} bonus" to "₹{0} বোনাস",
     "Total ₹{0}" to "মোট ₹{0}",
     "Monthly bonus for yearly plans" to "বার্ষিক প্ল্যানে মাসিক বোনাস",

@@ -103,6 +103,9 @@ fun ReferralScreen(store: AppStore, account: Account, summary: UserSummary?, pla
     }
 }
 
+/** 10000 → "10,000". */
+private fun rupees(amount: Int): String = "%,d".format(java.util.Locale.ENGLISH, amount)
+
 /** This month's yearly sales, the bonus earned, the next level, and the bonus table. */
 @Composable
 private fun MonthlyBonusCard(summary: UserSummary?) {
@@ -119,19 +122,21 @@ private fun MonthlyBonusCard(summary: UserSummary?) {
         )
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             Stat(t("Yearly sales this month"), "$sales", Modifier.weight(1f))
-            Stat(t("Bonus this month"), "₹$bonus", Modifier.weight(1f))
+            Stat(t("Bonus this month"), "₹${rupees(bonus)}", Modifier.weight(1f))
         }
         Text(
-            if (next != null) t("{0} more yearly sales to unlock a ₹{1} bonus", next.first - sales, next.second)
+            if (next != null) t("{0} more yearly sales to unlock a ₹{1} bonus", next.first - sales, rupees(next.second))
             else t("You've reached the top bonus level this month!"),
             style = Type.body.copy(color = Palette.brand, fontWeight = FontWeight.Bold), modifier = Modifier.padding(top = 10.dp, bottom = 6.dp),
         )
         REFERRAL_BONUS_LEVELS.forEach { (level, amount) ->
             val reached = sales >= level
-            Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text((if (reached) "✅ " else "• ") + t("{0} yearly sales", level), style = Type.body, modifier = Modifier.weight(1f))
-                Text(t("₹{0} bonus", amount), style = Type.body.copy(fontWeight = FontWeight.Bold), modifier = Modifier.padding(end = 12.dp))
-                Text(t("Total ₹{0}", level * REFERRAL_REWARD_RUPEES + amount), style = Type.small)
+            Row(Modifier.fillMaxWidth().padding(vertical = 5.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text((if (reached) "✅ " else "• ") + t("{0} sales", level), style = Type.body.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(1f))
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(t("₹{0} bonus", rupees(amount)), style = Type.body.copy(fontWeight = FontWeight.Bold, color = Palette.brand))
+                    Text(t("Total ₹{0}", rupees(level * REFERRAL_REWARD_RUPEES + amount)), style = Type.small)
+                }
             }
         }
     }
@@ -159,7 +164,7 @@ fun ReferralRulesScreen(onBack: () -> Unit) {
             Text(t("Earn up to ₹{0} per friend", REFERRAL_REWARD_RUPEES), style = Type.h2)
             Text(
                 t("Yearly plan: ₹{0} at once.\nMonthly plan: ₹{1} after the 1st payment + ₹{2} after the 2nd.", REFERRAL_REWARD_RUPEES, REFERRAL_MONTHLY_INSTALMENT, REFERRAL_MONTHLY_INSTALMENT) +
-                    "\n" + t("Plus a monthly bonus of up to ₹{0} for yearly sales.", REFERRAL_BONUS_LEVELS.last().second),
+                    "\n" + t("Plus a monthly bonus of up to ₹{0} for yearly sales.", rupees(REFERRAL_BONUS_LEVELS.last().second)),
                 style = Type.body.copy(color = Palette.inkSoft, lineHeight = 22.sp), modifier = Modifier.padding(top = 4.dp),
             )
         }

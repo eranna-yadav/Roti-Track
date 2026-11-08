@@ -1096,7 +1096,7 @@ internal val TA: Map<String, String> = mapOf(
     "Bonus this month" to "இந்த மாத போனஸ்",
     "{0} more yearly sales to unlock a ₹{1} bonus" to "₹{1} போனஸ் பெற இன்னும் {0} ஆண்டு விற்பனைகள்",
     "You've reached the top bonus level this month!" to "இந்த மாதம் நீங்கள் உயர்ந்த போனஸ் நிலையை அடைந்துவிட்டீர்கள்!",
-    "{0} yearly sales" to "{0} ஆண்டு விற்பனைகள்",
+    "{0} sales" to "{0} ஆண்டு விற்பனைகள்",
     "₹{0} bonus" to "₹{0} போனஸ்",
     "Total ₹{0}" to "மொத்தம் ₹{0}",
     "Monthly bonus for yearly plans" to "ஆண்டு திட்டங்களுக்கு மாதாந்திர போனஸ்",
