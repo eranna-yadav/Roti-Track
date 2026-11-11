@@ -191,3 +191,44 @@ class StepsTest {
         org.junit.Assert.assertEquals(200, store.burned(today))
     }
 }
+
+class SleepTest {
+    private fun store() = AppStore(object : Storage {
+        var t: String? = null
+        override fun load() = t
+        override fun save(text: String) { t = text }
+        override fun clear() { t = null }
+    })
+
+    @Test fun nightCountsForTheDayYouWakeUp() {
+        val zone = java.time.ZoneId.of("Asia/Kolkata")
+        val (start, end) = com.rotitrack.app.domain.Sleep.night("2026-11-11", 22, 30, 6, 30, zone)
+        assertEquals(8 * 60, ((end - start) / 60_000).toInt())
+        assertEquals("2026-11-10", com.rotitrack.app.domain.Sleep.dayOf(start, zone))
+        assertEquals("2026-11-11", com.rotitrack.app.domain.Sleep.dayOf(end, zone))
+        // An afternoon nap stays on the same day.
+        val (napStart, napEnd) = com.rotitrack.app.domain.Sleep.night("2026-11-11", 14, 0, 15, 0, zone)
+        assertEquals(60, ((napEnd - napStart) / 60_000).toInt())
+    }
+
+    @Test fun startAndEndLogsANightAndDropsMisTaps() {
+        val s = store()
+        val t0 = 1_000_000_000_000L
+        s.startSleep(t0)
+        s.endSleep(t0 + 7 * 3_600_000L)
+        assertEquals(1, s.state.sleep.entries.size)
+        assertEquals(null, s.state.sleep.activeStart)
+        assertEquals(7 * 60, com.rotitrack.app.domain.Sleep.minutes(s.lastSleep!!))
+        s.rateSleep(s.lastSleep!!.id, 3)
+        assertEquals(3, s.lastSleep!!.quality)
+        // Started by mistake and stopped a minute later: nothing is logged.
+        s.startSleep(t0 + 8 * 3_600_000L)
+        s.endSleep(t0 + 8 * 3_600_000L + 60_000)
+        assertEquals(1, s.state.sleep.entries.size)
+        // Manual entries must be between 10 minutes and 16 hours.
+        assertTrue(!s.addSleep(t0, t0 + 20 * 3_600_000L))
+        assertTrue(s.addSleep(t0 + 30 * 3_600_000L, t0 + 37 * 3_600_000L, 2))
+        s.removeSleep(s.lastSleep!!.id)
+        assertEquals(1, s.state.sleep.entries.size)
+    }
+}

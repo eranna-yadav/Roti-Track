@@ -10,6 +10,8 @@ import com.rotitrack.app.data.ExerciseEntry
 import com.rotitrack.app.data.FastRecord
 import com.rotitrack.app.data.Prefs
 import com.rotitrack.app.data.WeightEntry
+import com.rotitrack.app.data.SleepEntry
+import com.rotitrack.app.data.SleepLog
 import com.rotitrack.app.data.burnedKcal
 import com.rotitrack.app.data.Diet
 import com.rotitrack.app.data.FOODS
@@ -23,6 +25,7 @@ import com.rotitrack.app.data.builtinFood
 import com.rotitrack.app.data.drinkById
 import com.rotitrack.app.domain.Days
 import com.rotitrack.app.domain.Steps
+import com.rotitrack.app.domain.Sleep
 import com.rotitrack.app.domain.Nutrition
 import com.rotitrack.app.domain.PlannedMeal
 import com.rotitrack.app.domain.Planner
@@ -174,6 +177,34 @@ class AppStore(private val storage: Storage) {
 
     /** Logged exercise plus walking counted by the step counter. */
     fun burned(day: String): Int = state.exercises.filter { it.day == day }.sumOf { it.kcal } + stepKcal(day)
+
+    // ------------------------------------------------------------------ sleep
+
+    fun startSleep(at: Long = System.currentTimeMillis()) = update { it.copy(sleep = it.sleep.copy(activeStart = at)) }
+
+    /** Ends the night started with [startSleep]; a mis-tap of a few minutes is dropped. */
+    fun endSleep(at: Long = System.currentTimeMillis()) = update { s ->
+        val start = s.sleep.activeStart ?: return@update s
+        val entries = if (Sleep.valid(start, at)) s.sleep.entries + SleepEntry(uid(), start, at) else s.sleep.entries
+        s.copy(sleep = SleepLog(activeStart = null, entries = entries))
+    }
+
+    /** Logs a night by hand. Returns false if the times don't make sense. */
+    fun addSleep(start: Long, end: Long, quality: Int = 0): Boolean {
+        if (!Sleep.valid(start, end)) return false
+        update { s -> s.copy(sleep = s.sleep.copy(entries = (s.sleep.entries + SleepEntry(uid(), start, end, quality)).sortedBy { it.end })) }
+        return true
+    }
+
+    fun rateSleep(id: String, quality: Int) = update { s ->
+        s.copy(sleep = s.sleep.copy(entries = s.sleep.entries.map { if (it.id == id) it.copy(quality = quality) else it }))
+    }
+
+    fun removeSleep(id: String) = update { s -> s.copy(sleep = s.sleep.copy(entries = s.sleep.entries.filterNot { it.id == id })) }
+
+    fun sleepMinutes(day: String): Int = Sleep.minutesFor(state.sleep.entries, day)
+
+    val lastSleep: SleepEntry? get() = state.sleep.entries.maxByOrNull { it.end }
 
     // ------------------------------------------------------------------ steps
 

@@ -204,6 +204,8 @@ data class Prefs(
     /** Pro: count steps with the phone's step sensor. */
     val stepsOn: Boolean = false,
     val stepGoal: Int = 8000,
+    /** Sleep goal in minutes. */
+    val sleepGoalMin: Int = 480,
 )
 
 @Serializable
@@ -232,6 +234,17 @@ data class Fasting(
     val history: List<FastRecord> = emptyList(),
 )
 
+/** One night's sleep. [quality]: 0 not rated, 1 poor, 2 okay, 3 great. */
+@Serializable
+data class SleepEntry(val id: String, val start: Long, val end: Long, val quality: Int = 0)
+
+@Serializable
+data class SleepLog(
+    /** When "Going to sleep" was tapped, until "I'm awake". */
+    val activeStart: Long? = null,
+    val entries: List<SleepEntry> = emptyList(),
+)
+
 @Serializable
 data class AppState(
     val profile: Profile = Profile(),
@@ -248,6 +261,7 @@ data class AppState(
     val steps: Map<String, Int> = emptyMap(),
     /** The phone's step counter at the last reading, or -1 before the first. */
     val stepCounterLast: Long = -1,
+    val sleep: SleepLog = SleepLog(),
     /** "day|SLOT" → how many times the user tapped Swap. */
     val planShuffles: Map<String, Int> = emptyMap(),
 )

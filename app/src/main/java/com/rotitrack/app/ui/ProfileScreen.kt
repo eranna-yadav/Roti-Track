@@ -38,13 +38,13 @@ import com.rotitrack.app.account.Account
 import com.rotitrack.app.account.REFERRAL_REWARD_RUPEES
 import com.rotitrack.app.store.AppStore
 
-const val APP_VERSION = "1.6.5"
+const val APP_VERSION = "1.6.6"
 /** Where "Support Email" and "Request a Feature" send mail. Change to your own address. */
 const val SUPPORT_EMAIL = "rotitrack.app@gmail.com"
 /** Added to share messages so friends can install the app with one tap. */
 const val PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.rotitrack.app"
 
-enum class ProfilePage { PERSONAL, PREFERENCES, LANGUAGE, GOALS, FASTING, REMINDERS, WATER_REMINDERS, REFERRAL, REFERRAL_RULES, BADGES, REPORT, TERMS, PRIVACY, ARTICLES, ADMIN, PRO, GUIDE }
+enum class ProfilePage { PERSONAL, PREFERENCES, LANGUAGE, GOALS, FASTING, SLEEP, REMINDERS, WATER_REMINDERS, REFERRAL, REFERRAL_RULES, BADGES, REPORT, TERMS, PRIVACY, ARTICLES, ADMIN, PRO, GUIDE }
 
 @Composable
 fun ProfileScreen(
@@ -123,6 +123,7 @@ fun ProfileScreen(
                 value = if (store.state.fasting.activeStart != null) t("Fasting") else "${store.state.fasting.targetHours}:${24 - store.state.fasting.targetHours}",
                 onClick = { onOpen(ProfilePage.FASTING) },
             )
+            SettingsRow("😴", t("Sleep"), value = store.lastSleep?.let { sleepDuration(com.rotitrack.app.domain.Sleep.minutes(it)) } ?: "", onClick = { onOpen(ProfilePage.SLEEP) })
             SettingsRow("🔔", t("Tracking Reminders"), onClick = { onOpen(ProfilePage.REMINDERS) })
             SettingsRow("🏅", t("Badges"), value = "${store.state.badges.size}", last = true, onClick = { onOpen(ProfilePage.BADGES) })
         }

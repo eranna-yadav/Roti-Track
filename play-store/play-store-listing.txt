@@ -41,6 +41,10 @@ Made for Indian food and Indian homes, with calories, protein, carbs and fat for
 • Friendly voice reminders that call you by name, in your language
 • Quiet when your phone is on silent or Do Not Disturb
 
+😴 SLEEP TRACKER
+• Tap "Going to sleep" and "I'm awake", or log last night by hand
+• Rate your sleep, set a sleep goal and see your last 7 nights
+
 ⏳ INTERMITTENT FASTING TIMER
 • Track your fasting window – 12:12, 14:10, 16:8 and more
 

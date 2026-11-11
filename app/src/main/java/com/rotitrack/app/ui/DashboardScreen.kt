@@ -55,6 +55,7 @@ fun DashboardScreen(
     platform: Platform,
     onUpgrade: () -> Unit,
     onOpen: (Tab) -> Unit,
+    onSleep: () -> Unit = {},
 ) {
     val p = store.profile
     val day = today
@@ -125,6 +126,7 @@ fun DashboardScreen(
         }
 
         item { StepsCard(store, isPro, platform, onUpgrade) }
+        item { SleepCard(store, onSleep) }
 
         item {
             AppCard(color = Palette.saffronSoft, onClick = { onOpen(Tab.PLAN) }) {
