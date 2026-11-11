@@ -178,3 +178,31 @@ class AccountsTest {
         assertNotNull(check("RTFRIEND1", me.copy(razorpayPlanId = Plan.MONTHLY.productId)))
     }
 }
+
+class MonthlyReferralsTest {
+    @org.junit.Test fun leaderboardCountsFriendsAndYearlySalesPerMonth() {
+        val nov = java.time.Instant.parse("2026-11-10T10:00:00Z").toEpochMilli()
+        val oct = java.time.Instant.parse("2026-10-10T10:00:00Z").toEpochMilli()
+        val users = listOf(
+            com.rotitrack.app.account.UserSummary("a", "Asha", referralCode = "ASHA100", referralEarnings = 8_000,
+                referralMonths = mapOf("2026-11" to com.rotitrack.app.account.ReferralMonth(20, 2_000), "2026-10" to com.rotitrack.app.account.ReferralMonth(3, 0))),
+            com.rotitrack.app.account.UserSummary("b", "Ravi", referralCode = "RAVI100", referralEarnings = 300),
+            com.rotitrack.app.account.UserSummary("f1", "F1", referredByCode = "ASHA100", createdAt = nov),
+            com.rotitrack.app.account.UserSummary("f2", "F2", referredByCode = "ASHA100", createdAt = oct),
+            com.rotitrack.app.account.UserSummary("f3", "F3", referredByCode = "RAVI100", createdAt = nov),
+        )
+        val report = com.rotitrack.app.account.ReferralReport.of(users)
+        val novRows = report.month("2026-11")
+        org.junit.Assert.assertEquals(listOf("a", "b"), novRows.map { it.user.uid })
+        org.junit.Assert.assertEquals(20, novRows[0].yearlySales)
+        org.junit.Assert.assertEquals(1, novRows[0].joined)
+        org.junit.Assert.assertEquals(2_000, novRows[0].bonus)
+        org.junit.Assert.assertEquals(30 to 3_500, novRows[0].next)
+        org.junit.Assert.assertEquals(1, novRows[1].joined)
+        val octRows = report.month("2026-10")
+        org.junit.Assert.assertEquals(listOf("a"), octRows.map { it.user.uid })
+        org.junit.Assert.assertEquals(3, octRows[0].yearlySales)
+        org.junit.Assert.assertEquals(0, octRows[0].bonus)
+        org.junit.Assert.assertEquals(2, com.rotitrack.app.account.AdminStats.of(users, nov).newThisMonth)
+    }
+}

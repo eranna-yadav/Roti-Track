@@ -38,7 +38,7 @@ import com.rotitrack.app.account.Account
 import com.rotitrack.app.account.REFERRAL_REWARD_RUPEES
 import com.rotitrack.app.store.AppStore
 
-const val APP_VERSION = "1.6.4"
+const val APP_VERSION = "1.6.5"
 /** Where "Support Email" and "Request a Feature" send mail. Change to your own address. */
 const val SUPPORT_EMAIL = "rotitrack.app@gmail.com"
 /** Added to share messages so friends can install the app with one tap. */

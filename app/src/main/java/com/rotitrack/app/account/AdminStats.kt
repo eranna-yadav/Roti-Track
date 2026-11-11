@@ -13,6 +13,9 @@ data class AdminStats(
     val comp: Int,
     val mrr: Int,
     val new7d: Int,
+    val new30d: Int = 0,
+    /** Sign-ups this calendar month (India time). */
+    val newThisMonth: Int = 0,
     val active24h: Int,
     val blocked: Int,
     /** ₹ earned by referrers but not yet paid out. */
@@ -31,6 +34,8 @@ data class AdminStats(
                 // Yearly revenue spread over twelve months.
                 mrr = monthly * Plan.MONTHLY.rupees + yearly * Plan.YEARLY.rupees / 12,
                 new7d = users.count { now - it.createdAt < 7 * DAY_MS },
+                new30d = users.count { now - it.createdAt < 30 * DAY_MS },
+                newThisMonth = users.count { it.createdAt > 0 && istMonthKey(it.createdAt) == istMonthKey(now) },
                 active24h = users.count { now - it.lastActive < DAY_MS },
                 blocked = users.count { it.blocked },
                 referralDue = users.sumOf { it.referralDue },

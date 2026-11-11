@@ -130,6 +130,7 @@ class LocalDirectory(private val storage: Storage) : UserDirectory {
             referralCount = old.referralCount, referralCredited = old.referralCredited, referralPaid = old.referralPaid,
             referralCreditedAmount = old.referralCreditedAmount, referralBonusEarnings = old.referralBonusEarnings,
             referralMonth = old.referralMonth, referralMonthYearly = old.referralMonthYearly, referralMonthBonus = old.referralMonthBonus,
+            referralMonths = old.referralMonths,
             createdAt = if (old.createdAt > 0) old.createdAt else s.createdAt,
             // The code is chosen once, at sign-up.
             referralCode = old.referralCode,

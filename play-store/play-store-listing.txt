@@ -23,7 +23,7 @@ Made for Indian food and Indian homes, with calories, protein, carbs and fat for
 • Plan the whole week with the 7-day diet chart (Pro)
 
 🔥 CALORIE COUNTER & NUTRITION TRACKER
-• 190+ foods with calories and macros – Indian food first, plus popular Western and Chinese dishes like pizza, burgers, pasta, fried rice, noodles and momos
+• 240+ foods with calories and macros – Indian food first, with snacks, sweets and dry fruits, plus popular Western and Chinese dishes like pizza, burgers, pasta, fried rice, noodles and momos
 • Track calories, protein, carbs and fat for every meal
 • Log a food in seconds, or log your planned meal with one tap
 • Veg, egg and non-veg marks on every food
@@ -59,7 +59,7 @@ Simple articles on Indian nutrition and healthy habits, and a built-in guide tha
 Continue with Google in one tap, or use email and password. Your data syncs safely to your account.
 
 👑 ROTI TRACK PRO
-Unlock the full 7-day meal plan, meal swaps, 30-day trends, your own recipes and longer reports. Monthly (₹359) and yearly (₹1,099) plans, and the first year costs just ₹999 with a friend's referral code. Cancel anytime from Google Play.
+Unlock the full 7-day meal plan, meal swaps, a step counter that adds the calories you burn walking, 30-day trends, your own recipes and longer reports. Monthly (₹359) and yearly (₹1,099) plans, and the first year costs just ₹999 with a friend's referral code. Cancel anytime from Google Play.
 
 🎁 SHARE & EARN
 Share Roti Track with friends and family. Get your own easy code like PRIYA100. Your friend gets the first year of Pro for ₹999 instead of ₹1,099, and you earn ₹300 for every yearly plan, plus monthly bonuses of up to ₹10,000.
@@ -85,7 +85,7 @@ GRAPHICS (in this folder)
   1 Your day at a glance
   2 An Indian diet plan made for you
   3 Track calories & macros
-  4 190+ foods, Indian first
+  4 240+ foods, Indian first
   5 Drink enough water
   6 Never miss a meal
   7 Speaks your language

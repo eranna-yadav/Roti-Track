@@ -38,7 +38,7 @@ import kotlinx.serialization.Serializable
 enum class FoodCategory(private val labelEn: String) {
     BREAKFAST("Breakfast"), BREADS("Rotis"), RICE("Rice"), DAL("Dals"), SABZI("Sabzi"),
     NONVEG("Non-veg"), DAIRY("Dairy"), SNACKS("Snacks"), SWEETS("Sweets"),
-    WESTERN("Western"), CHINESE("Chinese"), BEVERAGES("Drinks"), FRUITS("Fruits"), CUSTOM("My foods");
+    WESTERN("Western"), CHINESE("Chinese"), BEVERAGES("Drinks"), FRUITS("Fruits"), DRY_FRUITS("Dry fruits"), CUSTOM("My foods");
 
     /** Western and Chinese foods can be logged, but the diet plan stays Indian. */
     val indian: Boolean get() = this != WESTERN && this != CHINESE
@@ -201,6 +201,9 @@ data class Prefs(
     val sound: WaterSound = WaterSound.DROP_1,
     val soundVolume: Float = 0.6f,
     val vibration: Boolean = true,
+    /** Pro: count steps with the phone's step sensor. */
+    val stepsOn: Boolean = false,
+    val stepGoal: Int = 8000,
 )
 
 @Serializable
@@ -241,6 +244,10 @@ data class AppState(
     val water: List<WaterEntry> = emptyList(),
     val meals: List<MealEntry> = emptyList(),
     val customFoods: List<Food> = emptyList(),
+    /** Day → steps counted by the phone (Pro). */
+    val steps: Map<String, Int> = emptyMap(),
+    /** The phone's step counter at the last reading, or -1 before the first. */
+    val stepCounterLast: Long = -1,
     /** "day|SLOT" → how many times the user tapped Swap. */
     val planShuffles: Map<String, Int> = emptyMap(),
 )

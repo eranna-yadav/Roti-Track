@@ -156,6 +156,21 @@ fun NutritionGoalsScreen(store: AppStore, onBack: () -> Unit) {
                 onPlus = { store.updateProfile { it.copy(cupMl = (it.cupMl + 50).coerceAtMost(1000)) } },
             )
         }
+
+        if (store.prefs.stepsOn) {
+            FormLabel(t("Steps"))
+            AppCard {
+                Text(t("Daily step goal"), style = Type.small)
+                Stepper(
+                    "%,d".format(java.util.Locale.ENGLISH, store.prefs.stepGoal),
+                    onMinus = { store.updatePrefs { it.copy(stepGoal = (it.stepGoal - 500).coerceAtLeast(1000)) } },
+                    onPlus = { store.updatePrefs { it.copy(stepGoal = (it.stepGoal + 500).coerceAtMost(30000)) } },
+                )
+                Spacer(Modifier.height(8.dp))
+                ToggleLine(t("Count my steps"), true) { on -> store.updatePrefs { it.copy(stepsOn = on) } }
+                Text(t("Steps add calories burned on the Food tab, like exercise."), style = Type.small)
+            }
+        }
     }
 }
 

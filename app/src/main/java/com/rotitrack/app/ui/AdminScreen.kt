@@ -55,6 +55,7 @@ import com.rotitrack.app.account.ReferralReport
 import com.rotitrack.app.account.Plan
 import com.rotitrack.app.account.UserDirectory
 import com.rotitrack.app.account.UserSummary
+import com.rotitrack.app.account.istMonthKey
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -127,26 +128,17 @@ fun AdminScreen(directory: UserDirectory, onOpen: (String) -> Unit, onBack: () -
                         }
                         Spacer(Modifier.height(10.dp))
                         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                            Kpi("Monthly subs", "${stats.monthly}", Modifier.weight(1f))
-                            Kpi("Yearly subs", "${stats.yearly}", Modifier.weight(1f))
+                            Kpi("Monthly", "${stats.monthly}", Modifier.weight(1f))
+                            Kpi("Yearly", "${stats.yearly}", Modifier.weight(1f))
                             Kpi("New (7 d)", "${stats.new7d}", Modifier.weight(1f))
                         }
-                        Spacer(Modifier.height(12.dp))
-                        AppCard {
-                            Text("Sign-ups, last 14 days", style = Type.title)
-                            Spacer(Modifier.height(12.dp))
-                            val now = System.currentTimeMillis()
-                            val bars = (13 downTo 0).map { ago ->
-                                val start = startOfDay(now) - ago * DAY_MS
-                                Bar(
-                                    if (ago % 2 == 0) SimpleDateFormat("d", Locale.getDefault()).format(Date(start)) else "",
-                                    list.count { it.createdAt in start until start + DAY_MS }.toFloat(),
-                                    ago == 0,
-                                )
-                            }
-                            BarChart(bars, goal = bars.map { it.value }.average().toFloat(), color = Palette.brand, height = 110.dp)
-                            Text("Dashed line is the daily average.", style = Type.small, modifier = Modifier.padding(top = 6.dp))
+                        Spacer(Modifier.height(10.dp))
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Kpi("Joined this month", "${stats.newThisMonth}", Modifier.weight(1f), Palette.brand)
+                            Kpi("Joined (30 days)", "${stats.new30d}", Modifier.weight(1f))
                         }
+                        Spacer(Modifier.height(12.dp))
+                        SignUpsCard(list)
                         TextField(
                             value = query, onValueChange = { query = it },
                             placeholder = { Text("Search name or email") },
@@ -181,6 +173,102 @@ fun AdminScreen(directory: UserDirectory, onOpen: (String) -> Unit, onBack: () -
     }
 }
 
+private enum class Growth(val label: String) { DAILY("Daily"), WEEKLY("Weekly"), MONTHLY("Monthly") }
+
+/** New accounts per day (14 days), week (12 weeks) or month (12 months, India time). */
+@Composable
+private fun SignUpsCard(list: List<UserSummary>) {
+    var growth by remember { mutableStateOf(Growth.DAILY) }
+    val now = System.currentTimeMillis()
+    val bars = when (growth) {
+        Growth.DAILY -> (13 downTo 0).map { ago ->
+            val start = startOfDay(now) - ago * DAY_MS
+            Bar(
+                if (ago % 2 == 0) SimpleDateFormat("d", Locale.getDefault()).format(Date(start)) else "",
+                list.count { it.createdAt in start until start + DAY_MS }.toFloat(),
+                ago == 0,
+            )
+        }
+        Growth.WEEKLY -> (11 downTo 0).map { ago ->
+            // Weeks end today: this week is the last 7 days.
+            val end = startOfDay(now) + DAY_MS - ago * 7 * DAY_MS
+            Bar(
+                if (ago % 3 == 0) SimpleDateFormat("d MMM", Locale.getDefault()).format(Date(end - DAY_MS)) else "",
+                list.count { it.createdAt in end - 7 * DAY_MS until end }.toFloat(),
+                ago == 0,
+            )
+        }
+        Growth.MONTHLY -> lastMonths(12).reversed().map { m ->
+            Bar(monthLabel(m).take(3), list.count { it.createdAt > 0 && istMonthKey(it.createdAt) == m }.toFloat(), m == istMonthKey(now))
+        }
+    }
+    AppCard {
+        Text("New sign-ups", style = Type.title, modifier = Modifier.padding(bottom = 8.dp))
+        ChipRow(Growth.entries.toList(), growth, label = { it.label }, onSelect = { growth = it })
+        Spacer(Modifier.height(12.dp))
+        BarChart(bars, goal = bars.map { it.value }.average().toFloat(), color = Palette.brand, height = 110.dp)
+        Text(
+            "Accounts created in the app; the dashed line is the average. Play Store installs are in Play Console → Statistics.",
+            style = Type.small, modifier = Modifier.padding(top = 6.dp),
+        )
+    }
+}
+
+/** The last [n] months, newest first, as "2026-11" (India time). */
+private fun lastMonths(n: Int): List<String> {
+    val now = java.time.YearMonth.parse(istMonthKey(System.currentTimeMillis()))
+    return (0 until n).map { now.minusMonths(it.toLong()).toString() }
+}
+
+private fun monthLabel(month: String): String =
+    java.time.YearMonth.parse(month).format(java.time.format.DateTimeFormatter.ofPattern("MMM yyyy", Locale.ENGLISH))
+
+/** Who sold how many yearly plans in a month, the bonus level reached, and what's left for the next one. */
+@Composable
+private fun MonthlyLeaderboard(report: ReferralReport, onOpen: (String) -> Unit) {
+    val months = remember { lastMonths(6) }
+    var month by remember { mutableStateOf(months.first()) }
+    val rows = report.month(month)
+    Text("Monthly bonus leaderboard", style = Type.h2, modifier = Modifier.padding(top = 20.dp, bottom = 4.dp))
+    Text(
+        "Yearly plans sold with each promoter's code in the month (India time). Bonuses are added to their earnings automatically when they reach a level.",
+        style = Type.small, modifier = Modifier.padding(bottom = 10.dp),
+    )
+    ChipRow(months, month, label = { if (it == months.first()) "This month" else monthLabel(it) }, onSelect = { month = it })
+    Spacer(Modifier.height(10.dp))
+    if (rows.isEmpty()) {
+        Text("No referrals in ${monthLabel(month)}.", style = Type.body.copy(color = Palette.muted), modifier = Modifier.padding(bottom = 8.dp))
+    } else {
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Kpi("Joined", "${rows.sumOf { it.joined }}", Modifier.weight(1f))
+            Kpi("Yearly sales", "${rows.sumOf { it.yearlySales }}", Modifier.weight(1f), Palette.saffron)
+            Kpi("Bonuses", rupees(rows.sumOf { it.bonus }), Modifier.weight(1f), Palette.leaf)
+        }
+        Spacer(Modifier.height(10.dp))
+    }
+    rows.forEachIndexed { i, r ->
+        Row(
+            Modifier.fillMaxWidth().padding(bottom = 8.dp).clip(RoundedCornerShape(18.dp)).background(Palette.card)
+                .clickable { onOpen(r.user.uid) }.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text("${i + 1}", style = Type.h2.copy(color = Palette.brand), modifier = Modifier.width(32.dp))
+            Column(Modifier.weight(1f)) {
+                Text(r.user.name.ifBlank { "(no name)" }, style = Type.title, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text("${r.user.referralCode} · ${r.joined} joined · ${r.yearlySales} yearly", style = Type.tiny, maxLines = 1)
+                Text(
+                    r.next?.let { (level, bonus) -> "${level - r.yearlySales} more → ${rupees(bonus)} bonus" } ?: "Top level reached",
+                    style = Type.tiny.copy(color = Palette.brand), maxLines = 1,
+                )
+            }
+            Column(horizontalAlignment = Alignment.End) {
+                Text(if (r.bonus > 0) rupees(r.bonus) else "—", style = Type.title.copy(color = if (r.bonus > 0) Palette.leaf else Palette.muted))
+                Text("bonus", style = Type.tiny)
+            }
+        }
+    }
+}
+
 @Composable
 private fun ReferralsPanel(report: ReferralReport, onOpen: (String) -> Unit, onPay: (Promoter) -> Unit, header: @Composable () -> Unit) {
     val clipboard = LocalClipboardManager.current
@@ -197,6 +285,7 @@ private fun ReferralsPanel(report: ReferralReport, onOpen: (String) -> Unit, onP
                 Kpi("Went Pro", "${report.wentPro}", Modifier.weight(1f), Palette.saffron)
                 Kpi("Promoters", "${report.promoters.size}", Modifier.weight(1f))
             }
+            MonthlyLeaderboard(report, onOpen)
             Text("Payouts due", style = Type.h2, modifier = Modifier.padding(top = 20.dp, bottom = 4.dp))
             Text(
                 "Send the amount to the promoter's UPI ID from your UPI app, then tap Mark as paid.",

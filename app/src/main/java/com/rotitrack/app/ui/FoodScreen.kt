@@ -126,6 +126,19 @@ fun FoodScreen(store: AppStore, platform: Platform, onAdd: (MealSlot, String) ->
                         Icon(Icons.Filled.Add, contentDescription = t("Add exercise"), tint = Color.White)
                     }
                 }
+                val steps = store.stepsFor(day)
+                if (steps > 0) {
+                    Spacer(Modifier.height(8.dp))
+                    Divider()
+                    Row(Modifier.padding(top = 8.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text("👟", fontSize = 22.sp, modifier = Modifier.width(32.dp))
+                        Column(Modifier.weight(1f)) {
+                            Text(t("Steps"), style = Type.body)
+                            Text(t("{0} steps · counted by your phone", "%,d".format(java.util.Locale.ENGLISH, steps)), style = Type.small)
+                        }
+                        Text("−${store.stepKcal(day)}", style = Type.title.copy(color = Palette.saffron), modifier = Modifier.padding(end = 12.dp))
+                    }
+                }
                 exercises.forEach { e ->
                     Spacer(Modifier.height(8.dp))
                     Divider()

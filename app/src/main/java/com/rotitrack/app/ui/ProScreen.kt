@@ -47,12 +47,13 @@ import kotlinx.coroutines.launch
 private val FEATURES get() = listOf(
     Triple(t("Water tracking & reminders"), true, true),
     Triple(t("Calorie & macro tracking"), true, true),
-    Triple(t("190+ Indian, Western & Chinese foods"), true, true),
+    Triple(t("240+ Indian, Western & Chinese foods"), true, true),
     Triple(t("Today's meal plan"), true, true),
     Triple(t("Full 7-day meal plan"), false, true),
     Triple(t("Swap any meal"), false, true),
     Triple(t("30-day trends"), false, true),
     Triple(t("Your own recipes"), false, true),
+    Triple(t("Step counter"), false, true),
 )
 
 @Composable

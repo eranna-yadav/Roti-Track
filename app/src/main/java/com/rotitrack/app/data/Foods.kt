@@ -6,6 +6,7 @@ import com.rotitrack.app.data.FoodCategory.BREAKFAST
 import com.rotitrack.app.data.FoodCategory.CHINESE
 import com.rotitrack.app.data.FoodCategory.DAIRY
 import com.rotitrack.app.data.FoodCategory.DAL
+import com.rotitrack.app.data.FoodCategory.DRY_FRUITS
 import com.rotitrack.app.data.FoodCategory.FRUITS
 import com.rotitrack.app.data.FoodCategory.NONVEG
 import com.rotitrack.app.data.FoodCategory.RICE
@@ -142,6 +143,22 @@ val FOODS: List<Food> = listOf(
     Food("sprouts-chaat", "Sprouts Chaat", "🥗", SNACKS, "1 bowl", 140, 9.0, 22.0, 2.0),
     Food("marie", "Marie Biscuits", "🍪", SNACKS, "4 biscuits", 120, 2.0, 20.0, 3.5),
     Food("sundal", "Chana Sundal", "🫘", SNACKS, "1 bowl (100 g)", 150, 8.0, 22.0, 4.0),
+    Food("aloo-tikki", "Aloo Tikki", "🥔", SNACKS, "2 pieces", 220, 4.0, 28.0, 10.0),
+    Food("dahi-puri", "Dahi Puri", "🥣", SNACKS, "6 puris", 230, 5.0, 32.0, 9.0),
+    Food("sev-puri", "Sev Puri", "🫓", SNACKS, "6 puris", 250, 5.0, 30.0, 12.0),
+    Food("chakli", "Chakli", "🌀", SNACKS, "2 pieces", 150, 2.5, 17.0, 8.0),
+    Food("mixture", "Namkeen Mixture", "🥨", SNACKS, "1 small bowl", 160, 4.0, 14.0, 10.0),
+    Food("banana-chips", "Banana Chips", "🍌", SNACKS, "1 small bowl", 155, 0.7, 17.0, 10.0),
+    Food("mathri", "Mathri", "🍘", SNACKS, "2 pieces", 160, 2.5, 17.0, 9.0),
+    Food("bread-pakora", "Bread Pakora", "🍞", SNACKS, "1 piece", 250, 6.0, 28.0, 13.0, piece = true),
+    Food("corn-chaat", "Sweet Corn Chaat", "🌽", SNACKS, "1 cup", 140, 4.0, 28.0, 2.0),
+    Food("paneer-tikka", "Paneer Tikka", "🧀", SNACKS, "5 pieces", 240, 15.0, 5.0, 17.0),
+    Food("fruit-chaat", "Fruit Chaat", "🍉", SNACKS, "1 bowl", 110, 1.5, 26.0, 0.5),
+    Food("dabeli", "Dabeli", "🍔", SNACKS, "1 piece", 300, 6.0, 42.0, 12.0, piece = true),
+    Food("mirchi-bajji", "Mirchi Bajji", "🌶️", SNACKS, "2 pieces", 220, 4.0, 20.0, 14.0),
+    Food("aloo-bonda", "Aloo Bonda", "🥔", SNACKS, "2 pieces", 240, 4.0, 28.0, 12.0),
+    Food("popcorn", "Popcorn", "🍿", SNACKS, "2 cups", 110, 2.0, 13.0, 6.0),
+    Food("egg-puff", "Egg Puff", "🥐", SNACKS, "1 piece", 290, 7.0, 24.0, 18.0, Diet.EGG, piece = true),
     // sweets
     Food("gulab-jamun", "Gulab Jamun", "🟤", SWEETS, "1 piece", 150, 2.0, 22.0, 6.0, piece = true),
     Food("rasgulla", "Rasgulla", "⚪", SWEETS, "1 piece", 110, 2.0, 23.0, 1.0, piece = true),
@@ -151,6 +168,22 @@ val FOODS: List<Food> = listOf(
     Food("sooji-halwa", "Sooji Halwa", "🍮", SWEETS, "1 bowl", 330, 4.0, 45.0, 15.0),
     Food("gajar-halwa", "Gajar Halwa", "🥕", SWEETS, "1 bowl", 300, 6.0, 38.0, 14.0),
     Food("barfi", "Kaju Barfi", "💠", SWEETS, "1 piece", 140, 3.0, 16.0, 7.0, piece = true),
+    Food("rasmalai", "Rasmalai", "🍥", SWEETS, "2 pieces", 250, 8.0, 30.0, 11.0),
+    Food("motichoor-ladoo", "Motichoor Ladoo", "🟠", SWEETS, "1 ladoo", 160, 2.0, 22.0, 7.0, piece = true),
+    Food("mysore-pak", "Mysore Pak", "🟨", SWEETS, "1 piece", 190, 2.0, 16.0, 13.0, piece = true),
+    Food("peda", "Milk Peda", "🟤", SWEETS, "1 piece", 110, 2.5, 16.0, 4.0, piece = true),
+    Food("sandesh", "Sandesh", "⚪", SWEETS, "1 piece", 100, 4.0, 14.0, 3.0, piece = true),
+    Food("payasam", "Semiya Payasam", "🍮", SWEETS, "1 bowl", 230, 6.0, 34.0, 8.0),
+    Food("shrikhand", "Shrikhand", "🍨", SWEETS, "1 small bowl", 250, 6.0, 36.0, 9.0),
+    Food("kulfi", "Kulfi", "🍡", SWEETS, "1 stick", 180, 4.0, 20.0, 9.0, piece = true),
+    Food("malpua", "Malpua", "🥞", SWEETS, "1 piece", 220, 3.0, 28.0, 11.0, piece = true),
+    Food("coconut-ladoo", "Coconut Ladoo", "🥥", SWEETS, "1 ladoo", 130, 1.5, 14.0, 8.0, piece = true),
+    Food("dry-fruit-ladoo", "Dry Fruit Ladoo", "🟫", SWEETS, "1 ladoo", 140, 3.0, 14.0, 8.0, piece = true),
+    Food("puran-poli", "Puran Poli", "🫓", SWEETS, "1 piece", 290, 7.0, 50.0, 7.0, piece = true),
+    Food("modak", "Modak", "🥟", SWEETS, "1 piece", 110, 1.5, 17.0, 4.0, piece = true),
+    Food("basundi", "Basundi", "🍮", SWEETS, "1 small bowl", 260, 8.0, 30.0, 12.0),
+    Food("chikki", "Peanut Chikki", "🥜", SWEETS, "1 piece", 120, 3.5, 13.0, 6.5, piece = true),
+    Food("soan-papdi", "Soan Papdi", "🧈", SWEETS, "1 piece", 130, 1.5, 15.0, 7.0, piece = true),
     // western
     Food("veg-pizza", "Veg Pizza", "🍕", WESTERN, "1 slice", 200, 8.0, 26.0, 7.0, piece = true),
     Food("margherita-pizza", "Margherita Pizza", "🍕", WESTERN, "1 slice", 190, 8.0, 24.0, 7.0, piece = true),
@@ -226,7 +259,21 @@ val FOODS: List<Food> = listOf(
     Food("pomegranate", "Pomegranate", "🔴", FRUITS, "½ cup arils", 72, 1.5, 16.0, 1.0),
     Food("grapes", "Grapes", "🍇", FRUITS, "1 cup", 104, 1.0, 27.0, 0.2),
     Food("chikoo", "Chikoo", "🟤", FRUITS, "1 medium", 80, 0.5, 20.0, 1.0, piece = true),
-    Food("dates", "Dates", "🟫", FRUITS, "3 dates", 67, 0.6, 18.0, 0.0),
+    Food("dates", "Dates", "🟫", DRY_FRUITS, "3 dates", 67, 0.6, 18.0, 0.0),
+    Food("almonds", "Almonds (Badam)", "🌰", DRY_FRUITS, "10 almonds", 70, 2.5, 2.6, 6.0),
+    Food("cashews", "Cashews (Kaju)", "🥜", DRY_FRUITS, "10 cashews", 85, 2.7, 4.5, 6.6),
+    Food("walnuts", "Walnuts (Akhrot)", "🌰", DRY_FRUITS, "4 walnut halves", 92, 2.1, 1.9, 9.2),
+    Food("pistachios", "Pistachios (Pista)", "🥜", DRY_FRUITS, "20 pistachios", 85, 3.0, 4.2, 6.8),
+    Food("raisins", "Raisins (Kishmish)", "🍇", DRY_FRUITS, "1 tbsp", 45, 0.5, 12.0, 0.1),
+    Food("anjeer", "Dried Figs (Anjeer)", "🟤", DRY_FRUITS, "2 figs", 50, 0.7, 13.0, 0.2),
+    Food("apricots", "Dried Apricots (Khubani)", "🟠", DRY_FRUITS, "4 apricots", 70, 1.0, 18.0, 0.2),
+    Food("prunes", "Prunes", "🟣", DRY_FRUITS, "3 prunes", 60, 0.6, 16.0, 0.1),
+    Food("mixed-dry-fruits", "Mixed Dry Fruits", "🥜", DRY_FRUITS, "1 handful (30 g)", 150, 4.0, 10.0, 11.0),
+    Food("pumpkin-seeds", "Pumpkin Seeds", "🎃", DRY_FRUITS, "1 tbsp", 56, 3.0, 1.1, 4.9),
+    Food("sunflower-seeds", "Sunflower Seeds", "🌻", DRY_FRUITS, "1 tbsp", 58, 2.1, 2.0, 5.1),
+    Food("flax-seeds", "Flax Seeds (Alsi)", "🌾", DRY_FRUITS, "1 tbsp", 53, 1.8, 2.9, 4.2),
+    Food("chia-seeds", "Chia Seeds", "⚫", DRY_FRUITS, "1 tbsp", 58, 2.0, 5.0, 3.7),
+    Food("dry-coconut", "Dry Coconut (Kopra)", "🥥", DRY_FRUITS, "1 tbsp", 35, 0.4, 1.3, 3.4),
 )
 
 private val foodIndex = FOODS.associateBy { it.id }

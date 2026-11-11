@@ -70,6 +70,12 @@ interface Platform {
     fun vibrate()
     /** Reads a sample meal reminder out loud, as the voice reminders will. */
     fun previewMealVoice() {}
+    /** Whether the phone has a step counter sensor. */
+    val stepSensorAvailable: Boolean get() = false
+    /** Asks for the physical activity permission if needed, then reports whether steps can be counted. */
+    fun requestStepPermission(onResult: (Boolean) -> Unit) = onResult(false)
+    /** Starts or stops counting steps, in the app and in the background. */
+    fun setStepTracking(on: Boolean) {}
     /** Renders the report as a PDF and opens the share sheet. */
     fun exportReport(report: Report)
     /** Light or dark status/navigation bar icons to match the theme. */
@@ -171,6 +177,9 @@ private fun SignedIn(services: Services, platform: Platform, nav: Navigator, acc
     val plan = playPlan ?: summary?.razorpayPlan
     val isPro = plan != null || summary?.isPro == true
     val isAdmin = account.isAdmin || summary?.isAdmin == true
+    // The step counter is a Pro feature: it runs only while Pro is active and switched on.
+    val countSteps = isPro && store.prefs.stepsOn
+    LaunchedEffect(countSteps) { platform.setStepTracking(countSteps) }
     val upgrade = { nav.push(Route.Pro) }
     val openPage = { page: ProfilePage ->
         when (page) {
@@ -209,7 +218,7 @@ private fun SignedIn(services: Services, platform: Platform, nav: Navigator, acc
         Box(Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding)) {
             when (route) {
                 is Route.Tabs -> when (route.tab) {
-                    Tab.HOME -> DashboardScreen(store, account, isPro, plan, onUpgrade = upgrade, onOpen = nav::tab)
+                    Tab.HOME -> DashboardScreen(store, account, isPro, plan, platform, onUpgrade = upgrade, onOpen = nav::tab)
                     Tab.WATER -> WaterScreen(store, platform, onReminders = { nav.push(Route.Page(ProfilePage.WATER_REMINDERS)) })
                     Tab.FOOD -> FoodScreen(
                         store, platform,

@@ -16,6 +16,7 @@ import com.rotitrack.app.domain.Planner
 import com.rotitrack.app.domain.formatServings
 import com.rotitrack.app.i18n.I18n
 import com.rotitrack.app.store.AppStore
+import com.rotitrack.app.domain.Days
 import com.rotitrack.app.store.Storage
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -59,6 +60,17 @@ class DietLogicTest {
                 (foods.flatMap { listOf(it.name, it.serving) } + listOf("Western", "Chinese"))
                     .forEach { assertNotNull("$code: $it", table[it]) }
             }
+        }
+    }
+
+    @Test fun dryFruitsSnacksAndSweetsAreListedAndTranslated() {
+        assertTrue(FOODS.count { it.category == FoodCategory.DRY_FRUITS } >= 12)
+        assertTrue(FOODS.count { it.category == FoodCategory.SNACKS } >= 30)
+        assertTrue(FOODS.count { it.category == FoodCategory.SWEETS } >= 24)
+        val foods = FOODS.filter { it.category in listOf(FoodCategory.DRY_FRUITS, FoodCategory.SNACKS, FoodCategory.SWEETS) }
+        for (code in listOf("hi", "kn", "te", "ta", "mr", "bn", "gu")) {
+            val table = I18n.table(code)
+            (foods.flatMap { listOf(it.name, it.serving) } + "Dry fruits").forEach { assertNotNull("$code: $it", table[it]) }
         }
     }
 
@@ -137,5 +149,45 @@ class DietLogicTest {
     @Test fun corruptSaveFallsBackToDefaults() {
         val store = AppStore(MemoryStorage("{not json"))
         assertFalse(store.profile.onboarded)
+    }
+}
+
+class StepsTest {
+    @Test fun firstReadingOnlySetsTheStart() {
+        val (steps, last) = com.rotitrack.app.domain.Steps.record(emptyMap(), -1, 12_000, "2026-11-11")
+        org.junit.Assert.assertEquals(emptyMap<String, Int>(), steps)
+        org.junit.Assert.assertEquals(12_000L, last)
+    }
+
+    @Test fun readingsAddUpPerDayAndSurviveARestart() {
+        val s = com.rotitrack.app.domain.Steps
+        var (steps, last) = s.record(emptyMap(), 12_000, 12_500, "2026-11-11")
+        org.junit.Assert.assertEquals(500, steps["2026-11-11"])
+        s.record(steps, last, 13_000, "2026-11-11").let { steps = it.first; last = it.second }
+        org.junit.Assert.assertEquals(1_000, steps["2026-11-11"])
+        // Phone restarted: the counter starts again from zero, so 300 are new steps.
+        s.record(steps, last, 300, "2026-11-11").let { steps = it.first; last = it.second }
+        org.junit.Assert.assertEquals(1_300, steps["2026-11-11"])
+        // A new day starts its own count.
+        s.record(steps, last, 900, "2026-11-12").let { steps = it.first; last = it.second }
+        org.junit.Assert.assertEquals(600, steps["2026-11-12"])
+        // A sensor glitch is ignored.
+        org.junit.Assert.assertEquals(600, s.record(steps, last, 900 + 60_000, "2026-11-12").first["2026-11-12"])
+    }
+
+    @Test fun stepsCountAsCaloriesBurned() {
+        org.junit.Assert.assertEquals(40, com.rotitrack.app.domain.Steps.kcal(1_000, 70.0))
+        val store = AppStore(object : Storage {
+            var t: String? = null
+            override fun load() = t
+            override fun save(text: String) { t = text }
+            override fun clear() { t = null }
+        })
+        val today = Days.today()
+        store.updateProfile { it.copy(weightKg = 70.0) }
+        store.recordStepCounter(1_000, today)
+        store.recordStepCounter(6_000, today)
+        org.junit.Assert.assertEquals(5_000, store.stepsFor(today))
+        org.junit.Assert.assertEquals(200, store.burned(today))
     }
 }

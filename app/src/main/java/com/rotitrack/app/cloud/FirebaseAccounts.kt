@@ -24,6 +24,7 @@ import com.rotitrack.app.account.AuthException
 import com.rotitrack.app.account.AuthService
 import com.rotitrack.app.account.UserDirectory
 import com.rotitrack.app.account.UserSummary
+import com.rotitrack.app.account.ReferralMonth
 import com.rotitrack.app.account.normalizeReferralCode
 import com.rotitrack.app.account.REFERRAL_CODE_ATTEMPTS
 import com.rotitrack.app.account.referralCodeFor
@@ -314,5 +315,9 @@ class FirestoreDirectory : UserDirectory {
         referralMonth = getString("referralMonth").orEmpty(),
         referralMonthYearly = getLong("referralMonthYearly")?.toInt() ?: 0,
         referralMonthBonus = getLong("referralMonthBonus")?.toInt() ?: 0,
+        referralMonths = (get("referralMonths") as? Map<*, *>).orEmpty().mapNotNull { (k, v) ->
+            val m = v as? Map<*, *> ?: return@mapNotNull null
+            k.toString() to ReferralMonth((m["yearly"] as? Number)?.toInt() ?: 0, (m["bonus"] as? Number)?.toInt() ?: 0)
+        }.toMap(),
     )
 }

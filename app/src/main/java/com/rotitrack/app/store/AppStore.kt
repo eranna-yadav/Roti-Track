@@ -22,6 +22,7 @@ import com.rotitrack.app.data.WaterEntry
 import com.rotitrack.app.data.builtinFood
 import com.rotitrack.app.data.drinkById
 import com.rotitrack.app.domain.Days
+import com.rotitrack.app.domain.Steps
 import com.rotitrack.app.domain.Nutrition
 import com.rotitrack.app.domain.PlannedMeal
 import com.rotitrack.app.domain.Planner
@@ -171,7 +172,21 @@ class AppStore(private val storage: Storage) {
 
     fun exercisesForDay(day: String): List<ExerciseEntry> = state.exercises.filter { it.day == day }.sortedBy { it.ts }
 
-    fun burned(day: String): Int = state.exercises.filter { it.day == day }.sumOf { it.kcal }
+    /** Logged exercise plus walking counted by the step counter. */
+    fun burned(day: String): Int = state.exercises.filter { it.day == day }.sumOf { it.kcal } + stepKcal(day)
+
+    // ------------------------------------------------------------------ steps
+
+    /** Adds a reading of the phone's step counter (steps since the phone started). */
+    fun recordStepCounter(counter: Long, day: String = Days.today()) {
+        val (steps, last) = Steps.record(state.steps, state.stepCounterLast, counter, day)
+        if (steps == state.steps && last == state.stepCounterLast) return
+        update { it.copy(steps = steps, stepCounterLast = last) }
+    }
+
+    fun stepsFor(day: String): Int = state.steps[day] ?: 0
+
+    fun stepKcal(day: String): Int = Steps.kcal(stepsFor(day), profile.weightKg)
 
     // ----------------------------------------------------------------- weight
 

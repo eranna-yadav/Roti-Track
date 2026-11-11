@@ -76,6 +76,8 @@ data class UserSummary(
     val referralMonth: String = "",
     val referralMonthYearly: Int = 0,
     val referralMonthBonus: Int = 0,
+    /** Server-maintained: month ("2026-11", India time) → yearly sales with this user's code and the bonus paid. */
+    val referralMonths: Map<String, ReferralMonth> = emptyMap(),
 ) {
     val referralDue: Int get() = (referralEarnings - referralPaid).coerceAtLeast(0)
 
@@ -92,6 +94,10 @@ data class UserSummary(
     /** Has never subscribed, so a referral code can still give the first-year price. */
     val firstSubscription: Boolean get() = razorpayPlanId == null && planId == null
 }
+
+/** One month of a promoter's referrals: yearly plans sold with their code, and the bonus reached. */
+@kotlinx.serialization.Serializable
+data class ReferralMonth(val yearly: Int = 0, val bonus: Int = 0)
 
 /**
  * Why [code] can't give [me] the yearly plan's referral price, or null when it can.

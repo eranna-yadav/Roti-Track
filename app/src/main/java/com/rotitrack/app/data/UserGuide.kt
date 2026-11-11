@@ -110,7 +110,7 @@ val USER_GUIDE: List<GuidePage> = listOf(
             ),
             GuideFeature(
                 "➕", "Log food",
-                "Search 190+ foods, from idli, dosa, dal, sabzi, biryani and sweets to popular Western and Chinese dishes, with nutrition per serving.",
+                "Search 240+ foods, from idli, dosa, dal, sabzi, biryani and sweets to popular Western and Chinese dishes, with nutrition per serving.",
                 listOf(
                     "Tap + on Breakfast, Lunch, Evening Snack or Dinner.",
                     "Search by name (in English or your language), or pick from Recent.",

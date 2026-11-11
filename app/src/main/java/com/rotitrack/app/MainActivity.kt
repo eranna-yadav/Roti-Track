@@ -49,6 +49,7 @@ import com.rotitrack.app.reminders.mealReminderText
 import com.rotitrack.app.report.PdfReport
 import com.rotitrack.app.reminders.Reminders
 import com.rotitrack.app.reminders.WaterSounds
+import com.rotitrack.app.steps.StepCounter
 import com.rotitrack.app.ui.App
 import com.rotitrack.app.ui.Navigator
 import com.rotitrack.app.ui.Platform
@@ -78,6 +79,7 @@ class MainActivity : ComponentActivity(), Platform, PaymentResultWithDataListene
         super.onResume()
         rotiTrack.currentActivity = this
         rotiTrack.services.billing.restore()
+        if (stepsWanted) StepCounter.startLive(this)
         // Picks up a change made in system settings, and makes pending reminders exact once allowed.
         val allowed = Alarms.exactAllowed(this)
         if (allowed != exactOk) {
@@ -98,7 +100,28 @@ class MainActivity : ComponentActivity(), Platform, PaymentResultWithDataListene
 
     override fun onPause() {
         if (rotiTrack.currentActivity === this) rotiTrack.currentActivity = null
+        StepCounter.stopLive(this)
         super.onPause()
+    }
+
+    /** Set by the app while Pro step counting is switched on. */
+    private var stepsWanted = false
+
+    override val stepSensorAvailable: Boolean get() = StepCounter.available(this)
+
+    override fun requestStepPermission(onResult: (Boolean) -> Unit) {
+        if (StepCounter.permitted(this)) {
+            onResult(true)
+            return
+        }
+        pendingResult = onResult
+        permissionLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
+    }
+
+    override fun setStepTracking(on: Boolean) {
+        stepsWanted = on
+        StepCounter.schedule(this, on)
+        if (on) StepCounter.startLive(this) else StepCounter.stopLive(this)
     }
 
     override fun requestNotifications(onResult: (Boolean) -> Unit) {
@@ -123,6 +146,7 @@ class MainActivity : ComponentActivity(), Platform, PaymentResultWithDataListene
         if (uid == null) {
             Reminders.cancel(this)
             MealReminders.cancelAll(this)
+            setStepTracking(false)
         } else {
             rotiTrack.services.billing.restore()
             val store = rotiTrack.storeFor(uid)

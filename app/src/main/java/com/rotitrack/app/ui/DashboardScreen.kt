@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -35,6 +36,7 @@ import com.rotitrack.app.account.Account
 import com.rotitrack.app.account.Plan
 import com.rotitrack.app.data.MealSlot
 import com.rotitrack.app.domain.Days
+import com.rotitrack.app.domain.Steps
 import com.rotitrack.app.domain.Nutrition
 import com.rotitrack.app.store.AppStore
 import java.time.LocalDate
@@ -50,6 +52,7 @@ fun DashboardScreen(
     account: Account,
     isPro: Boolean,
     plan: Plan?,
+    platform: Platform,
     onUpgrade: () -> Unit,
     onOpen: (Tab) -> Unit,
 ) {
@@ -121,6 +124,8 @@ fun DashboardScreen(
             Spacer(Modifier.height(12.dp))
         }
 
+        item { StepsCard(store, isPro, platform, onUpgrade) }
+
         item {
             AppCard(color = Palette.saffronSoft, onClick = { onOpen(Tab.PLAN) }) {
                 Text(t("UP NEXT · {0} · {1}", next.slot.label.uppercase(), next.slot.time), style = Type.tiny)
@@ -151,6 +156,66 @@ fun DashboardScreen(
             }
         } else if (plan != null) {
             item { Text(t("Pro · {0} plan", plan.label), style = Type.small, modifier = Modifier.padding(top = 4.dp)) }
+        }
+    }
+}
+
+/** Pro: today's steps from the phone's step counter, with the goal and calories burned. */
+@Composable
+private fun StepsCard(store: AppStore, isPro: Boolean, platform: Platform, onUpgrade: () -> Unit) {
+    val p = store.profile
+    val steps = store.stepsFor(today)
+    val goal = store.prefs.stepGoal
+    var problem by remember { mutableStateOf<String?>(null) }
+    when {
+        !isPro -> AppCard(onClick = onUpgrade) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("👟", fontSize = 28.sp)
+                Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
+                    Text(t("Step counter 🔒"), style = Type.title)
+                    Text(t("Count your steps automatically and add the calories you burn walking. A Pro feature."), style = Type.small)
+                }
+                Text(t("Go Pro"), style = Type.small.copy(color = Palette.brand, fontWeight = FontWeight.ExtraBold))
+            }
+        }
+        !store.prefs.stepsOn -> AppCard {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("👟", fontSize = 28.sp)
+                Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
+                    Text(t("Step counter"), style = Type.title)
+                    Text(t("Count your steps automatically and add the calories you burn walking."), style = Type.small)
+                }
+            }
+            problem?.let { Text(it, style = Type.small.copy(color = Palette.danger), modifier = Modifier.padding(top = 8.dp)) }
+            PillButton(
+                t("Turn on"),
+                {
+                    if (!platform.stepSensorAvailable) {
+                        problem = t("This phone doesn't have a step sensor.")
+                    } else {
+                        platform.requestStepPermission { ok ->
+                            if (ok) store.updatePrefs { it.copy(stepsOn = true) }
+                            else problem = t("Allow \"Physical activity\" for Roti Track in your phone's settings to count steps.")
+                        }
+                    }
+                },
+                Modifier.fillMaxWidth().padding(top = 10.dp), height = 44.dp,
+            )
+        }
+        else -> AppCard {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("👟", fontSize = 28.sp)
+                Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
+                    Text(t("Steps"), style = Type.small)
+                    Text("%,d".format(java.util.Locale.ENGLISH, steps), style = Type.h2)
+                }
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(t("≈ {0} kcal", store.stepKcal(today)), style = Type.title)
+                    Text(t("{0} km", "%.1f".format(Steps.km(steps, p.heightCm))), style = Type.small)
+                }
+            }
+            Spacer(Modifier.height(10.dp))
+            Progress(t("Daily goal"), "%,d".format(java.util.Locale.ENGLISH, goal), steps.toFloat() / goal, Palette.leaf)
         }
     }
 }
