@@ -169,6 +169,21 @@ fun SleepScreen(store: AppStore, platform: Platform, onBack: () -> Unit) {
                 style = Type.small, modifier = Modifier.padding(bottom = 16.dp),
             )
         }
+        Spacer(Modifier.height(12.dp))
+        SettingsGroup {
+            Column(Modifier.padding(vertical = 8.dp)) {
+                ToggleLine(
+                    t("🔊 Voice reminders"), store.prefs.sleepVoice,
+                    t("Bedtime and wake-up reminders are spoken in a gentle voice. Quiet when the phone is on silent or Do Not Disturb."),
+                ) { on -> store.updatePrefs { it.copy(sleepVoice = on) } }
+                if (store.prefs.sleepVoice) {
+                    Text(
+                        t("▶ Try it"), style = Type.body.copy(color = Palette.brand, fontWeight = FontWeight.Bold),
+                        modifier = Modifier.clickable { platform.previewSleepVoice() }.padding(vertical = 8.dp),
+                    )
+                }
+            }
+        }
 
         val recent = log.entries.sortedByDescending { it.end }.take(10)
         if (recent.isNotEmpty()) {

@@ -70,6 +70,8 @@ interface Platform {
     fun vibrate()
     /** Reads a sample meal reminder out loud, as the voice reminders will. */
     fun previewMealVoice() {}
+    /** Speaks one of the bedtime or wake-up messages. */
+    fun previewSleepVoice() {}
     /** Whether the phone has a step counter sensor. */
     val stepSensorAvailable: Boolean get() = false
     /** Asks for the physical activity permission if needed, then reports whether steps can be counted. */

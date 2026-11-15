@@ -213,6 +213,8 @@ data class Prefs(
     val sleepGoalMin: Int = 480,
     /** "bedtime" and "wake" reminders on the Sleep screen. */
     val sleepReminders: List<MealReminder> = DEFAULT_SLEEP_REMINDERS,
+    /** Sleep reminders are also spoken in a gentle voice. */
+    val sleepVoice: Boolean = true,
 )
 
 @Serializable

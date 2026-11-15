@@ -49,6 +49,7 @@ import com.rotitrack.app.reminders.mealReminderText
 import com.rotitrack.app.report.PdfReport
 import com.rotitrack.app.reminders.Reminders
 import com.rotitrack.app.reminders.SleepReminders
+import com.rotitrack.app.reminders.sleepReminderText
 import com.rotitrack.app.reminders.WaterSounds
 import com.rotitrack.app.steps.StepCounter
 import com.rotitrack.app.ui.App
@@ -235,6 +236,16 @@ class MainActivity : ComponentActivity(), Platform, PaymentResultWithDataListene
         val variant = (0..2).random()
         val (title, text) = mealReminderText(key, I18n.lang, name, variant)
         val (enTitle, enText) = mealReminderText(key, "en", name, variant)
+        MealVoice.speak(this, MealVoice.sentence(title, text), MealVoice.sentence(enTitle, enText))
+    }
+
+    override fun previewSleepVoice() {
+        val name = rotiTrack.activeStore?.profile?.name.orEmpty()
+        // A different message on each tap, so all of them can be heard.
+        val key = listOf("bedtime", "wake").random()
+        val variant = (0..4).random()
+        val (title, text) = sleepReminderText(key, I18n.lang, name, variant)
+        val (enTitle, enText) = sleepReminderText(key, "en", name, variant)
         MealVoice.speak(this, MealVoice.sentence(title, text), MealVoice.sentence(enTitle, enText))
     }
 

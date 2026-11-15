@@ -1,5 +1,6 @@
 package com.rotitrack.app.reminders
 
+import com.rotitrack.app.i18n.I18n
 import com.rotitrack.app.i18n.t
 import android.Manifest
 import android.annotation.SuppressLint
@@ -19,7 +20,6 @@ import com.rotitrack.app.R
 import com.rotitrack.app.data.MealReminder
 import com.rotitrack.app.domain.Days
 import com.rotitrack.app.rotiTrack
-import com.rotitrack.app.ui.sleepDuration
 import java.time.LocalDateTime
 import java.time.ZoneId
 
@@ -64,11 +64,13 @@ object SleepReminders {
 
     private fun intent(key: String) = Intent(Alarms.ACTION_SLEEP).putExtra(Alarms.EXTRA_KEY, key)
 
+    /** Returns false when notifications aren't allowed, so nothing was shown. */
     @SuppressLint("MissingPermission") // checked on the first line
-    fun notify(context: Context, title: String, text: String, button: Pair<String, String>?) {
+    fun notify(context: Context, title: String, text: String, button: Pair<String, String>?): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
-        ) return
+        ) return false
+        if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) return false
         val open = PendingIntent.getActivity(
             context, NOTIFICATION_ID, Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
             PendingIntent.FLAG_IMMUTABLE,
@@ -88,34 +90,40 @@ object SleepReminders {
             builder.addAction(0, label, pi)
         }
         NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, builder.build())
+        return true
     }
 }
 
+/** Gap between the notification sound and the voice. */
+private const val VOICE_DELAY_MS = 2_000L
+
 /**
- * Bedtime: skipped if the sleep timer is already running. Wake-up: offers "I'm awake" while it
- * runs, asks to log the night if nothing is logged yet, and stays quiet otherwise.
+ * Bedtime: a sweet good-night, skipped if the sleep timer is already running (they're asleep).
+ * Wake-up: a cheerful good-morning, with "I'm awake" while the timer runs, or a nudge to log the
+ * night if nothing is logged. Both are spoken when voice is on. Blocks while the voice speaks,
+ * so call it off the main thread.
  */
 fun runSleepReminder(context: Context, key: String) {
     val store = context.rotiTrack.activeStore ?: return
     // Tomorrow's alarm first, so a failure below can't stop the reminders.
     SleepReminders.schedule(context, store.prefs.sleepReminders)
     val sleeping = store.state.sleep.activeStart != null
-    when (key) {
-        "bedtime" -> if (!sleeping) SleepReminders.notify(
-            context,
-            t("Time for bed 🌙"),
-            t("Put the phone away and aim for {0} of sleep. Tap Going to sleep when you lie down.", sleepDuration(store.prefs.sleepGoalMin)),
-            t("🌙 Going to sleep") to SleepReminders.ACTION_START,
-        )
-        "wake" -> when {
-            sleeping -> SleepReminders.notify(
-                context, t("Good morning ☀️"), t("Tap I'm awake to save last night's sleep."),
-                t("☀️ I'm awake") to SleepReminders.ACTION_END,
-            )
-            store.sleepMinutes(Days.today()) == 0 -> SleepReminders.notify(
-                context, t("Good morning ☀️"), t("How did you sleep? Log last night in Roti Track."), null,
-            )
+    if (key == "bedtime" && sleeping) return
+    val name = store.profile.name
+    val (title, text) = sleepReminderText(key, I18n.lang, name)
+    val shown = when (key) {
+        "bedtime" -> SleepReminders.notify(context, title, text, t("🌙 Going to sleep") to SleepReminders.ACTION_START)
+        else -> when {
+            sleeping -> SleepReminders.notify(context, title, text + "\n" + t("Tap I'm awake to save last night's sleep."), t("☀️ I'm awake") to SleepReminders.ACTION_END)
+            store.sleepMinutes(Days.today()) == 0 -> SleepReminders.notify(context, title, text + "\n" + t("How did you sleep? Log last night in Roti Track."), null)
+            else -> SleepReminders.notify(context, title, text, null)
         }
+    }
+    if (shown && store.prefs.sleepVoice && MealVoice.allowed(context)) {
+        val (enTitle, enText) = sleepReminderText(key, "en", name)
+        // Let the notification sound finish first so the voice is heard clearly.
+        Thread.sleep(VOICE_DELAY_MS)
+        MealVoice.speakAndWait(context, MealVoice.sentence(title, text), MealVoice.sentence(enTitle, enText), timeoutSeconds = 25)
     }
 }
 
