@@ -262,7 +262,7 @@ private fun SignedIn(services: Services, platform: Platform, nav: Navigator, acc
                     ProfilePage.LANGUAGE -> LanguageScreen(store, onBack = nav::pop)
                     ProfilePage.GOALS -> NutritionGoalsScreen(store, onBack = nav::pop)
                     ProfilePage.FASTING -> FastingScreen(store, onBack = nav::pop)
-                    ProfilePage.SLEEP -> SleepScreen(store, onBack = nav::pop)
+                    ProfilePage.SLEEP -> SleepScreen(store, platform, onBack = nav::pop)
                     ProfilePage.REMINDERS -> TrackingRemindersScreen(store, platform, onWaterReminders = { nav.push(Route.Page(ProfilePage.WATER_REMINDERS)) }, onBack = nav::pop)
                     ProfilePage.WATER_REMINDERS -> WaterRemindersScreen(store, platform, onBack = nav::pop)
                     ProfilePage.REFERRAL -> ReferralScreen(store, account, summary, platform, onRules = { nav.push(Route.Page(ProfilePage.REFERRAL_RULES)) }, onBack = nav::pop)

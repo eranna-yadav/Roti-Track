@@ -126,7 +126,7 @@ fun TrackingRemindersScreen(store: AppStore, platform: Platform, onWaterReminder
 }
 
 @Composable
-private fun ReminderRow(r: MealReminder, last: Boolean, onTime: () -> Unit, onToggle: (Boolean) -> Unit) {
+internal fun ReminderRow(r: MealReminder, last: Boolean, onTime: () -> Unit, onToggle: (Boolean) -> Unit) {
     Column {
         Row(Modifier.fillMaxWidth().padding(vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(t(r.label), style = Type.title, modifier = Modifier.weight(1f))

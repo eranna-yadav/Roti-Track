@@ -16,6 +16,7 @@ import kotlin.concurrent.thread
 object Alarms {
     const val ACTION_WATER = "com.rotitrack.app.WATER_REMINDER"
     const val ACTION_MEAL = "com.rotitrack.app.MEAL_REMINDER"
+    const val ACTION_SLEEP = "com.rotitrack.app.SLEEP_REMINDER"
     const val EXTRA_AT = "at"
     const val EXTRA_KEY = "key"
 
@@ -49,6 +50,7 @@ object Alarms {
         val store = context.rotiTrack.activeStore ?: return
         Reminders.schedule(context, store.profile, store.prefs)
         MealReminders.schedule(context, store.prefs.mealReminders)
+        SleepReminders.schedule(context, store.prefs.sleepReminders)
     }
 }
 
@@ -62,6 +64,7 @@ class ReminderAlarmReceiver : BroadcastReceiver() {
                 when (intent.action) {
                     Alarms.ACTION_WATER -> runWaterReminder(app, intent.getLongExtra(Alarms.EXTRA_AT, 0L))
                     Alarms.ACTION_MEAL -> intent.getStringExtra(Alarms.EXTRA_KEY)?.let { runMealReminder(app, it) }
+                    Alarms.ACTION_SLEEP -> intent.getStringExtra(Alarms.EXTRA_KEY)?.let { runSleepReminder(app, it) }
                 }
             } finally {
                 result.finish()

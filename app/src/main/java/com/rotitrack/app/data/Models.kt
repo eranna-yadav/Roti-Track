@@ -135,6 +135,11 @@ val DEFAULT_MEAL_REMINDERS = listOf(
     MealReminder("end_of_day", "End of Day", 21, 0),
 )
 
+val DEFAULT_SLEEP_REMINDERS = listOf(
+    MealReminder("bedtime", "Bedtime", 22, 30, enabled = false),
+    MealReminder("wake", "Wake-up", 6, 30, enabled = false),
+)
+
 @Serializable enum class WaterReminderMode(private val labelEn: String, private val blurbEn: String) {
     STANDARD("Standard", "Based on your sleep and meal schedule"),
     INTERVAL("Interval", "A reminder every so often while you're awake"),
@@ -206,6 +211,8 @@ data class Prefs(
     val stepGoal: Int = 8000,
     /** Sleep goal in minutes. */
     val sleepGoalMin: Int = 480,
+    /** "bedtime" and "wake" reminders on the Sleep screen. */
+    val sleepReminders: List<MealReminder> = DEFAULT_SLEEP_REMINDERS,
 )
 
 @Serializable

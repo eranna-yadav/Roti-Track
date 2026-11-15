@@ -48,6 +48,7 @@ import com.rotitrack.app.reminders.MealVoice
 import com.rotitrack.app.reminders.mealReminderText
 import com.rotitrack.app.report.PdfReport
 import com.rotitrack.app.reminders.Reminders
+import com.rotitrack.app.reminders.SleepReminders
 import com.rotitrack.app.reminders.WaterSounds
 import com.rotitrack.app.steps.StepCounter
 import com.rotitrack.app.ui.App
@@ -139,6 +140,7 @@ class MainActivity : ComponentActivity(), Platform, PaymentResultWithDataListene
         val prefs = rotiTrack.activeStore?.prefs ?: Prefs()
         Reminders.schedule(this, profile, prefs)
         MealReminders.schedule(this, prefs.mealReminders)
+        SleepReminders.schedule(this, prefs.sleepReminders)
     }
 
     override fun sessionChanged(uid: String?) {
@@ -146,12 +148,14 @@ class MainActivity : ComponentActivity(), Platform, PaymentResultWithDataListene
         if (uid == null) {
             Reminders.cancel(this)
             MealReminders.cancelAll(this)
+            SleepReminders.cancelAll(this)
             setStepTracking(false)
         } else {
             rotiTrack.services.billing.restore()
             val store = rotiTrack.storeFor(uid)
             Reminders.schedule(this, store.profile, store.prefs)
             MealReminders.schedule(this, store.prefs.mealReminders)
+            SleepReminders.schedule(this, store.prefs.sleepReminders)
         }
     }
 

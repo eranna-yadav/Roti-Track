@@ -24,6 +24,7 @@ import kotlinx.coroutines.tasks.await
 import com.rotitrack.app.i18n.I18n
 import com.rotitrack.app.reminders.MealReminders
 import com.rotitrack.app.reminders.Reminders
+import com.rotitrack.app.reminders.SleepReminders
 import com.rotitrack.app.store.AndroidStorage
 import com.rotitrack.app.store.AppStore
 
@@ -56,6 +57,7 @@ class RotiTrackApp : Application() {
         I18n.lang = I18n.resolve(activeUid?.let { storeFor(it).prefs.language }.orEmpty())
         Reminders.createChannel(this)
         MealReminders.createChannel(this)
+        SleepReminders.createChannel(this)
 
         val (auth, directory) = if (usesFirebase) {
             val dir = FirestoreDirectory()

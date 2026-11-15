@@ -32,6 +32,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.rotitrack.app.data.MealReminder
 import com.rotitrack.app.data.SleepEntry
 import com.rotitrack.app.domain.Days
 import com.rotitrack.app.domain.Sleep
@@ -53,7 +54,7 @@ private fun qualityLabel(q: Int): String = when (q) {
 }
 
 @Composable
-fun SleepScreen(store: AppStore, onBack: () -> Unit) {
+fun SleepScreen(store: AppStore, platform: Platform, onBack: () -> Unit) {
     val log = store.state.sleep
     val goal = store.prefs.sleepGoalMin
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
@@ -66,6 +67,13 @@ fun SleepScreen(store: AppStore, onBack: () -> Unit) {
     val time = SimpleDateFormat("h:mm a", com.rotitrack.app.i18n.I18n.locale)
     val dayTime = SimpleDateFormat("EEE d MMM", com.rotitrack.app.i18n.I18n.locale)
     var manual by remember { mutableStateOf(false) }
+    var editing by remember { mutableStateOf<MealReminder?>(null) }
+
+    fun saveReminder(r: MealReminder) {
+        store.updatePrefs { pr -> pr.copy(sleepReminders = pr.sleepReminders.map { if (it.key == r.key) r else it }) }
+        if (r.enabled) platform.requestNotifications { platform.scheduleReminders(store.profile) }
+        else platform.scheduleReminders(store.profile)
+    }
 
     SubScreen(t("Sleep"), onBack) {
         AppCard(color = Palette.night) {
@@ -144,10 +152,35 @@ fun SleepScreen(store: AppStore, onBack: () -> Unit) {
             Text(t("Most adults need 7–9 hours of sleep. Good sleep helps control hunger and weight."), style = Type.small, modifier = Modifier.padding(top = 8.dp))
         }
 
+        SectionLabel(t("Reminders"))
+        val reminders = store.prefs.sleepReminders
+        if (reminders.any { it.enabled } && !platform.notificationsEnabled()) {
+            Banner(
+                t("Notifications are currently turned off for Roti Track.\nTo get reminders, allow notifications in system settings."),
+                t("Open Settings"),
+            ) { platform.openNotificationSettings() }
+        }
+        SettingsGroup {
+            reminders.forEachIndexed { i, r ->
+                ReminderRow(r, last = i == reminders.lastIndex, onTime = { editing = r }, onToggle = { saveReminder(r.copy(enabled = it)) })
+            }
+            Text(
+                t("Bedtime reminds you to wind down. Wake-up reminds you to stop the sleep timer. Tap the button on the reminder, no need to open the app."),
+                style = Type.small, modifier = Modifier.padding(bottom = 16.dp),
+            )
+        }
+
         val recent = log.entries.sortedByDescending { it.end }.take(10)
         if (recent.isNotEmpty()) {
             SectionLabel(t("Recent nights"))
             recent.forEach { e -> SleepRow(e, dayTime.format(Date(e.end)), "${time.format(Date(e.start))} → ${time.format(Date(e.end))}") { store.removeSleep(e.id) } }
+        }
+    }
+
+    editing?.let { r ->
+        TimeDialog(r.hour, r.minute, onDismiss = { editing = null }) { h, m ->
+            saveReminder(r.copy(hour = h, minute = m, enabled = true))
+            editing = null
         }
     }
 }
