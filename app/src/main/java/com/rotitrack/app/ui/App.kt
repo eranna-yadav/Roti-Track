@@ -218,7 +218,7 @@ private fun SignedIn(services: Services, platform: Platform, nav: Navigator, acc
         Box(Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding)) {
             when (route) {
                 is Route.Tabs -> when (route.tab) {
-                    Tab.HOME -> DashboardScreen(store, account, isPro, plan, platform, onUpgrade = upgrade, onOpen = nav::tab, onSleep = { nav.push(Route.Page(ProfilePage.SLEEP)) })
+                    Tab.HOME -> DashboardScreen(store, account, isPro, plan, platform, onUpgrade = upgrade, onOpen = nav::tab, onSleep = { nav.push(Route.Page(ProfilePage.SLEEP)) }, onSteps = { nav.push(Route.Page(ProfilePage.STEPS)) })
                     Tab.WATER -> WaterScreen(store, platform, onReminders = { nav.push(Route.Page(ProfilePage.WATER_REMINDERS)) })
                     Tab.FOOD -> FoodScreen(
                         store, platform,
@@ -263,6 +263,7 @@ private fun SignedIn(services: Services, platform: Platform, nav: Navigator, acc
                     ProfilePage.GOALS -> NutritionGoalsScreen(store, onBack = nav::pop)
                     ProfilePage.FASTING -> FastingScreen(store, onBack = nav::pop)
                     ProfilePage.SLEEP -> SleepScreen(store, platform, onBack = nav::pop)
+                    ProfilePage.STEPS -> StepsScreen(store, onBack = nav::pop)
                     ProfilePage.REMINDERS -> TrackingRemindersScreen(store, platform, onWaterReminders = { nav.push(Route.Page(ProfilePage.WATER_REMINDERS)) }, onBack = nav::pop)
                     ProfilePage.WATER_REMINDERS -> WaterRemindersScreen(store, platform, onBack = nav::pop)
                     ProfilePage.REFERRAL -> ReferralScreen(store, account, summary, platform, onRules = { nav.push(Route.Page(ProfilePage.REFERRAL_RULES)) }, onBack = nav::pop)

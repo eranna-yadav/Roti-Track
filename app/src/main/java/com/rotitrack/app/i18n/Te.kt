@@ -1213,4 +1213,13 @@ internal val TE: Map<String, String> = mapOf(
     "Tap I'm awake to save last night's sleep." to "గత రాత్రి నిద్రను సేవ్ చేయడానికి 'నేను లేచాను' ట్యాప్ చేయండి.",
     "How did you sleep? Log last night in Roti Track." to "నిద్ర ఎలా జరిగింది? గత రాత్రి నిద్రను Roti Track లో నమోదు చేయండి.",
     "Bedtime reminds you to wind down. Wake-up reminds you to stop the sleep timer. Tap the button on the reminder, no need to open the app." to "నిద్ర రిమైండర్ విశ్రాంతి తీసుకోమని గుర్తు చేస్తుంది. లేచే రిమైండర్ నిద్ర టైమర్ ఆపమని గుర్తు చేస్తుంది. రిమైండర్‌పై బటన్ ట్యాప్ చేయండి, యాప్ తెరవాల్సిన అవసరం లేదు.",
+    "of {0} steps" to "{0} అడుగులలో",
+    "Distance" to "దూరం",
+    "Steps to go" to "మిగిలిన అడుగులు",
+    "History" to "చరిత్ర",
+    "Best day" to "ఉత్తమ రోజు",
+    "Total distance" to "మొత్తం దూరం",
+    "See history ›" to "చరిత్ర చూడండి ›",
+    "8,000–10,000 steps a day is a good target for weight loss. Start lower and add 500 each week." to "బరువు తగ్గడానికి రోజుకు 8,000–10,000 అడుగులు మంచి లక్ష్యం. తక్కువతో మొదలుపెట్టి ప్రతి వారం 500 పెంచండి.",
+    "Your phone counts steps in the background, even when Roti Track is closed. Keep the phone in your pocket or hand while you walk. Steps add calories burned on the Food tab, like exercise." to "Roti Track మూసి ఉన్నా మీ ఫోన్ బ్యాక్‌గ్రౌండ్‌లో అడుగులు లెక్కిస్తుంది. నడిచేటప్పుడు ఫోన్ జేబులో లేదా చేతిలో ఉంచండి. అడుగుల కేలరీలు వ్యాయామం లాగే ఫుడ్ ట్యాబ్‌లో ఖర్చైన కేలరీలకు కలుస్తాయి.",
 )

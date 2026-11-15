@@ -1213,4 +1213,13 @@ internal val TA: Map<String, String> = mapOf(
     "Tap I'm awake to save last night's sleep." to "நேற்றிரவு தூக்கத்தைச் சேமிக்க 'நான் எழுந்துவிட்டேன்' தட்டவும்.",
     "How did you sleep? Log last night in Roti Track." to "தூக்கம் எப்படி இருந்தது? நேற்றிரவு தூக்கத்தை Roti Track-இல் பதிவு செய்யுங்கள்.",
     "Bedtime reminds you to wind down. Wake-up reminds you to stop the sleep timer. Tap the button on the reminder, no need to open the app." to "தூங்கும் நினைவூட்டல் ஓய்வெடுக்க நினைவூட்டுகிறது. எழும் நினைவூட்டல் தூக்க டைமரை நிறுத்த நினைவூட்டுகிறது. நினைவூட்டலில் உள்ள பொத்தானைத் தட்டவும், ஆப்பைத் திறக்கத் தேவையில்லை.",
+    "of {0} steps" to "{0} அடிகளில்",
+    "Distance" to "தூரம்",
+    "Steps to go" to "மீதமுள்ள அடிகள்",
+    "History" to "வரலாறு",
+    "Best day" to "சிறந்த நாள்",
+    "Total distance" to "மொத்த தூரம்",
+    "See history ›" to "வரலாற்றைப் பார் ›",
+    "8,000–10,000 steps a day is a good target for weight loss. Start lower and add 500 each week." to "எடை குறைக்க தினமும் 8,000–10,000 அடிகள் நல்ல இலக்கு. குறைவாகத் தொடங்கி ஒவ்வொரு வாரமும் 500 கூட்டுங்கள்.",
+    "Your phone counts steps in the background, even when Roti Track is closed. Keep the phone in your pocket or hand while you walk. Steps add calories burned on the Food tab, like exercise." to "Roti Track மூடியிருந்தாலும் உங்கள் போன் பின்னணியில் அடிகளை எண்ணுகிறது. நடக்கும்போது போனை பாக்கெட்டில் அல்லது கையில் வைத்திருங்கள். அடிகளின் கலோரிகள் உடற்பயிற்சி போல உணவு டேபில் எரிந்த கலோரிகளில் சேர்க்கப்படும்.",
 )

@@ -56,6 +56,7 @@ fun DashboardScreen(
     onUpgrade: () -> Unit,
     onOpen: (Tab) -> Unit,
     onSleep: () -> Unit = {},
+    onSteps: () -> Unit = {},
 ) {
     val p = store.profile
     val day = today
@@ -125,7 +126,7 @@ fun DashboardScreen(
             Spacer(Modifier.height(12.dp))
         }
 
-        item { StepsCard(store, isPro, platform, onUpgrade) }
+        item { StepsCard(store, isPro, platform, onUpgrade, onSteps) }
         item { SleepCard(store, onSleep) }
 
         item {
@@ -164,7 +165,7 @@ fun DashboardScreen(
 
 /** Pro: today's steps from the phone's step counter, with the goal and calories burned. */
 @Composable
-private fun StepsCard(store: AppStore, isPro: Boolean, platform: Platform, onUpgrade: () -> Unit) {
+private fun StepsCard(store: AppStore, isPro: Boolean, platform: Platform, onUpgrade: () -> Unit, onOpen: () -> Unit) {
     val p = store.profile
     val steps = store.stepsFor(today)
     val goal = store.prefs.stepGoal
@@ -204,7 +205,7 @@ private fun StepsCard(store: AppStore, isPro: Boolean, platform: Platform, onUpg
                 Modifier.fillMaxWidth().padding(top = 10.dp), height = 44.dp,
             )
         }
-        else -> AppCard {
+        else -> AppCard(onClick = onOpen) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("👟", fontSize = 28.sp)
                 Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
@@ -218,6 +219,7 @@ private fun StepsCard(store: AppStore, isPro: Boolean, platform: Platform, onUpg
             }
             Spacer(Modifier.height(10.dp))
             Progress(t("Daily goal"), "%,d".format(java.util.Locale.ENGLISH, goal), steps.toFloat() / goal, Palette.leaf)
+            Text(t("See history ›"), style = Type.small.copy(color = Palette.brand, fontWeight = FontWeight.Bold), modifier = Modifier.padding(top = 8.dp))
             if (steps == 0) {
                 Text(
                     t("Counting from now, even when the app is closed. Keep your phone with you while you walk."),

@@ -1213,4 +1213,13 @@ internal val GU: Map<String, String> = mapOf(
     "Tap I'm awake to save last night's sleep." to "ગઈ રાતની ઊંઘ સેવ કરવા 'હું જાગી ગયો' પર ટૅપ કરો.",
     "How did you sleep? Log last night in Roti Track." to "ઊંઘ કેવી રહી? ગઈ રાતની ઊંઘ Roti Track માં નોંધો.",
     "Bedtime reminds you to wind down. Wake-up reminds you to stop the sleep timer. Tap the button on the reminder, no need to open the app." to "સૂવાનું રિમાઇન્ડર તમને આરામ કરવાનું યાદ કરાવે છે. જાગવાનું રિમાઇન્ડર ઊંઘ ટાઇમર બંધ કરવાનું યાદ કરાવે છે. રિમાઇન્ડર પરનું બટન ટૅપ કરો, એપ ખોલવાની જરૂર નથી.",
+    "of {0} steps" to "{0} પગલાંમાંથી",
+    "Distance" to "અંતર",
+    "Steps to go" to "બાકી પગલાં",
+    "History" to "ઇતિહાસ",
+    "Best day" to "શ્રેષ્ઠ દિવસ",
+    "Total distance" to "કુલ અંતર",
+    "See history ›" to "ઇતિહાસ જુઓ ›",
+    "8,000–10,000 steps a day is a good target for weight loss. Start lower and add 500 each week." to "વજન ઘટાડવા માટે રોજ 8,000–10,000 પગલાં સારું લક્ષ્ય છે. ઓછાથી શરૂ કરો અને દર અઠવાડિયે 500 વધારો.",
+    "Your phone counts steps in the background, even when Roti Track is closed. Keep the phone in your pocket or hand while you walk. Steps add calories burned on the Food tab, like exercise." to "તમારો ફોન બેકગ્રાઉન્ડમાં પગલાં ગણે છે, Roti Track બંધ હોય ત્યારે પણ. ચાલતી વખતે ફોન ખિસ્સામાં કે હાથમાં રાખો. પગલાંની કેલરી કસરતની જેમ ફૂડ ટૅબ પર બળેલી કેલરીમાં ઉમેરાય છે.",
 )

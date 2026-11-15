@@ -1213,4 +1213,13 @@ internal val BN: Map<String, String> = mapOf(
     "Tap I'm awake to save last night's sleep." to "গত রাতের ঘুম সেভ করতে 'আমি জেগে উঠেছি' ট্যাপ করুন।",
     "How did you sleep? Log last night in Roti Track." to "ঘুম কেমন হল? গত রাতের ঘুম Roti Track-এ লিখুন।",
     "Bedtime reminds you to wind down. Wake-up reminds you to stop the sleep timer. Tap the button on the reminder, no need to open the app." to "ঘুমের রিমাইন্ডার আপনাকে বিশ্রাম নিতে মনে করায়। ওঠার রিমাইন্ডার ঘুমের টাইমার বন্ধ করতে মনে করায়। রিমাইন্ডারের বোতামে ট্যাপ করুন, অ্যাপ খোলার দরকার নেই।",
+    "of {0} steps" to "{0} পদক্ষেপের মধ্যে",
+    "Distance" to "দূরত্ব",
+    "Steps to go" to "বাকি পদক্ষেপ",
+    "History" to "ইতিহাস",
+    "Best day" to "সেরা দিন",
+    "Total distance" to "মোট দূরত্ব",
+    "See history ›" to "ইতিহাস দেখুন ›",
+    "8,000–10,000 steps a day is a good target for weight loss. Start lower and add 500 each week." to "ওজন কমাতে রোজ 8,000–10,000 পদক্ষেপ ভালো লক্ষ্য। কম দিয়ে শুরু করুন এবং প্রতি সপ্তাহে 500 বাড়ান।",
+    "Your phone counts steps in the background, even when Roti Track is closed. Keep the phone in your pocket or hand while you walk. Steps add calories burned on the Food tab, like exercise." to "আপনার ফোন ব্যাকগ্রাউন্ডে পদক্ষেপ গোনে, Roti Track বন্ধ থাকলেও। হাঁটার সময় ফোন পকেটে বা হাতে রাখুন। পদক্ষেপের ক্যালোরি ব্যায়ামের মতো ফুড ট্যাবে খরচে যোগ হয়।",
 )
