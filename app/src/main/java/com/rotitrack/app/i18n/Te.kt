@@ -1202,4 +1202,5 @@ internal val TE: Map<String, String> = mapOf(
     "Log your sleep" to "మీ నిద్రను నమోదు చేయండి",
     "Goal {0}" to "లక్ష్యం {0}",
     "Sleep tracker" to "నిద్ర ట్రాకర్",
+    "Counting from now, even when the app is closed. Keep your phone with you while you walk." to "ఇప్పటి నుండి లెక్కిస్తాం, యాప్ మూసి ఉన్నా కూడా. నడిచేటప్పుడు ఫోన్ మీ వద్ద ఉంచుకోండి.",
 )

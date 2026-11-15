@@ -1202,4 +1202,5 @@ internal val GU: Map<String, String> = mapOf(
     "Log your sleep" to "તમારી ઊંઘ નોંધો",
     "Goal {0}" to "લક્ષ્ય {0}",
     "Sleep tracker" to "ઊંઘ ટ્રેકર",
+    "Counting from now, even when the app is closed. Keep your phone with you while you walk." to "હવેથી ગણતરી શરૂ, એપ બંધ હોય ત્યારે પણ. ચાલતી વખતે ફોન સાથે રાખો.",
 )

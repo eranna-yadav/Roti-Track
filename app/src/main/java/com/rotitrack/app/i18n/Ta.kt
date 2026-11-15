@@ -1202,4 +1202,5 @@ internal val TA: Map<String, String> = mapOf(
     "Log your sleep" to "உங்கள் தூக்கத்தைப் பதிவு செய்யுங்கள்",
     "Goal {0}" to "இலக்கு {0}",
     "Sleep tracker" to "தூக்க டிராக்கர்",
+    "Counting from now, even when the app is closed. Keep your phone with you while you walk." to "இப்போதிலிருந்து எண்ணப்படும், செயலி மூடியிருந்தாலும். நடக்கும்போது போனை உடன் வைத்திருங்கள்.",
 )

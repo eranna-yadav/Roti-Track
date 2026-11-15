@@ -1202,4 +1202,5 @@ internal val KN: Map<String, String> = mapOf(
     "Log your sleep" to "ನಿಮ್ಮ ನಿದ್ರೆ ದಾಖಲಿಸಿ",
     "Goal {0}" to "ಗುರಿ {0}",
     "Sleep tracker" to "ನಿದ್ರೆ ಟ್ರ್ಯಾಕರ್",
+    "Counting from now, even when the app is closed. Keep your phone with you while you walk." to "ಈಗಿನಿಂದ ಎಣಿಕೆ ಶುರು, ಆ್ಯಪ್ ಮುಚ್ಚಿದ್ದರೂ ಸಹ. ನಡೆಯುವಾಗ ಫೋನ್ ಜೊತೆಗಿರಲಿ.",
 )

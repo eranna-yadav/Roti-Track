@@ -1202,4 +1202,5 @@ internal val HI: Map<String, String> = mapOf(
     "Log your sleep" to "अपनी नींद दर्ज करें",
     "Goal {0}" to "लक्ष्य {0}",
     "Sleep tracker" to "नींद ट्रैकर",
+    "Counting from now, even when the app is closed. Keep your phone with you while you walk." to "अब से गिनती शुरू, ऐप बंद होने पर भी। चलते समय फ़ोन साथ रखें।",
 )

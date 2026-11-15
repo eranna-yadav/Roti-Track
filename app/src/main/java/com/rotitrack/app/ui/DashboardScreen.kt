@@ -218,6 +218,12 @@ private fun StepsCard(store: AppStore, isPro: Boolean, platform: Platform, onUpg
             }
             Spacer(Modifier.height(10.dp))
             Progress(t("Daily goal"), "%,d".format(java.util.Locale.ENGLISH, goal), steps.toFloat() / goal, Palette.leaf)
+            if (steps == 0) {
+                Text(
+                    t("Counting from now, even when the app is closed. Keep your phone with you while you walk."),
+                    style = Type.small, modifier = Modifier.padding(top = 8.dp),
+                )
+            }
         }
     }
 }

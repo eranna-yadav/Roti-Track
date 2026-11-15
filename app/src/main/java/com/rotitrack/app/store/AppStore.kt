@@ -215,6 +215,14 @@ class AppStore(private val storage: Storage) {
         update { it.copy(steps = steps, stepCounterLast = last) }
     }
 
+    /** Daily totals from Google's on-device step recording (day → steps); a day only ever goes up. */
+    fun setDailySteps(days: Map<String, Int>) {
+        // Keeps the higher count, so steps counted before Google's recording started aren't lost.
+        val higher = days.filter { (d, n) -> n > (state.steps[d] ?: 0) }
+        if (higher.isEmpty()) return
+        update { it.copy(steps = it.steps + higher) }
+    }
+
     fun stepsFor(day: String): Int = state.steps[day] ?: 0
 
     fun stepKcal(day: String): Int = Steps.kcal(stepsFor(day), profile.weightKg)

@@ -1202,4 +1202,5 @@ internal val MR: Map<String, String> = mapOf(
     "Log your sleep" to "तुमची झोप नोंदवा",
     "Goal {0}" to "लक्ष्य {0}",
     "Sleep tracker" to "झोप ट्रॅकर",
+    "Counting from now, even when the app is closed. Keep your phone with you while you walk." to "आतापासून मोजणी सुरू, अ‍ॅप बंद असतानाही. चालताना फोन सोबत ठेवा.",
 )
