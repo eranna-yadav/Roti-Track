@@ -2,6 +2,7 @@ package com.rotitrack.app.ui
 
 import com.rotitrack.app.i18n.t
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,9 +16,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -27,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import com.rotitrack.app.domain.Days
 import com.rotitrack.app.domain.Steps
 import com.rotitrack.app.store.AppStore
+import kotlinx.coroutines.delay
 import java.util.Locale
 
 private fun count(n: Int): String = "%,d".format(Locale.ENGLISH, n)
@@ -35,7 +40,7 @@ private fun km(value: Double): String = t("{0} km", "%.1f".format(Locale.ENGLISH
 
 /** Pro: today's steps, the last 7 or 30 days, and the step settings. Opened from the Home card. */
 @Composable
-fun StepsScreen(store: AppStore, onBack: () -> Unit) {
+fun StepsScreen(store: AppStore, platform: Platform, onBack: () -> Unit) {
     val p = store.profile
     val goal = store.prefs.stepGoal
     val steps = store.stepsFor(today)
@@ -91,6 +96,8 @@ fun StepsScreen(store: AppStore, onBack: () -> Unit) {
             Text(t("8,000–10,000 steps a day is a good target for weight loss. Start lower and add 500 each week."), style = Type.small, modifier = Modifier.padding(top = 8.dp))
         }
 
+        WatchCard(platform)
+
         SectionLabel(t("How it works"))
         AppCard {
             Text(
@@ -103,6 +110,64 @@ fun StepsScreen(store: AppStore, onBack: () -> Unit) {
                 if (!on) onBack()
             }
         }
+    }
+}
+
+/** Steps walked without the phone, from a watch or band through Health Connect. */
+@Composable
+private fun WatchCard(platform: Platform) {
+    var state by remember { mutableStateOf<WatchSteps?>(null) }
+    var problem by remember { mutableStateOf<String?>(null) }
+    var check by remember { mutableIntStateOf(0) }
+    // Checked again every few seconds, so it updates after installing Health Connect or allowing access.
+    LaunchedEffect(check) {
+        while (true) {
+            state = platform.watchSteps()
+            delay(3_000)
+        }
+    }
+    val s = state ?: return
+    if (s == WatchSteps.UNSUPPORTED) return
+
+    SectionLabel(t("Watch or fitness band"))
+    AppCard {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("⌚", fontSize = 28.sp)
+            Column(Modifier.weight(1f).padding(start = 12.dp)) {
+                Text(if (s == WatchSteps.ON) t("Connected ✓") else t("Count steps from your watch"), style = Type.title)
+                Text(
+                    if (s == WatchSteps.ON) t("Steps from your watch or band are added. Steps both devices counted are counted once.")
+                    else t("Walking without your phone? Connect your watch or band through Health Connect and those steps count too."),
+                    style = Type.small,
+                )
+            }
+        }
+        problem?.let { Text(it, style = Type.small.copy(color = Palette.danger), modifier = Modifier.padding(top = 8.dp)) }
+        when (s) {
+            WatchSteps.ON -> Text(
+                t("Disconnect"),
+                style = Type.body.copy(color = Palette.danger, fontWeight = FontWeight.Bold),
+                modifier = Modifier.padding(top = 10.dp).clickable {
+                    platform.disconnectWatch()
+                    check++
+                },
+            )
+            else -> PillButton(
+                if (s == WatchSteps.INSTALL) t("Install Health Connect") else t("Connect"),
+                {
+                    problem = null
+                    platform.connectWatch { ok ->
+                        if (!ok && s == WatchSteps.OFF) problem = t("Allow \"Steps\" in Health Connect to connect.")
+                        check++
+                    }
+                },
+                Modifier.fillMaxWidth().padding(top = 10.dp), height = 44.dp,
+            )
+        }
+        Text(
+            t("Your watch app needs to share steps with Health Connect. Fitbit, Samsung Health, Mi Fitness, Google Fit and most others can."),
+            style = Type.tiny, modifier = Modifier.padding(top = 8.dp),
+        )
     }
 }
 

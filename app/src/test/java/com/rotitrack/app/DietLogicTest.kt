@@ -190,6 +190,44 @@ class StepsTest {
         org.junit.Assert.assertEquals(5_000, store.stepsFor(today))
         org.junit.Assert.assertEquals(200, store.burned(today))
     }
+
+    private fun memoryStore() = AppStore(object : Storage {
+        var t: String? = null
+        override fun load() = t
+        override fun save(text: String) { t = text }
+        override fun clear() { t = null }
+    })
+
+    @Test fun liveStepsShowAtOnceAndAreNotCountedTwice() {
+        val store = memoryStore()
+        val day = "2026-11-16"
+        store.setDailySteps(mapOf(day to 1_000))
+        repeat(3) { store.addLiveStep(day) }
+        org.junit.Assert.assertEquals(1_003, store.stepsFor(day))
+        store.saveLiveSteps()
+        org.junit.Assert.assertEquals(1_003, store.stepsFor(day))
+        org.junit.Assert.assertEquals(0, store.liveSteps)
+        // Google's recording later reports the same steps: kept once, not added again.
+        store.setDailySteps(mapOf(day to 1_003))
+        org.junit.Assert.assertEquals(1_003, store.stepsFor(day))
+        // A watch that saw more (walking without the phone) wins.
+        store.setDailySteps(mapOf(day to 2_500))
+        org.junit.Assert.assertEquals(2_500, store.stepsFor(day))
+        // A lower count never lowers the day.
+        store.setDailySteps(mapOf(day to 900))
+        org.junit.Assert.assertEquals(2_500, store.stepsFor(day))
+    }
+
+    @Test fun sensorLiveStepsAreDroppedOnceTheReadingIsSaved() {
+        val store = memoryStore()
+        val day = "2026-11-16"
+        store.recordStepCounter(10_000, day)
+        store.setLiveSteps(4, day)
+        org.junit.Assert.assertEquals(4, store.stepsFor(day))
+        store.recordStepCounter(10_004, day)
+        store.clearLiveSteps()
+        org.junit.Assert.assertEquals(4, store.stepsFor(day))
+    }
 }
 
 class SleepTest {

@@ -19,8 +19,8 @@ android {
         applicationId = "com.rotitrack.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 14
-        versionName = "1.6.8"
+        versionCode = 15
+        versionName = "1.6.9"
     }
 
     signingConfigs {
@@ -95,6 +95,7 @@ dependencies {
     implementation(libs.androidx.credentials.play.services)
     implementation(libs.googleid)
     implementation(libs.play.services.fitness)
+    implementation(libs.health.connect)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     testImplementation(libs.junit)

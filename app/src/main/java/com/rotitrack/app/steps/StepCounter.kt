@@ -56,6 +56,7 @@ object StepCounter {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var liveJob: Job? = null
     private var listener: SensorEventListener? = null
+    private var detector: SensorEventListener? = null
     private var savedAt = 0L
     private var savedCounter = -1L
 
@@ -93,20 +94,21 @@ object StepCounter {
         }
     }
 
-    /** Keeps today's steps up to date while the app is on screen. */
+    /**
+     * While the app is on screen the number goes up with every step: Google's recording gives the
+     * saved total, and the step detector adds each new step at once. Phones without the recording
+     * use the step counter, read the moment each step arrives. Watch steps are read too.
+     */
     fun startLive(context: Context) {
         val app = context.applicationContext
-        if (!permitted(app)) return
-        if (recordingAvailable(app)) {
-            if (liveJob?.isActive == true) return
-            liveJob = scope.launch {
-                while (isActive) {
-                    refresh(app)
-                    delay(20_000)
-                }
+        if (!permitted(app) || liveJob?.isActive == true) return
+        val recording = recordingAvailable(app)
+        if (recording) startDetector(app) else startSensor(app)
+        liveJob = scope.launch {
+            while (isActive) {
+                refresh(app, phone = recording)
+                delay(20_000)
             }
-        } else {
-            startSensor(app)
         }
     }
 
@@ -115,18 +117,30 @@ object StepCounter {
         liveJob = null
         listener?.let { sensors(context)?.unregisterListener(it) }
         listener = null
+        detector?.let { sensors(context)?.unregisterListener(it) }
+        detector = null
+        val store = context.rotiTrack.activeStore ?: return
+        // Recording mode keeps what was seen; the fallback's next counter reading includes it.
+        if (recordingAvailable(context)) store.saveLiveSteps() else store.clearLiveSteps()
+        savedCounter = -1L
     }
 
-    /** Reads the latest steps into the store: daily totals from Google, or one sensor reading. */
-    suspend fun refresh(context: Context) {
-        if (!permitted(context)) return
-        if (recordingAvailable(context)) {
-            val days = readDays(context) ?: return
-            withContext(Dispatchers.Main) { context.rotiTrack.activeStore?.setDailySteps(days) }
-        } else {
-            val counter = readSensorOnce(context) ?: return
-            withContext(Dispatchers.Main) { context.rotiTrack.activeStore?.recordStepCounter(counter) }
+    /**
+     * Reads the latest steps into the store: daily totals from Google, or one sensor reading
+     * ([phone]), then a watch's steps from Health Connect. Each day keeps the highest count, so
+     * steps both devices saw aren't counted twice.
+     */
+    suspend fun refresh(context: Context, phone: Boolean = true) {
+        val store = context.rotiTrack.activeStore ?: return
+        if (phone && permitted(context)) {
+            if (recordingAvailable(context)) {
+                withContext(Dispatchers.Main) { store.saveLiveSteps() }
+                readDays(context)?.let { days -> withContext(Dispatchers.Main) { store.setDailySteps(days) } }
+            } else {
+                readSensorOnce(context)?.let { counter -> withContext(Dispatchers.Main) { store.recordStepCounter(counter) } }
+            }
         }
+        HealthSteps.readDays(context)?.let { days -> withContext(Dispatchers.Main) { store.setDailySteps(days) } }
     }
 
     /** Steps per day for the last week, from Google's on-device recording. */
@@ -146,25 +160,47 @@ object StepCounter {
         }
     }.getOrNull()
 
-    /** Fallback: live readings of the step sensor. Saves at most every 10 steps or 15 seconds. */
+    /** Every step the moment it's taken, added on top of Google's recorded total. */
+    private fun startDetector(context: Context) {
+        if (detector != null) return
+        val manager = sensors(context) ?: return
+        val sensor = manager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR) ?: return
+        detector = object : SensorEventListener {
+            override fun onSensorChanged(event: SensorEvent) {
+                context.rotiTrack.activeStore?.addLiveStep()
+            }
+
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+        }
+        manager.registerListener(detector, sensor, SensorManager.SENSOR_DELAY_UI, 0)
+    }
+
+    /**
+     * Fallback: the step counter, delivered at once (no batching). Each step shows straight
+     * away; the reading is saved at most every 10 steps or 15 seconds.
+     */
     private fun startSensor(context: Context) {
         if (listener != null) return
         val manager = sensors(context) ?: return
         val sensor = manager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER) ?: return
         listener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent) {
+                val store = context.rotiTrack.activeStore ?: return
                 val counter = event.values[0].toLong()
                 val now = SystemClock.elapsedRealtime()
                 if (savedCounter < 0 || counter - savedCounter >= 10 || counter < savedCounter || now - savedAt > 15_000) {
-                    context.rotiTrack.activeStore?.recordStepCounter(counter)
+                    store.recordStepCounter(counter)
+                    store.clearLiveSteps()
                     savedCounter = counter
                     savedAt = now
+                } else {
+                    store.setLiveSteps((counter - savedCounter).toInt())
                 }
             }
 
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
         }
-        manager.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_NORMAL)
+        manager.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_UI, 0)
     }
 
     /** Fallback: one reading of the step sensor, or null if it doesn't answer within 10 seconds. */

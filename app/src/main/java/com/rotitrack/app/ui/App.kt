@@ -41,6 +41,9 @@ import com.rotitrack.app.domain.Report
 import com.rotitrack.app.store.AppStore
 import com.rotitrack.app.account.Account
 
+/** Steps from a watch or band: not possible on this phone, Health Connect needs installing, not connected, connected. */
+enum class WatchSteps { UNSUPPORTED, INSTALL, OFF, ON }
+
 /** What the Android layer provides to the UI. Keeps the screens platform-neutral. */
 interface Platform {
     /** Asks for notification permission if needed, then reports whether reminders can be shown. */
@@ -72,6 +75,11 @@ interface Platform {
     fun previewMealVoice() {}
     /** Speaks one of the bedtime or wake-up messages. */
     fun previewSleepVoice() {}
+    /** Whether steps from a watch or fitness band can be read (through Health Connect). */
+    suspend fun watchSteps(): WatchSteps = WatchSteps.UNSUPPORTED
+    /** Installs Health Connect or asks to read steps; reports whether steps can now be read. */
+    fun connectWatch(onResult: (Boolean) -> Unit) { onResult(false) }
+    fun disconnectWatch() {}
     /** Whether the phone has a step counter sensor. */
     val stepSensorAvailable: Boolean get() = false
     /** Asks for the physical activity permission if needed, then reports whether steps can be counted. */
@@ -265,7 +273,7 @@ private fun SignedIn(services: Services, platform: Platform, nav: Navigator, acc
                     ProfilePage.GOALS -> NutritionGoalsScreen(store, onBack = nav::pop)
                     ProfilePage.FASTING -> FastingScreen(store, onBack = nav::pop)
                     ProfilePage.SLEEP -> SleepScreen(store, platform, onBack = nav::pop)
-                    ProfilePage.STEPS -> StepsScreen(store, onBack = nav::pop)
+                    ProfilePage.STEPS -> StepsScreen(store, platform, onBack = nav::pop)
                     ProfilePage.REMINDERS -> TrackingRemindersScreen(store, platform, onWaterReminders = { nav.push(Route.Page(ProfilePage.WATER_REMINDERS)) }, onBack = nav::pop)
                     ProfilePage.WATER_REMINDERS -> WaterRemindersScreen(store, platform, onBack = nav::pop)
                     ProfilePage.REFERRAL -> ReferralScreen(store, account, summary, platform, onRules = { nav.push(Route.Page(ProfilePage.REFERRAL_RULES)) }, onBack = nav::pop)

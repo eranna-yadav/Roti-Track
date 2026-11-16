@@ -304,7 +304,8 @@ private val PRIVACY = listOf(
     "Payments" to "Payments are handled by Razorpay or Google Play. We never see or store your card, UPI or bank details. We keep a record of your subscription status.",
     "Sharing" to "We don't sell your data or show ads. We share data only with the services that run the app (Firebase, Razorpay, Google Play) or when the law requires it.",
     "Your choices" to "You can edit your details any time, export a PDF of your data, and delete your account from Profile → Delete Account, which removes your account and your data.",
-    "Reminders and voice" to "Meal and water reminders are scheduled on your phone. Voice reminders are spoken by your phone's own text-to-speech; no audio is recorded or sent anywhere.",
+    "Steps and Health Connect" to "The Pro step counter reads your steps from your phone's step sensor and Google Play services and, if you connect it, from Health Connect (steps saved by your watch or fitness band). Roti Track only reads step counts; it never writes, changes or deletes your health data. Steps are used only to show your steps, distance and calories burned in the app. They stay on your phone and are never sold, shared or used for ads. You can disconnect Health Connect any time on the Steps page or in Health Connect's settings.",
+    "Reminders and voice" to "Meal, water and sleep reminders are scheduled on your phone. Voice reminders are spoken by your phone's own text-to-speech; no audio is recorded or sent anywhere.",
     "Children" to "Roti Track is not meant for children under 13, and we don't knowingly collect their data.",
     "Contact" to "Questions about privacy? Email us at the address below.",
 )

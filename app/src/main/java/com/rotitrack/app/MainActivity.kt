@@ -49,6 +49,11 @@ import com.rotitrack.app.reminders.mealReminderText
 import com.rotitrack.app.report.PdfReport
 import com.rotitrack.app.reminders.Reminders
 import com.rotitrack.app.reminders.SleepReminders
+import com.rotitrack.app.steps.HealthSteps
+import com.rotitrack.app.ui.WatchSteps
+import androidx.health.connect.client.PermissionController
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import com.rotitrack.app.reminders.sleepReminderText
 import com.rotitrack.app.reminders.WaterSounds
 import com.rotitrack.app.steps.StepCounter
@@ -59,6 +64,15 @@ import com.rotitrack.app.ui.Platform
 class MainActivity : ComponentActivity(), Platform, PaymentResultWithDataListener {
 
     private var pendingResult: ((Boolean) -> Unit)? = null
+    private var pendingWatch: ((Boolean) -> Unit)? = null
+    private val uiScope = MainScope()
+
+    private val healthLauncher = registerForActivityResult(PermissionController.createRequestPermissionResultContract()) { granted ->
+        val ok = HealthSteps.PERMISSION in granted
+        pendingWatch?.invoke(ok)
+        pendingWatch = null
+        if (ok) uiScope.launch { StepCounter.refresh(this@MainActivity, phone = false) }
+    }
     private var exactOk by mutableStateOf(true)
 
     private val permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -237,6 +251,26 @@ class MainActivity : ComponentActivity(), Platform, PaymentResultWithDataListene
         val (title, text) = mealReminderText(key, I18n.lang, name, variant)
         val (enTitle, enText) = mealReminderText(key, "en", name, variant)
         MealVoice.speak(this, MealVoice.sentence(title, text), MealVoice.sentence(enTitle, enText))
+    }
+
+    override suspend fun watchSteps(): WatchSteps = HealthSteps.state(this)
+
+    override fun connectWatch(onResult: (Boolean) -> Unit) {
+        when (HealthSteps.status(this)) {
+            WatchSteps.INSTALL -> {
+                runCatching { startActivity(HealthSteps.installIntent()) }
+                onResult(false)
+            }
+            WatchSteps.OFF -> {
+                pendingWatch = onResult
+                healthLauncher.launch(setOf(HealthSteps.PERMISSION))
+            }
+            else -> onResult(false)
+        }
+    }
+
+    override fun disconnectWatch() {
+        uiScope.launch { HealthSteps.disconnect(this@MainActivity) }
     }
 
     override fun previewSleepVoice() {

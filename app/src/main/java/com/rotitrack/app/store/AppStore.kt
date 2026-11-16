@@ -2,6 +2,7 @@ package com.rotitrack.app.store
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.rotitrack.app.data.ExerciseType
@@ -223,7 +224,41 @@ class AppStore(private val storage: Storage) {
         update { it.copy(steps = it.steps + higher) }
     }
 
-    fun stepsFor(day: String): Int = state.steps[day] ?: 0
+    /**
+     * Steps seen on screen but not saved yet, so the number moves with every step. They're saved
+     * in batches ([saveLiveSteps]), or dropped ([clearLiveSteps]) when a saved reading already has them.
+     */
+    var liveSteps by mutableIntStateOf(0)
+        private set
+    private var liveDay = ""
+
+    fun addLiveStep(day: String = Days.today()) {
+        if (day != liveDay) {
+            saveLiveSteps()
+            liveDay = day
+        }
+        liveSteps++
+    }
+
+    /** For the step sensor fallback: steps since its last saved reading. */
+    fun setLiveSteps(n: Int, day: String = Days.today()) {
+        liveDay = day
+        liveSteps = n.coerceAtLeast(0)
+    }
+
+    fun saveLiveSteps() {
+        val n = liveSteps
+        if (n == 0) return
+        liveSteps = 0
+        val day = liveDay
+        update { it.copy(steps = it.steps + (day to (it.steps[day] ?: 0) + n)) }
+    }
+
+    fun clearLiveSteps() {
+        liveSteps = 0
+    }
+
+    fun stepsFor(day: String): Int = (state.steps[day] ?: 0) + if (day == liveDay) liveSteps else 0
 
     fun stepKcal(day: String): Int = Steps.kcal(stepsFor(day), profile.weightKg)
 
