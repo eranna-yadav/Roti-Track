@@ -271,6 +271,9 @@ data class AppState(
     /** The phone's step counter at the last reading, or -1 before the first. */
     val stepCounterLast: Long = -1,
     val sleep: SleepLog = SleepLog(),
+    /** When Google Play's rating popup was last requested, and how many times. */
+    val reviewAskedAt: Long = 0L,
+    val reviewAsks: Int = 0,
     /** "day|SLOT" → how many times the user tapped Swap. */
     val planShuffles: Map<String, Int> = emptyMap(),
 )

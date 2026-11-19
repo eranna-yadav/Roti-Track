@@ -80,6 +80,8 @@ interface Platform {
     /** Installs Health Connect or asks to read steps; reports whether steps can now be read. */
     fun connectWatch(onResult: (Boolean) -> Unit) { onResult(false) }
     fun disconnectWatch() {}
+    /** Shows Google Play's in-app rating popup (Google decides whether it actually appears). */
+    fun askForReview() {}
     /** Whether the phone has a step counter sensor. */
     val stepSensorAvailable: Boolean get() = false
     /** Asks for the physical activity permission if needed, then reports whether steps can be counted. */
@@ -288,8 +290,23 @@ private fun SignedIn(services: Services, platform: Platform, nav: Navigator, acc
         }
     }
 
+    // Ask for a Play Store rating only at a happy moment: right after a badge celebration,
+    // or on opening the app during a week-long streak (see ReviewPrompt for the limits).
+    fun askForReviewIfDue() {
+        if (store.reviewDue()) {
+            store.markReviewAsked()
+            platform.askForReview()
+        }
+    }
+    LaunchedEffect(store) {
+        delay(5_000)
+        if (store.streak() >= 7) askForReviewIfDue()
+    }
     store.celebrations.firstOrNull()?.let { badge ->
-        BadgeCelebration(badge) { store.celebrations.remove(badge) }
+        BadgeCelebration(badge) {
+            store.celebrations.remove(badge)
+            if (store.celebrations.isEmpty()) askForReviewIfDue()
+        }
     }
     deleteError?.let { msg ->
         AlertDialog(

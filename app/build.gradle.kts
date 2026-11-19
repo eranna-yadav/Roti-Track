@@ -96,6 +96,7 @@ dependencies {
     implementation(libs.googleid)
     implementation(libs.play.services.fitness)
     implementation(libs.health.connect)
+    implementation(libs.play.review)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     testImplementation(libs.junit)

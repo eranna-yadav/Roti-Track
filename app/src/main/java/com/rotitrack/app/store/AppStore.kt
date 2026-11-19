@@ -25,6 +25,7 @@ import com.rotitrack.app.data.WaterEntry
 import com.rotitrack.app.data.builtinFood
 import com.rotitrack.app.data.drinkById
 import com.rotitrack.app.domain.Days
+import com.rotitrack.app.domain.ReviewPrompt
 import com.rotitrack.app.domain.Steps
 import com.rotitrack.app.domain.Sleep
 import com.rotitrack.app.domain.Nutrition
@@ -202,6 +203,13 @@ class AppStore(private val storage: Storage) {
     }
 
     fun removeSleep(id: String) = update { s -> s.copy(sleep = s.sleep.copy(entries = s.sleep.entries.filterNot { it.id == id })) }
+
+    /** Whether this is a good moment to ask for a Play Store rating; see [ReviewPrompt]. */
+    fun reviewDue(now: Long = System.currentTimeMillis()): Boolean =
+        ReviewPrompt.due(now, streak(), state.reviewAskedAt, state.reviewAsks)
+
+    fun markReviewAsked(now: Long = System.currentTimeMillis()) =
+        update { it.copy(reviewAskedAt = now, reviewAsks = it.reviewAsks + 1) }
 
     fun sleepMinutes(day: String): Int = Sleep.minutesFor(state.sleep.entries, day)
 

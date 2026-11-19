@@ -50,6 +50,7 @@ import com.rotitrack.app.report.PdfReport
 import com.rotitrack.app.reminders.Reminders
 import com.rotitrack.app.reminders.SleepReminders
 import com.rotitrack.app.steps.HealthSteps
+import com.google.android.play.core.review.ReviewManagerFactory
 import com.rotitrack.app.ui.WatchSteps
 import androidx.health.connect.client.PermissionController
 import kotlinx.coroutines.MainScope
@@ -271,6 +272,14 @@ class MainActivity : ComponentActivity(), Platform, PaymentResultWithDataListene
 
     override fun disconnectWatch() {
         uiScope.launch { HealthSteps.disconnect(this@MainActivity) }
+    }
+
+    override fun askForReview() {
+        // Google decides whether the popup appears; nothing happens if it doesn't.
+        val manager = ReviewManagerFactory.create(this)
+        manager.requestReviewFlow().addOnCompleteListener { request ->
+            if (request.isSuccessful && !isFinishing) manager.launchReviewFlow(this, request.result)
+        }
     }
 
     override fun previewSleepVoice() {
