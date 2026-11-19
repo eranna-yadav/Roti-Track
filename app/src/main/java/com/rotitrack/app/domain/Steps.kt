@@ -39,4 +39,28 @@ object Steps {
 
     /** Distance in km, from a stride of about 41.5% of height. */
     fun km(steps: Int, heightCm: Int): Double = steps * heightCm * 0.415 / 100_000.0
+
+    /**
+     * Day totals after a reading. Google's recording ([phone]) is the truth for each day it has
+     * steps, so a count that went wrong is corrected. A watch ([watch]) only adds steps walked
+     * without the phone: the higher of the two wins, so steps both saw count once. Days Google has
+     * nothing for keep what's saved. [watchUnread]: a watch is connected but couldn't be read now,
+     * so saved counts (which may include its steps) aren't lowered.
+     */
+    fun merge(saved: Map<String, Int>, phone: Map<String, Int>?, watch: Map<String, Int>?, watchUnread: Boolean = false): Map<String, Int> {
+        val days = phone.orEmpty().keys + watch.orEmpty().keys
+        if (days.isEmpty()) return saved
+        val merged = saved.toMutableMap()
+        for (day in days) {
+            val p = phone?.get(day)?.takeIf { it > 0 }
+            val w = watch?.get(day) ?: 0
+            val s = saved[day] ?: 0
+            merged[day] = when {
+                p == null -> maxOf(s, w)
+                watchUnread -> maxOf(p, s)
+                else -> maxOf(p, w)
+            }
+        }
+        return merged
+    }
 }

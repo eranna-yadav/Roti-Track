@@ -11,7 +11,6 @@
     <!-- Pro step counter: the phone's step sensor. -->
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
     <uses-feature android:name="android.hardware.sensor.stepcounter" android:required="false" />
-    <uses-feature android:name="android.hardware.sensor.stepdetector" android:required="false" />
     <!-- Pro: steps from a watch or fitness band, read from Health Connect. -->
     <uses-permission android:name="android.permission.health.READ_STEPS" />
 

@@ -198,35 +198,42 @@ class StepsTest {
         override fun clear() { t = null }
     })
 
-    @Test fun liveStepsShowAtOnceAndAreNotCountedTwice() {
+    @Test fun googlesCountCorrectsAnOverCountedDay() {
         val store = memoryStore()
-        val day = "2026-11-16"
-        store.setDailySteps(mapOf(day to 1_000))
-        repeat(3) { store.addLiveStep(day) }
-        org.junit.Assert.assertEquals(1_003, store.stepsFor(day))
-        store.saveLiveSteps()
-        org.junit.Assert.assertEquals(1_003, store.stepsFor(day))
-        org.junit.Assert.assertEquals(0, store.liveSteps)
-        // Google's recording later reports the same steps: kept once, not added again.
-        store.setDailySteps(mapOf(day to 1_003))
-        org.junit.Assert.assertEquals(1_003, store.stepsFor(day))
-        // A watch that saw more (walking without the phone) wins.
-        store.setDailySteps(mapOf(day to 2_500))
-        org.junit.Assert.assertEquals(2_500, store.stepsFor(day))
-        // A lower count never lowers the day.
-        store.setDailySteps(mapOf(day to 900))
-        org.junit.Assert.assertEquals(2_500, store.stepsFor(day))
+        val day = "2026-11-19"
+        store.mergeSteps(mapOf(day to 4_000), null)
+        // Google's recording says 1,000: the wrong 4,000 is replaced.
+        store.mergeSteps(mapOf(day to 1_000), null)
+        org.junit.Assert.assertEquals(1_000, store.stepsFor(day))
     }
 
-    @Test fun sensorLiveStepsAreDroppedOnceTheReadingIsSaved() {
+    @Test fun watchStepsCountOnceAndOnlyAdd() {
         val store = memoryStore()
-        val day = "2026-11-16"
-        store.recordStepCounter(10_000, day)
-        store.setLiveSteps(4, day)
-        org.junit.Assert.assertEquals(4, store.stepsFor(day))
-        store.recordStepCounter(10_004, day)
+        val day = "2026-11-19"
+        // Walked with both: the higher count wins, not the sum.
+        store.mergeSteps(mapOf(day to 3_000), mapOf(day to 3_200))
+        org.junit.Assert.assertEquals(3_200, store.stepsFor(day))
+        // Watch connected but unreadable right now: the saved count isn't lowered.
+        store.mergeSteps(mapOf(day to 3_100), null, watchUnread = true)
+        org.junit.Assert.assertEquals(3_200, store.stepsFor(day))
+        // A day Google has nothing for keeps what's saved.
+        store.recordStepCounter(5_000, "2026-11-10")
+        store.recordStepCounter(5_600, "2026-11-10")
+        store.mergeSteps(mapOf("2026-11-10" to 0), null)
+        org.junit.Assert.assertEquals(600, store.stepsFor("2026-11-10"))
+    }
+
+    @Test fun liveCountIsShownButNeverSaved() {
+        val store = memoryStore()
+        val day = "2026-11-19"
+        store.mergeSteps(mapOf(day to 1_000), null)
+        store.showLiveSteps(1_012, day)
+        org.junit.Assert.assertEquals(1_012, store.stepsFor(day))
+        org.junit.Assert.assertEquals(1_000, store.savedSteps(day))
+        // Google catches up with the same steps: still 1,012, not 2,012.
+        store.mergeSteps(mapOf(day to 1_012), null)
         store.clearLiveSteps()
-        org.junit.Assert.assertEquals(4, store.stepsFor(day))
+        org.junit.Assert.assertEquals(1_012, store.stepsFor(day))
     }
 }
 

@@ -216,49 +216,35 @@ class AppStore(private val storage: Storage) {
         update { it.copy(steps = steps, stepCounterLast = last) }
     }
 
-    /** Daily totals from Google's on-device step recording (day → steps); a day only ever goes up. */
-    fun setDailySteps(days: Map<String, Int>) {
-        // Keeps the higher count, so steps counted before Google's recording started aren't lost.
-        val higher = days.filter { (d, n) -> n > (state.steps[d] ?: 0) }
-        if (higher.isEmpty()) return
-        update { it.copy(steps = it.steps + higher) }
+    /** New readings from Google's recording and a watch; see [Steps.merge]. */
+    fun mergeSteps(phone: Map<String, Int>?, watch: Map<String, Int>?, watchUnread: Boolean = false) {
+        val merged = Steps.merge(state.steps, phone, watch, watchUnread)
+        if (merged != state.steps) update { it.copy(steps = merged) }
     }
 
     /**
-     * Steps seen on screen but not saved yet, so the number moves with every step. They're saved
-     * in batches ([saveLiveSteps]), or dropped ([clearLiveSteps]) when a saved reading already has them.
+     * Today's total while the app is open, read from the phone's step counter as you walk, so the
+     * number moves straight away. Only shown, never saved: the saved count comes from Google's
+     * recording (or the counter fallback), so nothing is counted twice.
      */
-    var liveSteps by mutableIntStateOf(0)
+    var liveTotal by mutableIntStateOf(0)
         private set
     private var liveDay = ""
 
-    fun addLiveStep(day: String = Days.today()) {
-        if (day != liveDay) {
-            saveLiveSteps()
-            liveDay = day
-        }
-        liveSteps++
-    }
-
-    /** For the step sensor fallback: steps since its last saved reading. */
-    fun setLiveSteps(n: Int, day: String = Days.today()) {
+    fun showLiveSteps(total: Int, day: String = Days.today()) {
         liveDay = day
-        liveSteps = n.coerceAtLeast(0)
-    }
-
-    fun saveLiveSteps() {
-        val n = liveSteps
-        if (n == 0) return
-        liveSteps = 0
-        val day = liveDay
-        update { it.copy(steps = it.steps + (day to (it.steps[day] ?: 0) + n)) }
+        liveTotal = total.coerceAtLeast(0)
     }
 
     fun clearLiveSteps() {
-        liveSteps = 0
+        liveDay = ""
+        liveTotal = 0
     }
 
-    fun stepsFor(day: String): Int = (state.steps[day] ?: 0) + if (day == liveDay) liveSteps else 0
+    /** Saved steps for [day], without the live count. */
+    fun savedSteps(day: String): Int = state.steps[day] ?: 0
+
+    fun stepsFor(day: String): Int = maxOf(savedSteps(day), if (day == liveDay) liveTotal else 0)
 
     fun stepKcal(day: String): Int = Steps.kcal(stepsFor(day), profile.weightKg)
 
