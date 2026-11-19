@@ -160,7 +160,7 @@ const val REFERRAL_MONTHLY_INSTALMENT = 150
  * Monthly bonus: yearly sales made with the user's code in one calendar month (India time) →
  * bonus for that month. Only the highest level reached counts. Must match functions/lib.js.
  */
-val REFERRAL_BONUS_LEVELS: List<Pair<Int, Int>> = listOf(20 to 2000, 30 to 3500, 40 to 5000, 50 to 7000, 75 to 8500, 100 to 10000)
+val REFERRAL_BONUS_LEVELS: List<Pair<Int, Int>> = listOf(20 to 2000, 50 to 5000, 100 to 10000, 250 to 25000, 500 to 50000, 750 to 75000, 1000 to 100000)
 
 fun referralBonusFor(yearlySales: Int): Int = REFERRAL_BONUS_LEVELS.lastOrNull { yearlySales >= it.first }?.second ?: 0
 

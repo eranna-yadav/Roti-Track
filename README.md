@@ -66,8 +66,9 @@ from the Pro screen.
   `PRIYA100`. When a friend signs up with it and then buys Pro, the referrer
   earns up to ₹300: all at once for a yearly plan, or ₹150 after the friend's
   1st monthly payment and ₹150 after the 2nd. Yearly sales in a calendar month
-  (India time) also earn a bonus: ₹2,000 at 20, ₹3,500 at 30, ₹5,000 at 40,
-  ₹7,000 at 50, ₹8,500 at 75 and ₹10,000 at 100. Google Play purchases are
+  (India time) also earn a bonus: ₹2,000 at 20, ₹5,000 at 50, ₹10,000 at 100,
+  ₹25,000 at 250, ₹50,000 at 500, ₹75,000 at 750 and ₹1,00,000 at 1,000.
+  Google Play purchases are
   checked on the server (`verifyPlayPurchase`) so they count too.
   The full rules are under Profile → Referral rules. Users add a
   UPI ID for payouts.

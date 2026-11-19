@@ -79,8 +79,8 @@ fun ReferralScreen(store: AppStore, account: Account, summary: UserSummary?, pla
         MonthlyBonusCard(summary)
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             Stat(t("Friends joined Pro"), "${summary?.referralCount ?: 0}", Modifier.weight(1f))
-            Stat(t("Earned"), "₹${summary?.referralEarnings ?: 0}", Modifier.weight(1f))
-            Stat(t("Paid to you"), "₹${summary?.referralPaid ?: 0}", Modifier.weight(1f))
+            Stat(t("Earned"), "₹${rupees(summary?.referralEarnings ?: 0)}", Modifier.weight(1f))
+            Stat(t("Paid to you"), "₹${rupees(summary?.referralPaid ?: 0)}", Modifier.weight(1f))
         }
         SectionLabel(t("Get paid"))
         AppCard {
@@ -103,8 +103,16 @@ fun ReferralScreen(store: AppStore, account: Account, summary: UserSummary?, pla
     }
 }
 
-/** 10000 → "10,000". */
-private fun rupees(amount: Int): String = "%,d".format(java.util.Locale.ENGLISH, amount)
+/** Indian grouping: 10000 → "10,000", 100000 → "1,00,000". */
+fun indianNumber(amount: Int): String {
+    val digits = kotlin.math.abs(amount.toLong()).toString()
+    val sign = if (amount < 0) "-" else ""
+    if (digits.length <= 3) return sign + digits
+    val head = digits.dropLast(3)
+    return sign + head.reversed().chunked(2).joinToString(",").reversed() + "," + digits.takeLast(3)
+}
+
+private fun rupees(amount: Int): String = indianNumber(amount)
 
 /** This month's yearly sales, the bonus earned, the next level, and the bonus table. */
 @Composable
@@ -132,7 +140,7 @@ private fun MonthlyBonusCard(summary: UserSummary?) {
         REFERRAL_BONUS_LEVELS.forEach { (level, amount) ->
             val reached = sales >= level
             Row(Modifier.fillMaxWidth().padding(vertical = 5.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text((if (reached) "✅ " else "• ") + t("{0} sales", level), style = Type.body.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(1f))
+                Text((if (reached) "✅ " else "• ") + t("{0} sales", indianNumber(level)), style = Type.body.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(1f))
                 Column(horizontalAlignment = Alignment.End) {
                     Text(t("₹{0} bonus", rupees(amount)), style = Type.body.copy(fontWeight = FontWeight.Bold, color = Palette.brand))
                     Text(t("Total ₹{0}", rupees(level * REFERRAL_REWARD_RUPEES + amount)), style = Type.small)
@@ -150,7 +158,7 @@ val REFERRAL_RULES get() = listOf(
     t("If they stop after one month") to t("If your friend cancels or their 2nd monthly payment doesn't go through, you keep the first ₹{0} but don't earn the second.", REFERRAL_MONTHLY_INSTALMENT),
     t("Switching to yearly") to t("If your friend moves from monthly to yearly, you earn the rest of the ₹{0} when the yearly payment is confirmed.", REFERRAL_REWARD_RUPEES),
     t("Most ₹{0} per friend", REFERRAL_REWARD_RUPEES) to t("Each friend earns you at most ₹{0} in total, however long they stay Pro. There's no limit on how many friends you invite.", REFERRAL_REWARD_RUPEES),
-    t("Monthly bonus for yearly plans") to t("Count the yearly plans your friends buy with your code in one calendar month (1st to last day, India time). Reach 20, 30, 40, 50, 75 or 100 and earn a bonus of ₹2,000, ₹3,500, ₹5,000, ₹7,000, ₹8,500 or ₹10,000 on top of ₹{0} per sale. Only the highest level you reach in the month counts, and the count starts again on the 1st.", REFERRAL_REWARD_RUPEES),
+    t("Monthly bonus for yearly plans") to t("Count the yearly plans your friends buy with your code in one calendar month (1st to last day, India time). Reach 20, 50, 100, 250, 500, 750 or 1,000 and earn a bonus of ₹2,000, ₹5,000, ₹10,000, ₹25,000, ₹50,000, ₹75,000 or ₹1,00,000 on top of ₹{0} per sale. Only the highest level you reach in the month counts, and the count starts again on the 1st.", REFERRAL_REWARD_RUPEES),
     t("Which payments count") to t("Pro plans your friend pays for in the Roti Track app, through Google Play or Razorpay. Free Pro given by Roti Track and refunded payments don't count."),
     t("Getting paid") to t("Add your UPI ID on the Refer & earn screen. The Roti Track team checks each payment and sends your earnings to that UPI ID."),
     t("Fair use") to t("Referring yourself, fake or duplicate accounts, and spam are not allowed. Rewards earned this way are cancelled and the account may be blocked."),
@@ -293,7 +301,7 @@ private val TERMS = listOf(
     "About Roti Track" to "Roti Track helps you plan Indian meals and track calories, macros, water, exercise, weight and fasting. It is a wellness tool, not a medical service, and does not replace advice from a doctor or dietitian.",
     "Your account" to "Keep your password safe. You are responsible for activity on your account. We may suspend accounts that misuse the app or the referral programme.",
     "Pro subscription" to "Pro costs ₹359 per month or ₹1,099 per year, including GST. If you sign up with a friend's referral code, your first year of the yearly plan costs ₹999. Plans renew automatically until you cancel. Cancel Google Play subscriptions in the Play Store and Razorpay subscriptions from the Pro screen; you keep Pro until the end of the paid period. Payments are non-refundable except where the law or the store's policy requires.",
-    "Referral programme" to "You earn up to ₹300 when a friend signs up with your code and pays for Pro: ₹300 once their yearly plan is paid, or ₹150 after their first monthly payment and ₹150 after their second. You can also earn a monthly bonus of up to ₹10,000 for the number of yearly plans sold with your code in a calendar month. The full Referral rules in the app apply. Each friend counts once. Self-referrals, fake accounts and spam are not allowed and forfeit rewards. We may change or end the programme with notice; earned rewards will still be paid.",
+    "Referral programme" to "You earn up to ₹300 when a friend signs up with your code and pays for Pro: ₹300 once their yearly plan is paid, or ₹150 after their first monthly payment and ₹150 after their second. You can also earn a monthly bonus of up to ₹1,00,000 for the number of yearly plans sold with your code in a calendar month. The full Referral rules in the app apply. Each friend counts once. Self-referrals, fake accounts and spam are not allowed and forfeit rewards. We may change or end the programme with notice; earned rewards will still be paid.",
     "Food and health information" to "Nutrition values are typical home-style estimates and vary with recipes and portions. Calorie, macro, water and fasting targets are general guidance. If you are pregnant, diabetic, have a medical condition or an eating disorder, consult a professional before changing your diet.",
     "Changes" to "We may update these terms. Continuing to use the app after an update means you accept the new terms.",
 )

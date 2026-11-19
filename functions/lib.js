@@ -107,7 +107,7 @@ const REFERRAL_MONTHLY_INSTALMENT = 150;
 
 /** Yearly sales in one month → bonus for that month. Only the highest level reached counts. */
 const REFERRAL_BONUS_LEVELS = [
-  [100, 10000], [75, 8500], [50, 7000], [40, 5000], [30, 3500], [20, 2000],
+  [1000, 100000], [750, 75000], [500, 50000], [250, 25000], [100, 10000], [50, 5000], [20, 2000],
 ];
 
 function referralBonusFor(yearlySales) {

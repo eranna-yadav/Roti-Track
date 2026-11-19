@@ -197,7 +197,7 @@ class MonthlyReferralsTest {
         org.junit.Assert.assertEquals(20, novRows[0].yearlySales)
         org.junit.Assert.assertEquals(1, novRows[0].joined)
         org.junit.Assert.assertEquals(2_000, novRows[0].bonus)
-        org.junit.Assert.assertEquals(30 to 3_500, novRows[0].next)
+        org.junit.Assert.assertEquals(50 to 5_000, novRows[0].next)
         org.junit.Assert.assertEquals(1, novRows[1].joined)
         val octRows = report.month("2026-10")
         org.junit.Assert.assertEquals(listOf("a"), octRows.map { it.user.uid })

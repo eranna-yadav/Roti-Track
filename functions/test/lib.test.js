@@ -101,24 +101,25 @@ test("Google Play purchases earn referrals like Razorpay ones", () => {
 test("monthly bonus: the highest level reached in the month, paid once", () => {
   assert.strictEqual(lib.referralBonusFor(19), 0);
   assert.strictEqual(lib.referralBonusFor(20), 2000);
-  assert.strictEqual(lib.referralBonusFor(29), 2000);
-  assert.strictEqual(lib.referralBonusFor(30), 3500);
-  assert.strictEqual(lib.referralBonusFor(40), 5000);
-  assert.strictEqual(lib.referralBonusFor(50), 7000);
-  assert.strictEqual(lib.referralBonusFor(75), 8500);
+  assert.strictEqual(lib.referralBonusFor(49), 2000);
+  assert.strictEqual(lib.referralBonusFor(50), 5000);
   assert.strictEqual(lib.referralBonusFor(100), 10000);
-  assert.strictEqual(lib.referralBonusFor(250), 10000);
+  assert.strictEqual(lib.referralBonusFor(250), 25000);
+  assert.strictEqual(lib.referralBonusFor(500), 50000);
+  assert.strictEqual(lib.referralBonusFor(750), 75000);
+  assert.strictEqual(lib.referralBonusFor(1000), 100000);
+  assert.strictEqual(lib.referralBonusFor(5000), 100000);
   // 20 sales × ₹300 + ₹2,000 = ₹8,000, as in the published table.
   assert.strictEqual(20 * lib.REFERRAL_REWARD + lib.referralBonusFor(20), 8000);
   assert.strictEqual(100 * lib.REFERRAL_REWARD + lib.referralBonusFor(100), 40000);
 
-  // Reaching 20 pays ₹2,000; reaching 30 pays only the extra ₹1,500.
+  // Reaching 20 pays ₹2,000; reaching 50 pays only the extra ₹3,000.
   let r = { referralMonths: { "2026-11": { yearly: 19, bonus: 0 } } };
   assert.deepStrictEqual(lib.addYearlySale(r, "2026-11"), { month: "2026-11", yearly: 20, bonus: 2000, bonusNow: 2000 });
   r = { referralMonths: { "2026-11": { yearly: 20, bonus: 2000 } } };
   assert.strictEqual(lib.addYearlySale(r, "2026-11").bonusNow, 0);
-  r = { referralMonths: { "2026-11": { yearly: 29, bonus: 2000 } } };
-  assert.strictEqual(lib.addYearlySale(r, "2026-11").bonusNow, 1500);
+  r = { referralMonths: { "2026-11": { yearly: 49, bonus: 2000 } } };
+  assert.strictEqual(lib.addYearlySale(r, "2026-11").bonusNow, 3000);
   // A new month starts again from zero.
   assert.deepStrictEqual(lib.addYearlySale(r, "2026-12"), { month: "2026-12", yearly: 1, bonus: 0, bonusNow: 0 });
   // Months follow India time: 30 Nov 19:00 UTC is already 1 Dec in India.

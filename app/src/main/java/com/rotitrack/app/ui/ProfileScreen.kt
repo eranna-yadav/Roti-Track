@@ -140,9 +140,6 @@ fun ProfileScreen(
 
         SectionLabel(t("Support & Legal"))
         SettingsGroup {
-            SettingsRow("📲", t("Share Roti Track"), subtitle = t("Invite friends and family"), onClick = {
-                platform.share(t("I use Roti Track to plan my Indian diet, count calories and drink enough water. Try it free:") + "\n" + PLAY_STORE_URL)
-            })
             SettingsRow("📣", t("Request a Feature"), onClick = {
                 platform.openUrl("mailto:$SUPPORT_EMAIL?subject=" + encode("Roti Track feature request"))
             })

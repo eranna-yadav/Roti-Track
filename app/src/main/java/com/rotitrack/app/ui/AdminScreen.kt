@@ -390,7 +390,7 @@ private fun PayDialog(u: UserSummary, onDismiss: () -> Unit, onConfirm: () -> Un
     )
 }
 
-private fun rupees(n: Int): String = "₹" + "%,d".format(n)
+private fun rupees(n: Int): String = "₹" + indianNumber(n)
 
 @Composable
 private fun Kpi(label: String, value: String, modifier: Modifier, color: Color = Palette.ink) {
