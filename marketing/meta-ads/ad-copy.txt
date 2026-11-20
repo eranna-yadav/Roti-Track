@@ -10,23 +10,31 @@ Images in this folder
 Upload both sizes of the same ad together: Meta picks the right one per placement.
 
 ------------------------------------------------------------
-AD 1 – "Eat roti. Lose weight."   (images: ad-1-roti-*)
+AD 1 – "Your thali, counted."   (images: ad-1-thali-*)
 Primary text:
-Eat roti, dal and rice, and still reach your weight goal 🫓
+2 rotis, rice, dal, sabzi, curd and salad = 875 calories 🍛
+Roti Track counts calories in real Indian food, so you can eat your thali and still reach your weight goal. Free on Google Play.
+Headline: Your thali, counted.
+Description: Indian calorie counter
+
+------------------------------------------------------------
+AD 2 – Quiz: "Which has more calories?"   (images: ad-2-quiz-*)
+Primary text:
+2 rotis or 1 bowl of rice: which has more calories? Comment A or B 👇
+(Answer: 2 rotis, 220 kcal vs 195 kcal.) Know every bite with Roti Track, the calorie counter made for Indian food. Free on Google Play.
+Headline: Which has more calories?
+Description: 240+ Indian foods
+
+------------------------------------------------------------
+AD 3 – "Eat roti. Lose weight."   (images: ad-3-roti-*)
+Primary text:
+You don't have to give up roti to lose weight 🫓
 Roti Track gives you a daily Indian diet plan, counts calories in Indian food and reminds you to drink water. Free on Google Play.
 Headline: Eat roti. Lose weight.
 Description: Indian diet plan & calorie counter
 
 ------------------------------------------------------------
-AD 2 – "Know the calories in your thali"   (images: ad-2-thali-*)
-Primary text:
-How many calories are in 2 rotis? A bowl of dal? Your chai? 🤔
-Roti Track knows 240+ Indian foods. Log your thali in 2 taps and see calories, protein, carbs and fat. Free on Google Play.
-Headline: Calories in your thali, in 2 taps
-Description: 240+ Indian foods
-
-------------------------------------------------------------
-AD 3 – "Diet plan in your language"   (images: ad-3-language-*)
+AD 4 – "Your diet coach speaks your language"   (images: ad-4-languages-*)
 Primary text:
 आपकी भाषा में डाइट प्लान 🇮🇳
 Roti Track works fully in हिन्दी, ಕನ್ನಡ, తెలుగు, தமிழ், मराठी, বাংলা, ગુજરાતી and English, with meal and water reminders that call you by name. Free on Google Play.
@@ -40,10 +48,10 @@ TARGETING (start here, then let Meta optimise)
 • Gender: all (try women 25–45 as a separate ad set; usually strong for diet apps)
 • Interests: Weight loss, Dieting, Healthy diet, Indian cuisine, Physical fitness, Yoga, Nutrition
 • Placements: Advantage+ (automatic)
-• Language ads: for Ad 3, add separate ad sets by state/language (e.g. Hindi belt, Karnataka, Telangana & AP, Tamil Nadu)
+• Language ads: for Ad 4, add separate ad sets by state/language (e.g. Hindi belt, Karnataka, Telangana & AP, Tamil Nadu)
 
 BUDGET & TESTING
-• Start: ₹300–500 per day for 7 days, all 3 ads in one ad set
+• Start: ₹300–500 per day for 7 days, all 4 ads in one ad set
 • After 7 days: turn off the ad with the highest cost per install, put more budget on the best one
 • Good result for a diet app in India: ₹8–25 per install
 
