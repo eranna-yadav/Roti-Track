@@ -72,7 +72,7 @@ class MainActivity : ComponentActivity(), Platform, PaymentResultWithDataListene
         val ok = HealthSteps.PERMISSION in granted
         pendingWatch?.invoke(ok)
         pendingWatch = null
-        if (ok) uiScope.launch { StepCounter.refresh(this@MainActivity, phone = false) }
+        if (ok) uiScope.launch { StepCounter.refresh(this@MainActivity, phone = false, sensor = false) }
     }
     private var exactOk by mutableStateOf(true)
 

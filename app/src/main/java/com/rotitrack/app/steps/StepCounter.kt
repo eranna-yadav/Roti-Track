@@ -57,10 +57,6 @@ object StepCounter {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var liveJob: Job? = null
     private var listener: SensorEventListener? = null
-    /** Recording mode: the saved total and counter reading the live count starts from. */
-    private var baseDay = ""
-    private var baseSteps = 0
-    private var baseCounter = -1L
     private var savedAt = 0L
     private var savedCounter = -1L
 
@@ -109,7 +105,8 @@ object StepCounter {
         startSensor(app, recording)
         liveJob = scope.launch {
             while (isActive) {
-                refresh(app, phone = recording)
+                // The live listener already reads the step counter, so no extra sensor read here.
+                refresh(app, phone = recording, sensor = false)
                 delay(20_000)
             }
         }
@@ -122,27 +119,26 @@ object StepCounter {
         listener = null
         context.rotiTrack.activeStore?.clearLiveSteps()
         savedCounter = -1L
-        baseCounter = -1L
     }
 
     /**
-     * Reads the latest steps into the store: daily totals from Google, or one sensor reading
-     * ([phone]), and a watch's steps from Health Connect. See [com.rotitrack.app.domain.Steps.merge].
+     * Reads the latest steps into the store: one step-counter reading ([sensor]), daily totals from
+     * Google's recording ([phone]), and a watch's steps from Health Connect. See
+     * [com.rotitrack.app.domain.Steps.merge]. A day's total never goes down.
      */
-    suspend fun refresh(context: Context, phone: Boolean = true) {
+    suspend fun refresh(context: Context, phone: Boolean = true, sensor: Boolean = true) {
         val store = context.rotiTrack.activeStore ?: return
-        val recording = phone && permitted(context) && recordingAvailable(context)
-        if (phone && permitted(context) && !recording) {
-            readSensorOnce(context)?.let { counter -> withContext(Dispatchers.Main) { store.recordStepCounter(counter) } }
+        val allowed = permitted(context)
+        val recording = allowed && recordingAvailable(context)
+        if (sensor && allowed) {
+            readSensorOnce(context)?.let { counter ->
+                withContext(Dispatchers.Main) { store.recordStepCounter(counter, Days.today(), sameDayOnly = recording) }
+            }
         }
-        val days = if (recording) readDays(context) else null
+        val days = if (phone && recording) readDays(context) else null
         val watch = HealthSteps.readDays(context)
         val watchUnread = watch == null && HealthSteps.connected(context)
-        withContext(Dispatchers.Main) {
-            store.mergeSteps(days, watch, watchUnread)
-            // A corrected (lower) saved count: start the live count again from it.
-            if (store.savedSteps(Days.today()) < baseSteps) baseCounter = -1L
-        }
+        withContext(Dispatchers.Main) { store.mergeSteps(days, watch, watchUnread) }
     }
 
     /** Steps per day for the last week, from Google's on-device recording. */
@@ -164,9 +160,8 @@ object StepCounter {
 
     /**
      * The phone's step counter, delivered as it changes (no batching), so the number on screen
-     * moves while you walk. With Google's recording the live number is only shown: the saved
-     * count comes from Google. Without it (fallback) the counter is saved at most every 10 steps
-     * or 15 seconds.
+     * moves while you walk. The reading is saved at most every 10 steps or 15 seconds, so the count
+     * carries on from where it was after the app is closed or the screen turns off.
      */
     private fun startSensor(context: Context, recording: Boolean) {
         if (listener != null) return
@@ -177,22 +172,15 @@ object StepCounter {
                 val store = context.rotiTrack.activeStore ?: return
                 val counter = event.values[0].toLong()
                 val today = Days.today()
-                if (recording) {
-                    if (baseCounter < 0 || today != baseDay || counter < baseCounter) {
-                        baseDay = today
-                        baseSteps = store.savedSteps(today)
-                        baseCounter = counter
-                    }
-                    store.showLiveSteps(baseSteps + (counter - baseCounter).toInt(), today)
-                    return
-                }
                 val now = SystemClock.elapsedRealtime()
                 if (savedCounter < 0 || counter - savedCounter >= 10 || counter < savedCounter || now - savedAt > 15_000) {
-                    store.recordStepCounter(counter, today)
+                    store.recordStepCounter(counter, today, sameDayOnly = recording)
+                    store.clearLiveSteps()
                     savedCounter = counter
                     savedAt = now
+                } else {
+                    store.showLiveSteps(store.stepsWithCounter(counter, today, sameDayOnly = recording), today)
                 }
-                store.showLiveSteps(store.savedSteps(today) + (counter - savedCounter).toInt(), today)
             }
 
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}

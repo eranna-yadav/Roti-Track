@@ -218,22 +218,47 @@ class AppStore(private val storage: Storage) {
     // ------------------------------------------------------------------ steps
 
     /** Adds a reading of the phone's step counter (steps since the phone started). */
-    fun recordStepCounter(counter: Long, day: String = Days.today()) {
-        val (steps, last) = Steps.record(state.steps, state.stepCounterLast, counter, day)
-        if (steps == state.steps && last == state.stepCounterLast) return
-        update { it.copy(steps = steps, stepCounterLast = last) }
+    /**
+     * Adds a reading of the phone's step counter (steps since the phone started): the steps since
+     * the last reading go to the phone's own count for [day], and the day's total becomes the higher
+     * of that and what's saved, so it never goes down. [sameDayOnly]: when the last reading was on
+     * another day, only start counting again (Google's recording has those steps on the right day).
+     */
+    fun recordStepCounter(counter: Long, day: String = Days.today(), sameDayOnly: Boolean = false) {
+        val (phone, last) = phoneAfter(counter, day, sameDayOnly)
+        if (phone == state.phoneSteps && last == state.stepCounterLast && state.stepCounterDay == day) return
+        val p = phone[day] ?: 0
+        update {
+            it.copy(
+                phoneSteps = phone, stepCounterLast = last, stepCounterDay = day,
+                steps = if (p > (it.steps[day] ?: 0)) it.steps + (day to p) else it.steps,
+            )
+        }
     }
 
-    /** New readings from Google's recording and a watch; see [Steps.merge]. */
+    /** Today's total if [counter] were saved now, for the live number on screen. Saves nothing. */
+    fun stepsWithCounter(counter: Long, day: String = Days.today(), sameDayOnly: Boolean = false): Int =
+        maxOf(savedSteps(day), phoneAfter(counter, day, sameDayOnly).first[day] ?: 0)
+
+    private fun phoneAfter(counter: Long, day: String, sameDayOnly: Boolean): Pair<Map<String, Int>, Long> {
+        val fresh = sameDayOnly && state.stepCounterDay != day
+        return Steps.record(state.phoneSteps, if (fresh) -1 else state.stepCounterLast, counter, day)
+    }
+
+    /**
+     * New readings from Google's recording ([phone]) and a watch; see [Steps.merge]. The phone's
+     * count for a day is the higher of Google's and the step counter's, so the total never drops
+     * back while Google's recording catches up.
+     */
     fun mergeSteps(phone: Map<String, Int>?, watch: Map<String, Int>?, watchUnread: Boolean = false) {
-        val merged = Steps.merge(state.steps, phone, watch, watchUnread)
+        val p = phone?.mapValues { (d, n) -> maxOf(n, state.phoneSteps[d] ?: 0) }
+        val merged = Steps.merge(state.steps, p, watch, watchUnread)
         if (merged != state.steps) update { it.copy(steps = merged) }
     }
 
     /**
-     * Today's total while the app is open, read from the phone's step counter as you walk, so the
-     * number moves straight away. Only shown, never saved: the saved count comes from Google's
-     * recording (or the counter fallback), so nothing is counted twice.
+     * Today's total while the app is open, from the phone's step counter between saves, so the
+     * number moves straight away. The counter itself is saved every few steps.
      */
     var liveTotal by mutableIntStateOf(0)
         private set

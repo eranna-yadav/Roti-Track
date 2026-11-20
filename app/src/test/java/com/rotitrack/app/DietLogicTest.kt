@@ -223,6 +223,50 @@ class StepsTest {
         org.junit.Assert.assertEquals(600, store.stepsFor("2026-11-10"))
     }
 
+    @Test fun stepsNeverJumpBackWhenGoogleIsBehind() {
+        val store = memoryStore()
+        val day = "2026-11-21"
+        store.mergeSteps(mapOf(day to 20), null)          // Google's recording so far
+        store.recordStepCounter(5_000, day, sameDayOnly = true)   // first counter reading: start point
+        store.recordStepCounter(5_080, day, sameDayOnly = true)   // walked 80 steps
+        org.junit.Assert.assertEquals(80, store.stepsFor(day))
+        // App paused and opened again; Google still says 25: the total stays at 80, not 25.
+        store.clearLiveSteps()
+        store.mergeSteps(mapOf(day to 25), null)
+        org.junit.Assert.assertEquals(80, store.stepsFor(day))
+        // Walked 30 more while the app was closed: counted from where it was.
+        store.recordStepCounter(5_110, day, sameDayOnly = true)
+        org.junit.Assert.assertEquals(110, store.stepsFor(day))
+        // Live number between saves.
+        org.junit.Assert.assertEquals(115, store.stepsWithCounter(5_115, day, sameDayOnly = true))
+        // Google catches up and passes the counter: the higher wins.
+        store.mergeSteps(mapOf(day to 140), null)
+        org.junit.Assert.assertEquals(140, store.stepsFor(day))
+    }
+
+    @Test fun counterStepsFromYesterdayAreNotAddedToToday() {
+        val store = memoryStore()
+        store.recordStepCounter(1_000, "2026-11-20", sameDayOnly = true)
+        store.recordStepCounter(1_500, "2026-11-20", sameDayOnly = true)
+        // Next morning: only a new start point; Google's recording has the night's steps per day.
+        store.recordStepCounter(2_300, "2026-11-21", sameDayOnly = true)
+        org.junit.Assert.assertEquals(500, store.stepsFor("2026-11-20"))
+        org.junit.Assert.assertEquals(0, store.stepsFor("2026-11-21"))
+        store.recordStepCounter(2_350, "2026-11-21", sameDayOnly = true)
+        org.junit.Assert.assertEquals(50, store.stepsFor("2026-11-21"))
+    }
+
+    @Test fun watchAndPhoneCountedOnce() {
+        val store = memoryStore()
+        val day = "2026-11-21"
+        store.recordStepCounter(100, day)
+        store.recordStepCounter(1_100, day)                 // phone saw 1,000
+        store.mergeSteps(mapOf(day to 900), mapOf(day to 1_200))   // watch saw 1,200
+        org.junit.Assert.assertEquals(1_200, store.stepsFor(day))
+        store.recordStepCounter(1_300, day)                 // phone now 1,200: still 1,200, not 2,400
+        org.junit.Assert.assertEquals(1_200, store.stepsFor(day))
+    }
+
     @Test fun liveCountIsShownButNeverSaved() {
         val store = memoryStore()
         val day = "2026-11-19"

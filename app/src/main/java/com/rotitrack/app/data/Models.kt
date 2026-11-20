@@ -270,6 +270,10 @@ data class AppState(
     val steps: Map<String, Int> = emptyMap(),
     /** The phone's step counter at the last reading, or -1 before the first. */
     val stepCounterLast: Long = -1,
+    /** The day of [stepCounterLast]. */
+    val stepCounterDay: String = "",
+    /** Steps the phone's own step counter has seen, day → steps (phone only, no watch). */
+    val phoneSteps: Map<String, Int> = emptyMap(),
     val sleep: SleepLog = SleepLog(),
     /** When Google Play's rating popup was last requested, and how many times. */
     val reviewAskedAt: Long = 0L,
