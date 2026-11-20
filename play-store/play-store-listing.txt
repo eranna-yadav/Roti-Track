@@ -85,12 +85,12 @@ Website: https://roti-track.web.app
 GRAPHICS (in this folder)
 • icon-512.png – App icon, 512 × 512
 • feature-graphic.png – Feature graphic, 1024 × 500
-• screenshot-1.png … screenshot-8.png – Phone screenshots, 1080 × 1920
-  1 Your day at a glance
-  2 An Indian diet plan made for you
-  3 Track calories & macros
-  4 240+ foods, Indian first
-  5 Drink enough water
-  6 Never miss a meal
-  7 Speaks your language
-  8 Health articles
+• screenshot-1.png … screenshot-8.png – Phone screenshots, 1440 × 2560 (HD)
+  1 Lose weight eating Indian food
+  2 Your Indian diet plan, made for you
+  3 Count calories in Indian food
+  4 240+ Indian foods with calories
+  5 Drink enough water every day
+  6 Step counter & smartwatch sync
+  7 Sleep tracker with sweet reminders
+  8 Diet app in 8 Indian languages
