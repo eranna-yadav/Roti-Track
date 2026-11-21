@@ -1269,4 +1269,5 @@ internal val TA: Map<String, String> = mapOf(
     "Added to {0}: {1} kcal" to "{0}-இல் சேர்க்கப்பட்டது: {1} kcal",
     "Weight loss recipe book" to "எடை குறைப்பு ரெசிபி புத்தகம்",
     "Dips & chutneys" to "டிப் & சட்னி",
+    "{0} Indian recipes with calories and protein" to "கலோரி மற்றும் புரதத்துடன் {0} இந்திய ரெசிபிகள்",
 )

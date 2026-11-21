@@ -1269,4 +1269,5 @@ internal val HI: Map<String, String> = mapOf(
     "Added to {0}: {1} kcal" to "{0} में जोड़ा गया: {1} kcal",
     "Weight loss recipe book" to "वज़न घटाने की रेसिपी बुक",
     "Dips & chutneys" to "डिप और चटनी",
+    "{0} Indian recipes with calories and protein" to "कैलोरी और प्रोटीन के साथ {0} भारतीय रेसिपी",
 )

@@ -47,7 +47,14 @@ import com.rotitrack.app.store.AppStore
 import kotlin.math.roundToInt
 
 @Composable
-fun FoodScreen(store: AppStore, platform: Platform, onAdd: (MealSlot, String) -> Unit, onReminders: () -> Unit) {
+fun FoodScreen(
+    store: AppStore,
+    platform: Platform,
+    onAdd: (MealSlot, String) -> Unit,
+    onReminders: () -> Unit,
+    isPro: Boolean = false,
+    onRecipes: () -> Unit = {},
+) {
     val p = store.profile
     val todayKey = today
     var day by remember { mutableStateOf(todayKey) }
@@ -110,6 +117,20 @@ fun FoodScreen(store: AppStore, platform: Platform, onAdd: (MealSlot, String) ->
                     MacroBar(t("Protein"), totals.protein, macros.protein, Palette.protein)
                     MacroBar(t("Carbs"), totals.carbs, macros.carbs, Palette.carbs)
                     MacroBar(t("Fat"), totals.fat, macros.fat, Palette.fat)
+                }
+            }
+        }
+        item(key = "recipes") {
+            AppCard(color = Palette.saffronSoft, onClick = onRecipes) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("🍲", fontSize = 30.sp)
+                    Spacer(Modifier.width(12.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text(t("Weight loss recipes"), style = Type.title)
+                        Text(t("{0} Indian recipes with calories and protein", com.rotitrack.app.data.Recipes.all.size), style = Type.small)
+                    }
+                    if (isPro) Text("›", fontSize = 28.sp, color = Palette.saffron)
+                    else Badge("PRO", Palette.saffron)
                 }
             }
         }

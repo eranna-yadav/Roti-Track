@@ -239,6 +239,8 @@ private fun SignedIn(services: Services, platform: Platform, nav: Navigator, acc
                         store, platform,
                         onAdd = { slot, day -> nav.push(Route.AddFood(slot, day)) },
                         onReminders = { nav.push(Route.Page(ProfilePage.REMINDERS)) },
+                        isPro = isPro,
+                        onRecipes = { nav.push(Route.Recipes) },
                     )
                     Tab.PLAN -> PlanScreen(store, isPro, onUpgrade = upgrade, onOpenArticles = { nav.push(Route.Articles) }, onEditProfile = { nav.push(Route.Page(ProfilePage.PERSONAL)) })
                     Tab.PROFILE -> ProfileScreen(

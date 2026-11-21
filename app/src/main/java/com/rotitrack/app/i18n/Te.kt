@@ -1269,4 +1269,5 @@ internal val TE: Map<String, String> = mapOf(
     "Added to {0}: {1} kcal" to "{0} లో జోడించబడింది: {1} kcal",
     "Weight loss recipe book" to "బరువు తగ్గించే రెసిపీ పుస్తకం",
     "Dips & chutneys" to "డిప్స్ & చట్నీలు",
+    "{0} Indian recipes with calories and protein" to "కేలరీలు మరియు ప్రోటీన్‌తో {0} భారతీయ రెసిపీలు",
 )

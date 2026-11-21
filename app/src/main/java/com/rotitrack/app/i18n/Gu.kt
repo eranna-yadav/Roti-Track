@@ -1269,4 +1269,5 @@ internal val GU: Map<String, String> = mapOf(
     "Added to {0}: {1} kcal" to "{0} માં ઉમેર્યું: {1} kcal",
     "Weight loss recipe book" to "વજન ઘટાડવાની રેસિપી બુક",
     "Dips & chutneys" to "ડિપ અને ચટણી",
+    "{0} Indian recipes with calories and protein" to "કેલરી અને પ્રોટીન સાથે {0} ભારતીય રેસિપી",
 )
