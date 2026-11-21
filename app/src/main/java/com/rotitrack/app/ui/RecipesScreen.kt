@@ -1,6 +1,7 @@
 package com.rotitrack.app.ui
 
 import com.rotitrack.app.i18n.t
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -39,6 +40,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,7 +53,7 @@ import com.rotitrack.app.store.AppStore
 
 /** Pro: the weight loss recipe book. Everyone can browse the names; opening a recipe needs Pro. */
 @Composable
-fun RecipesScreen(isPro: Boolean, onOpen: (String) -> Unit, onUpgrade: () -> Unit, onBack: () -> Unit) {
+fun RecipesScreen(isPro: Boolean, platform: Platform, onOpen: (String) -> Unit, onUpgrade: () -> Unit, onBack: () -> Unit) {
     var query by remember { mutableStateOf("") }
     var category by remember { mutableStateOf<RecipeCategory?>(null) }
     val list = Recipes.search(query, category)
@@ -96,7 +99,7 @@ fun RecipesScreen(isPro: Boolean, onOpen: (String) -> Unit, onUpgrade: () -> Uni
                 }
             }
             item { Text(t("{0} recipes", list.size), style = Type.small) }
-            items(list, key = { it.id }) { r -> RecipeRow(r, locked = !isPro) { if (isPro) onOpen(r.id) else onUpgrade() } }
+            items(list, key = { it.id }) { r -> RecipeRow(r, platform.recipePhoto(r.id), locked = !isPro) { if (isPro) onOpen(r.id) else onUpgrade() } }
             if (list.isEmpty()) item {
                 Text(t("No recipes match. Try another word."), style = Type.body.copy(color = Palette.muted), modifier = Modifier.padding(top = 24.dp))
             }
@@ -105,13 +108,14 @@ fun RecipesScreen(isPro: Boolean, onOpen: (String) -> Unit, onUpgrade: () -> Uni
 }
 
 @Composable
-private fun RecipeRow(r: Recipe, locked: Boolean, onClick: () -> Unit) {
+private fun RecipeRow(r: Recipe, photo: Painter?, locked: Boolean, onClick: () -> Unit) {
     Row(
         Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Palette.card).clickable(onClick = onClick).padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(Modifier.size(56.dp).clip(RoundedCornerShape(16.dp)).background(Palette.chip), contentAlignment = Alignment.Center) {
-            Text(r.emoji, fontSize = 30.sp)
+        Box(Modifier.size(64.dp).clip(RoundedCornerShape(16.dp)).background(Palette.chip), contentAlignment = Alignment.Center) {
+            if (photo != null) Image(photo, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+            else Text(r.emoji, fontSize = 30.sp)
         }
         Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
             Text(r.title, style = Type.title, maxLines = 2)
@@ -123,15 +127,21 @@ private fun RecipeRow(r: Recipe, locked: Boolean, onClick: () -> Unit) {
 
 /** One recipe: what it is, ingredients, steps, why it helps, and logging it as a meal. */
 @Composable
-fun RecipeScreen(store: AppStore, id: String, onBack: () -> Unit) {
+fun RecipeScreen(store: AppStore, platform: Platform, id: String, onBack: () -> Unit) {
     val r = Recipes.byId(id) ?: return onBack()
+    val photo = platform.recipePhoto(r.id)
     var slot by remember { mutableStateOf<MealSlot?>(null) }
     var logged by remember { mutableStateOf<String?>(null) }
 
     SubScreen(r.category.label, onBack) {
         AppCard {
-            Box(Modifier.fillMaxWidth().height(110.dp).clip(RoundedCornerShape(18.dp)).background(Palette.saffronSoft), contentAlignment = Alignment.Center) {
-                Text(r.emoji, fontSize = 64.sp)
+            if (photo != null) {
+                Image(photo, contentDescription = r.title, contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxWidth().height(220.dp).clip(RoundedCornerShape(18.dp)))
+            } else {
+                Box(Modifier.fillMaxWidth().height(110.dp).clip(RoundedCornerShape(18.dp)).background(Palette.saffronSoft), contentAlignment = Alignment.Center) {
+                    Text(r.emoji, fontSize = 64.sp)
+                }
             }
             Text(r.title, style = Type.h2, modifier = Modifier.padding(top = 14.dp))
             Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -141,6 +151,16 @@ fun RecipeScreen(store: AppStore, id: String, onBack: () -> Unit) {
             }
             Text(r.intro, style = Type.body, modifier = Modifier.padding(top = 14.dp))
             Text(t("Per serving. Values are approximate."), style = Type.tiny, modifier = Modifier.padding(top = 8.dp))
+        }
+
+        SectionLabel(t("Why it helps you lose weight"))
+        AppCard(color = Palette.leafSoft) {
+            r.benefits.forEach { line ->
+                Row(Modifier.padding(vertical = 4.dp)) {
+                    Text("✓", style = Type.body.copy(color = Palette.leaf, fontWeight = FontWeight.ExtraBold), modifier = Modifier.width(22.dp))
+                    Text(line, style = Type.body)
+                }
+            }
         }
 
         SectionLabel(t("Ingredients"))
@@ -161,16 +181,6 @@ fun RecipeScreen(store: AppStore, id: String, onBack: () -> Unit) {
                         Text("${i + 1}", style = Type.tiny.copy(color = Color.White, fontWeight = FontWeight.ExtraBold))
                     }
                     Text(step, style = Type.body, modifier = Modifier.padding(start = 12.dp, top = 2.dp))
-                }
-            }
-        }
-
-        SectionLabel(t("Why it helps you lose weight"))
-        AppCard(color = Palette.leafSoft) {
-            r.benefits.forEach { line ->
-                Row(Modifier.padding(vertical = 4.dp)) {
-                    Text("✓", style = Type.body.copy(color = Palette.leaf, fontWeight = FontWeight.ExtraBold), modifier = Modifier.width(22.dp))
-                    Text(line, style = Type.body)
                 }
             }
         }

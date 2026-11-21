@@ -15,6 +15,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -82,6 +83,9 @@ interface Platform {
     fun disconnectWatch() {}
     /** Shows Google Play's in-app rating popup (Google decides whether it actually appears). */
     fun askForReview() {}
+    /** The recipe book's photo for a recipe, or null when there is none. */
+    @Composable
+    fun recipePhoto(id: String): Painter? = null
     /** Whether the phone has a step counter sensor. */
     val stepSensorAvailable: Boolean get() = false
     /** Asks for the physical activity permission if needed, then reports whether steps can be counted. */
@@ -263,8 +267,8 @@ private fun SignedIn(services: Services, platform: Platform, nav: Navigator, acc
                 }
                 is Route.AddFood -> AddFoodScreen(store, route.slot, route.day, isPro, onUpgrade = upgrade, onBack = nav::pop)
                 Route.Articles -> ArticlesScreen(onOpen = { nav.push(Route.Article(it)) }, onBack = nav::pop)
-                Route.Recipes -> RecipesScreen(isPro, onOpen = { nav.push(Route.Recipe(it)) }, onUpgrade = upgrade, onBack = nav::pop)
-                is Route.Recipe -> if (isPro) RecipeScreen(store, route.id, onBack = nav::pop) else LaunchedEffect(Unit) { nav.pop() }
+                Route.Recipes -> RecipesScreen(isPro, platform, onOpen = { nav.push(Route.Recipe(it)) }, onUpgrade = upgrade, onBack = nav::pop)
+                is Route.Recipe -> if (isPro) RecipeScreen(store, platform, route.id, onBack = nav::pop) else LaunchedEffect(Unit) { nav.pop() }
                 is Route.Article -> ArticleScreen(route.id, onBack = nav::pop)
                 Route.Guide -> GuideScreen(onOpen = { nav.push(Route.GuidePage(it)) }, onBack = nav::pop)
                 is Route.GuidePage -> GuidePageScreen(route.id, onBack = nav::pop)

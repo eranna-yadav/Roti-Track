@@ -50,6 +50,9 @@ import com.rotitrack.app.report.PdfReport
 import com.rotitrack.app.reminders.Reminders
 import com.rotitrack.app.reminders.SleepReminders
 import com.rotitrack.app.steps.HealthSteps
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.runtime.Composable
 import com.google.android.play.core.review.ReviewManagerFactory
 import com.rotitrack.app.ui.WatchSteps
 import androidx.health.connect.client.PermissionController
@@ -272,6 +275,12 @@ class MainActivity : ComponentActivity(), Platform, PaymentResultWithDataListene
 
     override fun disconnectWatch() {
         uiScope.launch { HealthSteps.disconnect(this@MainActivity) }
+    }
+
+    @Composable
+    override fun recipePhoto(id: String): Painter? {
+        val res = remember(id) { resources.getIdentifier("recipe_$id", "drawable", packageName) }
+        return if (res != 0) painterResource(res) else null
     }
 
     override fun askForReview() {

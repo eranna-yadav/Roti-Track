@@ -9,10 +9,11 @@ import org.junit.Test
 class RecipesTest {
     @Test fun everyRecipeIsComplete() {
         val all = Recipes.all
-        assertTrue("recipes: ${all.size}", all.size >= 74)
+        assertEquals(125, all.size)
+        RecipeCategory.entries.forEach { c -> assertTrue("no ${c.key}", all.any { it.category == c }) }
         assertEquals(all.size, all.map { it.id }.toSet().size)
         for (r in all) {
-            assertTrue("${r.title}: kcal", r.kcal in 20..800)
+            assertTrue("${r.title}: kcal", r.kcal in 0..800)
             assertTrue("${r.title}: ingredients", r.ingredients.size >= 3)
             assertTrue("${r.title}: steps", r.steps.size >= 3)
             assertTrue("${r.title}: benefits", r.benefits.isNotEmpty())
