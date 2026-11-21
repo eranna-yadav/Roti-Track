@@ -52,6 +52,7 @@ private val FEATURES get() = listOf(
     Triple(t("Sleep tracker"), true, true),
     Triple(t("Full 7-day meal plan"), false, true),
     Triple(t("Swap any meal"), false, true),
+    Triple(t("Weight loss recipe book"), false, true),
     Triple(t("30-day trends"), false, true),
     Triple(t("Your own recipes"), false, true),
     Triple(t("Step counter"), false, true),

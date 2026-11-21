@@ -44,7 +44,7 @@ const val SUPPORT_EMAIL = "rotitrack.app@gmail.com"
 /** Added to share messages so friends can install the app with one tap. */
 const val PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.rotitrack.app"
 
-enum class ProfilePage { PERSONAL, PREFERENCES, LANGUAGE, GOALS, FASTING, SLEEP, STEPS, REMINDERS, WATER_REMINDERS, REFERRAL, REFERRAL_RULES, BADGES, REPORT, TERMS, PRIVACY, ARTICLES, ADMIN, PRO, GUIDE }
+enum class ProfilePage { PERSONAL, PREFERENCES, LANGUAGE, GOALS, FASTING, SLEEP, STEPS, RECIPES, REMINDERS, WATER_REMINDERS, REFERRAL, REFERRAL_RULES, BADGES, REPORT, TERMS, PRIVACY, ARTICLES, ADMIN, PRO, GUIDE }
 
 @Composable
 fun ProfileScreen(
@@ -127,6 +127,7 @@ fun ProfileScreen(
             if (isPro && store.prefs.stepsOn) {
                 SettingsRow("👟", t("Steps"), value = "%,d".format(java.util.Locale.ENGLISH, store.stepsFor(today)), onClick = { onOpen(ProfilePage.STEPS) })
             }
+            SettingsRow("🍲", t("Weight loss recipes"), value = if (isPro) "${com.rotitrack.app.data.Recipes.all.size}" else "PRO", onClick = { onOpen(ProfilePage.RECIPES) })
             SettingsRow("🔔", t("Tracking Reminders"), onClick = { onOpen(ProfilePage.REMINDERS) })
             SettingsRow("🏅", t("Badges"), value = "${store.state.badges.size}", last = true, onClick = { onOpen(ProfilePage.BADGES) })
         }
